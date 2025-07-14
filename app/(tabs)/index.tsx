@@ -1,6 +1,6 @@
 // app/index.tsx
-import { View, Text, Button } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Button, Text, View } from 'react-native';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -11,6 +11,10 @@ export default function HomeScreen() {
       <Button
         title="챗봇 화면으로 이동"
         onPress={() => router.push('/chatbot')}
+      />
+      <Button
+        title="로그인 화면으로 이동"
+        onPress={() => router.push('/login')}
       />
     </View>
   );
