@@ -1,12 +1,8 @@
-// app/account/login.tsx
+// app/account/reset-password.tsx
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Button, Text } from 'react-native';
 import styled from 'styled-components/native';
 
-LoginScreen.options = {
-  name: "로그인"
-}
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -21,28 +17,8 @@ export default function LoginScreen() {
 
   return (
     <Container>
-      <Title>로그인</Title>
+      <Title>비밀번호 재설정</Title>
 
-      <Input
-        placeholder="이메일"
-        value={email}
-        onChangeText={setEmail}
-      />
-
-      <Input
-        placeholder="비밀번호"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-  
-    <Text onPress={() => router.push('/account/reset-password')} style={{ color: 'grey' }}>비밀번호를 잊으셨나요?</Text>
-
-      <Button title="로그인" onPress={handleLogin} />
-
-      <Text style={{ textAlign: 'center', marginBottom: 20 }}>
-        계정이 없으신가요? <Text onPress={() => router.push('/account/register')} style={{ color: 'blue' }}>회원가입</Text>
-      </Text>
     </Container>
   );
 }
