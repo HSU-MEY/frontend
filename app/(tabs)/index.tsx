@@ -14,7 +14,7 @@ export default function HomeScreen() {
       />
       <Button
         title="로그인 화면으로 이동"
-        onPress={() => router.push('/login')}
+        onPress={() => router.push('/account/login')}
       />
     </View>
   );
