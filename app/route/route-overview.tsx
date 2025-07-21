@@ -1,4 +1,5 @@
 // app/route/route
+import { router } from 'expo-router';
 import { ScrollView } from 'react-native';
 import styled from 'styled-components/native';
 
@@ -51,7 +52,7 @@ export default function RouteOverviewScreen() {
         <ButtonOutline>
           <ButtonText>다음에 할래요</ButtonText>
         </ButtonOutline>
-        <ButtonPrimary>
+        <ButtonPrimary onPress={() => router.push("/route/route-step")}>
           <ButtonTextPrimary>여행을 시작하지</ButtonTextPrimary>
         </ButtonPrimary>
       </ButtonRow>
