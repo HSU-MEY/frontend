@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { ScrollView } from 'react-native';
 import styled from 'styled-components/native';
 
@@ -5,10 +6,49 @@ type TabProps = {
   active: boolean;
 };
 
+type Place = {
+  id: number;
+  title: string;
+  category: string;
+  distance: string;
+  time: string;
+  address: string;
+  thumbnail: string;
+};
+
+export const places: Place[] = [
+  {
+    id: 1,
+    title: '케이팝 프렌즈',
+    category: '음반/레코드샵',
+    distance: '192m',
+    time: '09:30 ~ 23:00',
+    address: '서울 중구 명동8가길 17 2층',
+    thumbnail: 'https://placehold.co/300x300',
+  },
+  {
+    id: 2,
+    title: 'Lucky Ducky 럭키덕키',
+    category: '카페',
+    distance: '287m',
+    time: '09:00 ~ 21:00',
+    address: '서울 중구 명동5길 16 1층',
+    thumbnail: 'https://placehold.co/300x300',
+  },
+  {
+    id: 3,
+    title: '케이메카 명동본점',
+    category: '음반/레코드샵',
+    distance: '301m',
+    time: '10:00 ~ 23:00',
+    address: '서울 중구 명동8나길 5 1~4층',
+    thumbnail: 'https://placehold.co/300x300',
+  },
+];
+
 export default function MapScreen() {
   return (
     <ScrollView>
-
       <MapImage source={{ uri: 'https://placehold.co/600x400' }} />
 
       <TabRow>
@@ -18,38 +58,18 @@ export default function MapScreen() {
       </TabRow>
 
       <PlaceList>
-        <PlaceItem>
-          <PlaceNumber>1</PlaceNumber>
-          <PlaceInfo>
-            <PlaceTitle>케이팝 프렌즈</PlaceTitle>
-            <PlaceSub>음반/레코드샵, 192m</PlaceSub>
-            <PlaceTime>09:30 ~ 23:00</PlaceTime>
-            <PlaceAddress>서울 중구 명동8가길 17 2층</PlaceAddress>
-          </PlaceInfo>
-          <PlaceThumb source={{ uri: 'https://placehold.co/300x300' }} />
-        </PlaceItem>
-
-        <PlaceItem>
-          <PlaceNumber>2</PlaceNumber>
-          <PlaceInfo>
-            <PlaceTitle>Lucky Ducky 럭키덕키</PlaceTitle>
-            <PlaceSub>카페, 287m</PlaceSub>
-            <PlaceTime>09:00 ~ 21:00</PlaceTime>
-            <PlaceAddress>서울 중구 명동5길 16 1층</PlaceAddress>
-          </PlaceInfo>
-          <PlaceThumb source={{ uri: 'https://placehold.co/300x300' }} />
-        </PlaceItem>
-
-        <PlaceItem>
-          <PlaceNumber>3</PlaceNumber>
-          <PlaceInfo>
-            <PlaceTitle>케이메카 명동본점</PlaceTitle>
-            <PlaceSub>음반/레코드샵, 301m</PlaceSub>
-            <PlaceTime>10:00 ~ 23:00</PlaceTime>
-            <PlaceAddress>서울 중구 명동8나길 5 1~4층</PlaceAddress>
-          </PlaceInfo>
-          <PlaceThumb source={{ uri: 'https://placehold.co/300x300' }} />
-        </PlaceItem>
+        {places.map((place: Place) => (
+          <PlaceItem key={place.id} onPress={() => router.push('/place-detail')}>
+            <PlaceNumber>{place.id}</PlaceNumber>
+            <PlaceInfo>
+              <PlaceTitle>{place.title}</PlaceTitle>
+              <PlaceSub>{place.category}, {place.distance}</PlaceSub>
+              <PlaceTime>{place.time}</PlaceTime>
+              <PlaceAddress>{place.address}</PlaceAddress>
+            </PlaceInfo>
+            <PlaceThumb source={{ uri: place.thumbnail }} />
+          </PlaceItem>
+        ))}
       </PlaceList>
     </ScrollView>
   );
