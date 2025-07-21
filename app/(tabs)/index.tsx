@@ -20,6 +20,10 @@ export default function HomeScreen() {
         title="장소 디테일 화면으로 이동"
         onPress={() => router.push('/place-detail')}
       />
+      <Button
+        title="루트 시작 화면으로 이동"
+        onPress={() => router.push('/route/route-overview')}
+      />
     </View>
   );
 }

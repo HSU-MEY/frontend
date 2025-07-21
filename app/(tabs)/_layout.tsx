@@ -1,5 +1,7 @@
-import { Tabs } from 'expo-router';
+// app/route/route-overview.tsx
+
 import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
   return (
@@ -14,9 +16,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="route"
         options={{
-          title: '탐색',
+          title: '루트',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="search-outline" size={size} color={color} />
           ),
