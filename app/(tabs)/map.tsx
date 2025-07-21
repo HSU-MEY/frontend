@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { ScrollView } from 'react-native';
 import styled from 'styled-components/native';
 
@@ -9,12 +8,6 @@ type TabProps = {
 export default function MapScreen() {
   return (
     <ScrollView>
-      <Header>
-        <BackButton>
-          <Ionicons name="arrow-back" size={20} color="#333" />
-        </BackButton>
-        <HeaderTitle>지도</HeaderTitle>
-      </Header>
 
       <MapImage source={{ uri: 'https://placehold.co/600x400' }} />
 

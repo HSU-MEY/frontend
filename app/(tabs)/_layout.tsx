@@ -16,11 +16,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="route"
+        name="map"
         options={{
-          title: '루트',
+          title: '지도',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search-outline" size={size} color={color} />
+            <Ionicons name="map-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="chatbot"
+        options={{
+          title: 'AI 챗봇',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="chatbubble-outline" size={size} color={color} />
           ),
         }}
       />
