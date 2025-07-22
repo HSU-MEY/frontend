@@ -124,7 +124,7 @@ const PlaceList = styled.View`
   padding: 0 16px 16px 16px;
 `;
 
-const PlaceItem = styled.View`
+const PlaceItem = styled.TouchableOpacity`
   flex-direction: row;
   border: 1px solid #dceeff;
   border-radius: 12px;
