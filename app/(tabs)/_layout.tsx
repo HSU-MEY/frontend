@@ -1,36 +1,15 @@
+// app/(tabs)/_layout.tsx
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import CustomTabBar from '../../components/CustomTabBar';
 
 export default function TabLayout() {
   return (
-    <Tabs>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: '홈',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: '탐색',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="mypage"
-        options={{
-          title: '마이페이지',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
-          ),
-        }}
-      />
+    <Tabs tabBar={(props) => <CustomTabBar {...props} />}>
+      <Tabs.Screen name="index" options={{ headerShown: false }} />
+      <Tabs.Screen name="map" options={{ headerShown: false }} />
+      <Tabs.Screen name="route" options={{ headerShown: false }} />
+      <Tabs.Screen name="chatbot" options={{ headerShown: false }} />
+      <Tabs.Screen name="myroute" options={{ headerShown: false }} />
     </Tabs>
   );
 }
