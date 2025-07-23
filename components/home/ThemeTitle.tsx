@@ -1,29 +1,16 @@
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
-export default function OngoingRoute() {
-    // 여기에 나중에 API로부터 데이터를 가져올예정
-    const currentRoute = {
-        image: require('../../assets/images/sample-stage.png'), // 예시 이미지
-        title: 'K-POP 루트: idol',
-        location: '서울 홍대',
-        startDate: '25.07.04',
-        progress: 88,
-    };
-
+export default function ThemeTitle() {
     return (
         <View style={styles.container}>
-            {/* 이미지 + 텍스트 가로 배치 */}
             <View style={styles.headerRow}>
                 <Image
-                    source={require('../../assets/images/icons/route.png')}
+                    source={require('../../assets/images/icons/theme.png')}
                     style={styles.icon}
                 />
-                <Text style={styles.title}>현재 진행중인 루트가 있어요!</Text>
+                <Text style={styles.title}>테마별 탐색</Text>
             </View>
-
-            {/* 동적 카드 */}
-            {/* <RouteTicketCard {...currentRoute} /> */}
         </View>
     );
 }
