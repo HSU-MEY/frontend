@@ -66,10 +66,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center', // 중앙 정렬
         paddingHorizontal: 0,
         marginBottom: 18,
+        width: '100%'
     },
     tab: {
-        marginRight: 5,
-        width: 60,
+        marginRight: 6,
+        width: 62,
         alignItems: 'center',
     },
     tabInner: {

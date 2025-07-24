@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   headerBackground: {
     backgroundColor: '#279FFF',
     alignItems: 'center',
-    paddingTop: 35,
+    paddingTop: 4,
     // paddingBottom: 0,
     marginBottom: -5
   },

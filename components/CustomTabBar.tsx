@@ -1,5 +1,6 @@
 // components/CustomTabBar.tsx
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import {
     Dimensions,
@@ -8,7 +9,6 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
@@ -52,14 +52,11 @@ const icons = [
 ];
 
 export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
-    const insets = useSafeAreaInsets();
+    const router = useRouter();
 
     return (
         <View
-            style={[
-                styles.tabBarContainer,
-                { height: 56 + insets.bottom, paddingBottom: insets.bottom },
-            ]}
+            style={styles.tabBarContainer}
         >
             {icons.map((item, index) => {
                 const isFocused = state.routes[state.index].name === item.key;
@@ -68,7 +65,13 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
                     <TouchableOpacity
                         key={item.key}
                         style={styles.tabItem}
-                        onPress={() => navigation.navigate(item.key)}
+                        onPress={() => {
+                            if (item.key === 'route') {
+                                router.push('/route/route'); // 탭이 아닌 라우트는 router.push로 이동
+                            } else {
+                                navigation.navigate(item.key);
+                            }
+                        }}
                     >
                         <Image
                             source={isFocused ? item.focusedImage : item.image}
@@ -93,7 +96,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#EAF6FC',
         justifyContent: 'space-around',
         alignItems: 'center',
-        // height: 56
+        height: 56
     },
     tabItem: {
         alignItems: 'center',

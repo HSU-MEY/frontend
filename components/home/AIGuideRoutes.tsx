@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Bold',
     color: '#000',
   },
   cardContainer: {
@@ -154,20 +154,20 @@ const styles = StyleSheet.create({
 
   cardTitle: {
     fontSize: 13,
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Bold',
     color: '#fff',
   },
 
   cardLocation: {
     fontSize: 12,
     color: '#fff',
-    fontFamily: 'Pretendard-Medium',
+    fontFamily: 'Pretendard-SemiBold',
     marginTop: 0,
   },
 
   cardDescription: {
     fontSize: 11,
     color: '#fff',
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
   },
 });

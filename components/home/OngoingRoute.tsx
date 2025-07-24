@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 16,
-        fontFamily: 'Pretendard-SemiBold',
+        fontFamily: 'Pretendard-Bold',
         color: '#000',
     },
 });
