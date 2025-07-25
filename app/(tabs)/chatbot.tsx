@@ -1,14 +1,15 @@
 // app/(tabs)/chatbot.tsx
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { FlatList } from 'react-native';
+import { FlatList, StyleSheet } from 'react-native';
 import styled from 'styled-components/native';
 
 export default function AiGuideScreen() {
   const [input, setInput] = useState('');
 
   const messages = [
-    { id: '1', sender: 'ai', text: '안녕하세요, 저는 당신의 AI 가이드 MEY입니다! 무엇을 도와드릴까요?' },
+    { id: '1', sender: 'ai', text: '안녕하세요, 저는 당신의 AI 가이드 MEY입니다! 무엇을 도와드릴까요?', suggestion: ["K-POP 루트 추천해줘", "주변 맛집 추천해줘"] },
     { id: '2', sender: 'user', text: 'K-POP 루트 추천해줘' },
     { id: '3', sender: 'ai', text: '물론이죠, K-POP 루트를 추천해드릴게요' },
   ];
@@ -21,24 +22,32 @@ export default function AiGuideScreen() {
         renderItem={({ item }) =>
           item.sender === 'ai' ? (
             <AiMessage>
-              <Avatar source={{ uri: 'https://placehold.co/30x30' }} />
+              <AvatarWrapper>
+                <Avatar source={{ uri: 'https://placehold.co/30x30' }} />
+                MEY
+              </AvatarWrapper>
               <MessageBubble>
                 <MessageText>{item.text}</MessageText>
               </MessageBubble>
+              <SuggestionBox>
+                {item.suggestion?.map((suggestion, index) => (
+                  <TagButton key={index} onPress={() => setInput(suggestion)}>
+                    <TagText>{suggestion}</TagText>
+                  </TagButton>
+                ))}
+              </SuggestionBox>
             </AiMessage>
           ) : (
             <UserMessage>
-              <UserBubble>
+              <LinearGradient
+                colors={['#8569ff', '#53bdff']}
+                start={[0, 1]} end={[1, 0]}
+                style={styleSheet.userBubble}
+              >
                 <UserText>{item.text}</UserText>
-              </UserBubble>
+              </LinearGradient>
             </UserMessage>
           )
-        }
-        ListHeaderComponent={
-          <SuggestionBox>
-            <TagButton><TagText>K-POP 루트 추천해줘</TagText></TagButton>
-            <TagButton><TagText>주변 맛집 추천해줘</TagText></TagButton>
-          </SuggestionBox>
         }
         ListFooterComponent={
           <CardWrapper>
@@ -69,16 +78,33 @@ export default function AiGuideScreen() {
   );
 }
 
+const styleSheet = StyleSheet.create({
+  userBubble: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    maxWidth: '80%',
+  },
+});
+
 
 const Container = styled.View`
   flex: 1;
   background-color: #fff;
 `;
 
+
 const AiMessage = styled.View`
-  flex-direction: row;
+  flex-direction: column;
+  gap: 10px;
   margin-bottom: 12px;
   align-items: flex-start;
+`;
+
+const AvatarWrapper = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 8px;
 `;
 
 const Avatar = styled.Image`
@@ -89,9 +115,9 @@ const Avatar = styled.Image`
 `;
 
 const MessageBubble = styled.View`
-  background-color: #f2f2f2;
-  padding: 10px 14px;
-  border-radius: 12px;
+  background-color: #faf8ff;
+  padding: 10px 20px;
+  border-radius: 0 12px 12px 12px;
   max-width: 80%;
 `;
 
@@ -102,13 +128,6 @@ const MessageText = styled.Text`
 const UserMessage = styled.View`
   align-items: flex-end;
   margin-bottom: 12px;
-`;
-
-const UserBubble = styled.View`
-  background-color: #6ba7ff;
-  padding: 10px 14px;
-  border-radius: 12px;
-  max-width: 80%;
 `;
 
 const UserText = styled.Text`
