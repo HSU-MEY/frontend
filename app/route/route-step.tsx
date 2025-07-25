@@ -10,7 +10,7 @@ export default function RouteStepScreen() {
 
       <Section>
         <PlaceName>케이팝 스퀘어 홍대</PlaceName>
-        <InfoButton onPress={() => router.push("/place-detail")}>
+        <InfoButton onPress={() => router.push("/place/place-detail")}>
           <InfoText>이 플레이스에 대한 정보</InfoText>
           <Ionicons name="chevron-forward" size={16} color="white" />
         </InfoButton>
