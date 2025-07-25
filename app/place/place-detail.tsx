@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Linking, ScrollView } from 'react-native';
+import { Linking } from 'react-native';
 import styled from 'styled-components/native';
 
 export default function PlaceDetailScreen() {
   return (
-    <ScrollView>
+    <Container>
       <TopImage source={{ uri: 'https://placehold.co/600x400' }} />
 
       <Section>
@@ -81,9 +81,14 @@ export default function PlaceDetailScreen() {
           </NearbyCard>
         </Row>
       </Section>
-    </ScrollView>
+    </Container>
   );
 }
+
+const Container = styled.ScrollView`
+  flex: 1;
+  background-color: #fff;
+`;
 
 const TopImage = styled.Image`
   width: 100%;

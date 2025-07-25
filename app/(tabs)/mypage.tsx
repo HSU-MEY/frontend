@@ -2,7 +2,6 @@
 import RouteCard from '@/components/mypage/route-card';
 import { AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { ScrollView } from 'react-native';
 import styled from 'styled-components/native';
 
 import { completedRoutes, inProgressRoutes, upcomingRoutes } from '@/data/routesInProgress';
@@ -10,7 +9,7 @@ import { completedRoutes, inProgressRoutes, upcomingRoutes } from '@/data/routes
 
 export default function MyPage() {
   return (
-    <ScrollView>
+    <Container>
       <Header>
         <BackgroundImage source={{ uri: 'https://placehold.co/600x200?text=K-Route' }} />
         <AvatarWrapper>
@@ -97,9 +96,14 @@ export default function MyPage() {
         <SettingItem>로그아웃</SettingItem>
         <SettingItem>회원 탈퇴</SettingItem>
       </Section>
-    </ScrollView>
+    </Container>
   );
 }
+
+const Container = styled.ScrollView`
+  flex: 1;
+  background-color: white;
+`;
 
 const Header = styled.View`
   align-items: center;

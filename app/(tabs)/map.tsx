@@ -1,5 +1,4 @@
 import { router } from 'expo-router';
-import { ScrollView } from 'react-native';
 import styled from 'styled-components/native';
 
 import { places } from '@/data/placeByMap';
@@ -11,7 +10,7 @@ type TabProps = {
 
 export default function MapScreen() {
   return (
-    <ScrollView>
+    <Container>
       <MapImage source={{ uri: 'https://placehold.co/600x400' }} />
 
       <TabRow>
@@ -34,9 +33,14 @@ export default function MapScreen() {
           </PlaceItem>
         ))}
       </PlaceList>
-    </ScrollView>
+    </Container>
   );
 }
+
+const Container = styled.ScrollView`
+  flex: 1;
+  background-color: white;
+`;
 
 const Header = styled.View`
   flex-direction: row;
