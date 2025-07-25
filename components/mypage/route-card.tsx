@@ -1,4 +1,6 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
+import { ImageBackground, StyleSheet } from 'react-native';
 import styled from 'styled-components/native';
 
 type Props = {
@@ -10,40 +12,60 @@ type Props = {
 
 const RouteCard = ({ thumbnail, title, date, progress }: Props) => {
   return (
-    <CardContainer>
-      <Thumbnail source={{ uri: thumbnail }} />
-      <Title numberOfLines={2}>{title}</Title>
-      <DateText>{date}</DateText>
-      {progress && <ProgressText>{progress}</ProgressText>}
-    </CardContainer>
+    <ImageBackground
+      source={{ uri: thumbnail }}
+      style={styleSheet.cardContainer}
+      imageStyle={styleSheet.imageStyle}
+      >
+      <LinearGradient
+        colors={['#000', 'transparent']}
+        start={[0, 1]}
+        end={[0, 0]}
+      >
+          <TextContainer>
+              <Title numberOfLines={2}>{title}</Title>
+              <DateText>{date}</DateText>
+              {progress && <ProgressText>{progress}</ProgressText>}
+          </TextContainer>
+      </LinearGradient>
+    </ImageBackground>
   );
 };
 
 export default RouteCard;
 
-const CardContainer = styled.View`
-  flex: 1;
-  background: #f7f7f7;
-  padding: 8px;
-  border-radius: 8px;
-  max-width: 48%;
-`;
+const styleSheet = StyleSheet.create({
+  cardContainer: {
+    flex: 1,
+    height: 120,
+    borderRadius: 8,
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+    maxWidth: '48%',
+    marginBottom: 12,
+  },
+  imageStyle: {
+    borderRadius: 8,
+  },
+});
 
-const Thumbnail = styled.Image`
-  width: 100%;
-  height: 80px;
-  border-radius: 6px;
-  margin-bottom: 6px;
+
+const TextContainer = styled.View`
+  padding: 8px;
+  bottom: 0;
+  left: 0;
+  right: 0;
 `;
 
 const Title = styled.Text`
   font-size: 13px;
   font-weight: bold;
+  color: white;
 `;
 
 const DateText = styled.Text`
   font-size: 12px;
-  color: #888;
+  color: white;
 `;
 
 const ProgressText = styled.Text`
