@@ -1,3 +1,4 @@
+import TicketCard from '@/components/TicketCard';
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
@@ -24,6 +25,14 @@ export default function OngoingRoute() {
 
             {/* 동적 카드 */}
             {/* <RouteTicketCard {...currentRoute} /> */}
+            <TicketCard
+                title="K-POP 루트: idol"
+                location="서울 홍대"
+                startDate="25.07.04"
+                progress={88}
+                imageSource={require('@/assets/images/sample-stage.png')}
+            />
+
         </View>
     );
 }
@@ -36,6 +45,7 @@ const styles = StyleSheet.create({
     headerRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginBottom: 10
     },
     icon: {
         width: 20,
