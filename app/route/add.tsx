@@ -1,3 +1,4 @@
+import Header from '@/components/common/Header';
 import { useSelectedRoute } from '@/contexts/SelectedRouteContext';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -82,43 +83,62 @@ export default function AddRouteScreen() {
   const filtered = search.trim() === ''
     ? allPlaces.filter((p) => p.isRecommended)
     : allPlaces.filter((p) =>
-        p.name.includes(search) || p.address.includes(search) || p.tag.includes(search)
-      );
+      p.name.includes(search) || p.address.includes(search) || p.tag.includes(search)
+    );
 
   return (
-    <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: '#fff' }}>
+    <View style={styles.container}>
+      <Header title="장소 추가" />
+
       {/* 검색창 */}
-      <View style={styles.searchBox}>
-        <TextInput
-          placeholder="장소를 검색해보세요"
-          value={search}
-          onChangeText={setSearch}
-          style={styles.input}
-          placeholderTextColor="#999"
+      <View style={styles.mapContainer}>
+        <Image
+          source={require('@/assets/images/sample-map.png')} // 지도 이미지
+          style={styles.map}
         />
-        <Image source={require('@/assets/images/icons/search.png')} style={styles.icon} />
+
+        {/* 검색창 */}
+        <View style={styles.searchBox}>
+          <TextInput
+            placeholder="가고싶은 장소를 검색해보세요!"
+            value={search}
+            onChangeText={setSearch}
+            style={styles.searchInput}
+            placeholderTextColor="#666"
+          />
+          <Image
+            source={require('@/assets/images/icons/search.png')}
+            style={styles.searchIcon}
+          />
+        </View>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-        <Text style={styles.title}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingBottom: insets.bottom + 100,
+        }}
+        style={styles.scrollContent}
+      >
+        <Text style={styles.sectionTitle}>
           {search.trim() === ''
-            ? '추천 장소 목록'
+            ? 'K-Route가 추천해주는 장소'
             : filtered.length === 0
-            ? '검색 결과 없음'
-            : `검색 결과 (${filtered.length}개)`}
+              ? '검색 결과가 없습니다.'
+              : `검색한 장소 (${filtered.length}개)`}
         </Text>
 
         {filtered.map((place) => (
           <View key={place.id} style={styles.card}>
-            <Image source={place.image} style={styles.image} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.name}>{place.name}</Text>
-              <Text style={styles.sub}>{place.address}</Text>
-              <Text style={styles.sub}>{place.time}</Text>
+            <Image source={place.image} style={styles.placeImage} />
+            <View style={styles.info}>
+              <Text style={styles.title}>{place.name}</Text>
+              <Text style={styles.subtitle}>{place.address}</Text>
+              <Text style={styles.time}>{place.time}</Text>
               <Text style={styles.tag}>{place.tag}</Text>
             </View>
-            <TouchableOpacity style={styles.addBtn} onPress={() => handleAdd(place)}>
-              <Image source={require('@/assets/images/icons/plus.png')} style={{ width: 16, height: 16 }} />
+            <TouchableOpacity style={styles.plusButton} onPress={() => handleAdd(place)}>
+              <Image source={require('@/assets/images/icons/plus.png')}
+                style={styles.plusIcon} />
             </TouchableOpacity>
           </View>
         ))}
@@ -150,14 +170,44 @@ export default function AddRouteScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#fff' },
+  mapContainer: { position: 'relative', width: '100%', height: 280 },
+  map: { width: '100%', height: '100%', resizeMode: 'cover' },
   searchBox: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    right: 16,
     flexDirection: 'row',
-    backgroundColor: '#eee',
-    margin: 16,
-    borderRadius: 8,
     alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 5,
     paddingHorizontal: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
+    height: 44,
   },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: 'Pretendard-Medium',
+    color: '#000',
+  },
+  searchIcon: { width: 28, height: 28, marginLeft: 8 },
+  scrollContent: { paddingHorizontal: 0, backgroundColor: '#fff' },
+  sectionTitle: {
+    fontSize: 16,
+    fontFamily: 'Pretendard-Bold',
+    marginTop: 20,
+    marginBottom: 0,
+    color: '#000',
+    paddingHorizontal: 16
+  },
+
+
   input: {
     flex: 1,
     height: 44,
@@ -169,20 +219,16 @@ const styles = StyleSheet.create({
     height: 20,
     tintColor: '#999',
   },
-  title: {
-    fontSize: 16,
-    fontFamily: 'Pretendard-Bold',
-    marginHorizontal: 16,
-    marginBottom: 12,
-  },
   card: {
     flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    marginBottom: 0,
     alignItems: 'center',
-    marginHorizontal: 16,
-    marginBottom: 12,
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#d9d9d9'
   },
   image: {
     width: 80,
@@ -199,12 +245,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Pretendard-Regular',
     color: '#555',
-  },
-  tag: {
-    fontSize: 12,
-    fontFamily: 'Pretendard-Regular',
-    color: '#1C5BD8',
-    marginTop: 4,
   },
   addBtn: {
     width: 32,
@@ -253,24 +293,70 @@ const styles = StyleSheet.create({
   },
   footer: {
     position: 'absolute',
-    bottom: 0,
     left: 0,
     right: 0,
+    bottom: 0,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 12,
     backgroundColor: '#fff',
-    padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#eee',
   },
   confirmButton: {
     backgroundColor: '#1C5BD8',
-    borderRadius: 8,
-    height: 50,
-    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 5,
     alignItems: 'center',
+    height: 50,
   },
   confirmText: {
     color: '#fff',
     fontSize: 16,
     fontFamily: 'Pretendard-Bold',
+  },
+
+  placeImage: {
+    width: 120,
+    height: 70,
+    borderRadius: 5,
+    resizeMode: 'cover',
+    marginRight: 12,
+  },
+  info: { flex: 1 },
+  title: {
+    fontSize: 14,
+    fontFamily: 'Pretendard-Bold',
+    color: '#000',
+    marginBottom: 0,
+  },
+  subtitle: {
+    fontSize: 12,
+    fontFamily: 'Pretendard-Medium',
+    color: '#555',
+  },
+  time: {
+    fontSize: 12,
+    fontFamily: 'Pretendard-Medium',
+    color: '#555',
+  },
+  tag: {
+    fontSize: 12,
+    fontFamily: 'Pretendard-Medium',
+    color: '#1C5BD8',
+    marginTop: 4,
+  },
+  plusButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 1000,
+    backgroundColor: '#DFEAFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 0,
+  },
+  plusIcon: {
+    width: 14,
+    height: 14
   },
 });

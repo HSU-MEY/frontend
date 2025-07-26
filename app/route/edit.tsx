@@ -6,12 +6,12 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import {
     Dimensions,
-    FlatList,
     Image,
+    ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 
 const screenWidth = Dimensions.get('window').width;
@@ -80,20 +80,19 @@ export default function EditRouteScreen() {
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
             <Header title="루트 편집" />
 
-            <View>
-                <Image source={require('@/assets/images/sample-route.png')}
-                    style={styles.mapimage}
-                    resizeMode="cover" />
-            </View>
+            <Image
+                source={require('@/assets/images/sample-route.png')}
+                style={styles.mapimage}
+                resizeMode="cover"
+            />
 
             <View style={styles.routeInfo}>
                 <Text style={styles.routeTitle}>K-Beauty 추천 루트: Skincare</Text>
                 <Text style={styles.routeSub}>
-                    서울시 홍대{'\n'}
-                    예상 시간: 5시간 30분  |  예상 비용: 54,000원
+                    서울시 홍대{'\n'}예상 시간: 5시간 30분  |  예상 비용: 54,000원
                 </Text>
                 <Text style={styles.tip}>장소를 삭제할 수 있어요!</Text>
 
@@ -108,14 +107,48 @@ export default function EditRouteScreen() {
             {selectedPlaces.length === 0 ? (
                 <Text style={styles.empty}>선택된 장소가 없습니다.</Text>
             ) : (
-                <FlatList
-                    data={selectedPlaces}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={renderItem}
-                    contentContainerStyle={styles.listContainer}
-                />
+                <View style={styles.listContainer}>
+                    {selectedPlaces.map((item, index) => (
+                        <View key={item.id} style={styles.cardWrap}>
+                            {index !== 0 && <View style={styles.verticalLine} />}
+                            <View style={styles.card}>
+                                <TouchableOpacity
+                                    style={styles.closeCircle}
+                                    onPress={() => handleDelete(item.id)}
+                                >
+                                    <Text style={styles.closeX}>×</Text>
+                                </TouchableOpacity>
+
+                                <Image source={item.image} style={styles.image} />
+
+                                <View style={styles.info}>
+                                    <Text style={styles.name}>{item.name}</Text>
+                                    <Text style={styles.address}>{item.address}</Text>
+                                    <Text style={styles.time}>{item.time}</Text>
+
+                                    <View style={styles.bottomRow}>
+                                        <Text style={styles.tag}>{item.tag}</Text>
+                                        <View style={styles.orderButtons}>
+                                            <TouchableOpacity onPress={() => moveItem(index, index - 1)}>
+                                                <Ionicons name="arrow-up" size={18} color="#1C5BD8" />
+                                            </TouchableOpacity>
+                                            <TouchableOpacity onPress={() => moveItem(index, index + 1)}>
+                                                <Ionicons name="arrow-down" size={18} color="#1C5BD8" style={{ marginTop: 4 }} />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </View>
+
+                                <View style={styles.iconBackground}>
+                                    <Ionicons name="chevron-forward" size={24} color="#1C5BD8" />
+                                </View>
+                            </View>
+                        </View>
+                    ))}
+                </View>
             )}
-            <View style={styles.fixedButtonContainer}>
+
+            <View style={styles.bottomButtonWrapper}>
                 <TouchableOpacity>
                     <LinearGradient
                         colors={['#69E8D9', '#0080FF']}
@@ -127,7 +160,7 @@ export default function EditRouteScreen() {
                     </LinearGradient>
                 </TouchableOpacity>
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
@@ -182,7 +215,7 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         paddingHorizontal: 16,
-        paddingBottom: 120,
+        paddingBottom: 0,
         paddingVertical: 20
     },
     cardWrap: {
@@ -260,22 +293,27 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
     },
-    fixedButtonContainer: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 0,
+    // fixedButtonContainer: {
+    //     position: 'absolute',
+    //     left: 0,
+    //     right: 0,
+    //     bottom: 0,
+    //     paddingHorizontal: 16,
+    //     paddingTop: 12,
+    //     paddingBottom: 12,
+    //     backgroundColor: '#fff',
+    //     borderTopWidth: 1,
+    //     borderTopColor: '#eee',
+    // },
+    bottomButtonWrapper: {
+        marginTop: 24,
         paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: 12,
-        backgroundColor: '#fff',
-        borderTopWidth: 1,
-        borderTopColor: '#eee',
+        paddingBottom: 40, // 여유 있게 아래 여백
     },
     closeCircle: {
         position: 'absolute',
         top: -10,
-        left: -10,
+        left: -5,
         width: 24,
         height: 24,
         borderRadius: 12,
@@ -301,5 +339,16 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginLeft: 8,
     },
+    scrollContent: {
+        paddingBottom: 80,
+    },
+    iconBackground: {
+        width: 32,
+        height: 32,
+        borderRadius: 18, // 반지름 = 지름 / 2
+        backgroundColor: '#DFEAFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+    }
 
 });
