@@ -1,11 +1,20 @@
 // app/(tabs)/mypage.tsx
+import { FavoritePlace } from '@/components/mypage/favorite-place';
 import RouteCard from '@/components/mypage/route-card';
-import { AntDesign } from '@expo/vector-icons';
+import { Place } from '@/types/Place';
 import { router } from 'expo-router';
 import styled from 'styled-components/native';
 
 import { completedRoutes, inProgressRoutes, upcomingRoutes } from '@/data/routesInProgress';
 
+const favoritePlaces: Place[] = [
+  { id: 1, category: '', title: '명동문화 홍대점', address: '서울특별시', thumbnail: 'https://placehold.co/100x100?text=명동문화 홍대점' },
+  { id: 2, category: '', title: '케이메카 명동본점', address: '서울특별시', thumbnail: 'https://placehold.co/100x100?text=케이메카 명동본점' },
+  { id: 3, category: '', title: '일상생활 부천점 시연관', address: '경기도 부천시', thumbnail: 'https://placehold.co/100x100?text=일상생활 부천점 시연관' },
+  { id: 4, category: '', title: '선샤인 스튜디오', address: '서울특별시', thumbnail: 'https://placehold.co/100x100?text=선샤인 스튜디오' },
+  { id: 5, category: '', title: '지노 카페', address: '서울특별시', thumbnail: 'https://placehold.co/100x100?text=지노 카페' },
+  { id: 6, category: '', title: '올리브명 명동타운', address: '서울특별시', thumbnail: 'https://placehold.co/100x100?text=올리브명 명동타운' },
+];
 
 export default function MyPage() {
   return (
@@ -73,19 +82,15 @@ export default function MyPage() {
       <Section>
         <SectionTitle>❤️ 좋아하는 장소</SectionTitle>
         <Grid>
-          {[
-            '명동문화 홍대점',
-            '케이메카 명동본점',
-            '일상생활 부천점 시연관',
-            '선샤인 스튜디오',
-            '지노 카페',
-            '올리브명 명동타운',
-          ].map((title, index) => (
-            <PlaceBox key={index}>
-              <PlaceImage source={{ uri: `https://placehold.co/100x100?text=${index + 1}` }} />
-              <PlaceLabel numberOfLines={1}>{title}</PlaceLabel>
-              <AntDesign name="heart" size={16} color="#eb4d4b" />
-            </PlaceBox>
+          {favoritePlaces.map((place) => (
+            <FavoritePlace
+              key={place.id}
+              id={place.id}
+              category={place.category}
+              title={place.title}
+              thumbnail={place.thumbnail}
+              address={place.address}
+            />
           ))}
         </Grid>
       </Section>
@@ -167,6 +172,7 @@ const Row = styled.View`
 
 const Grid = styled.View`
   flex-direction: row;
+  justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
 `;

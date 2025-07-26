@@ -1,18 +1,29 @@
 import { Place } from '@/types/Place';
 import styled from 'styled-components/native';
 
-const FavoritePlace = ({title, address}: Place) => {
+export const FavoritePlace = ({title, address, thumbnail}: Place) => {
   return (
     <FavoritePlaceContainer>
-      <Title>{ title }</Title>
-      <Address>{ address }</Address>
+      <PlaceThumb source={{ uri: thumbnail }} />
+      <PlaceInfo>
+        <Title>{title}</Title>
+        <Address>{address}</Address>
+      </PlaceInfo>
     </FavoritePlaceContainer>
   );
 }
 
+const PlaceThumb = styled.Image`
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+`;
+
+const PlaceInfo = styled.View`
+  width: 100px;
+`;
+
 const FavoritePlaceContainer = styled.View`
-  flex: 1;
-  padding: 16px;
 `;
 
 const Title = styled.Text`
