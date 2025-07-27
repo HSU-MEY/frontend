@@ -2,9 +2,11 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import {
+    Image,
     ImageBackground,
     StyleSheet,
     Text,
+    TouchableOpacity,
     View
 } from 'react-native';
 import ClippedImage from './ClippedImage';
@@ -15,7 +17,7 @@ interface TicketCardProps {
     startDate: string;
     progress: number;
     imageSource: any; // 공연 이미지
-    //onDelete?: () => void; // 삭제 콜백 (선택적)
+    onDelete?: () => void; // 삭제 콜백 (선택적)
 }
 
 export default function TicketCard({
@@ -24,7 +26,7 @@ export default function TicketCard({
     startDate,
     progress,
     imageSource,
-    //onDelete,
+    onDelete,
 }: TicketCardProps) {
     return (
         <ImageBackground
@@ -57,16 +59,14 @@ export default function TicketCard({
                     </View>
                 </View>
 
-                {/* 삭제 버튼 */}
-                {/* {onDelete && (
+                {onDelete ? (
                     <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
                         <Image
-                            source={require('@/assets/images/icons/delete.png')} // 삭제 아이콘 경로
+                            source={require('@/assets/images/icons/delete.png')}
                             style={styles.deleteIcon}
                         />
-                        <Text style={styles.deleteText}>삭제</Text>
                     </TouchableOpacity>
-                )} */}
+                ) : null}
             </View>
         </ImageBackground>
     );
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     },
     progressBar: {
         height: 8,
-        width: 160,
+        width: 140,
         backgroundColor: '#eee',
         borderRadius: 100,
         marginTop: 1,
@@ -136,13 +136,17 @@ const styles = StyleSheet.create({
     },
     deleteButton: {
         width: 40,
+        height: 92,
+        marginRight: 3,
         alignItems: 'center',
         justifyContent: 'center',
     },
     deleteIcon: {
-        width: 16,
-        height: 16,
-        marginBottom: 4,
+        width: '100%',
+        height: '100%',
+        //borderRadius: 5
+        borderTopRightRadius: 5,
+        borderBottomRightRadius: 5
     },
     deleteText: {
         fontSize: 10,

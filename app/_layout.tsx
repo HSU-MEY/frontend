@@ -41,6 +41,9 @@ export default function RootLayout() {
                 <Stack.Screen name="route/start" options={{ headerShown: false }} />
                 <Stack.Screen name="route/edit" options={{ headerShown: false }} />
                 <Stack.Screen name="route/add" options={{ headerShown: false }} />
+                <Stack.Screen name="routehistory/ongoing" options={{ headerShown: false }} />
+                <Stack.Screen name="routehistory/pending" options={{ headerShown: false }} />
+                <Stack.Screen name="routehistory/completed" options={{ headerShown: false }} />
                 <Stack.Screen name="+not-found" />
               </Stack>
             </SelectedRouteProvider>

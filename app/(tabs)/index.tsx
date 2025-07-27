@@ -1,5 +1,6 @@
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
+import { Button, Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
 
 // 컴포넌트 import
 import ThemeTitle from '@/components/home/ThemeTitle';
@@ -15,6 +16,7 @@ const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState<ThemeCategory>('K-Pop');
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
@@ -39,6 +41,12 @@ export default function HomeScreen() {
             <ThemeTabs selected={selectedCategory} onSelect={setSelectedCategory} />
             <ThemeRouteCards category={selectedCategory} limit={2} />
             <PopularPlaces />
+
+            <View>
+              <Button title="진행 전 루트" onPress={() => router.push('/routehistory/pending')} />
+              <Button title="진행 중 루트" onPress={() => router.push('/routehistory/ongoing')} />
+              <Button title="완료된 루트" onPress={() => router.push('/routehistory/completed')} />
+            </View>
           </View>
         </View>
       </ScrollView>
