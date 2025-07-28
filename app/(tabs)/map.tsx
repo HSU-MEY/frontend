@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import styled from 'styled-components/native';
 
-import { places } from '@/data/placeByMap';
+import { places } from '@/data/dummyPlaces';
 
 type TabProps = {
   active: boolean;
@@ -11,7 +11,7 @@ type TabProps = {
 export default function MapScreen() {
   return (
     <Container>
-      <MapImage source={{ uri: 'https://placehold.co/600x400' }} />
+      <MapImage source={ require('@/assets/images/sample-map.png') } />
 
       <TabRow>
         <Tab active={true}>K-Pop</Tab>
@@ -22,14 +22,16 @@ export default function MapScreen() {
       <PlaceList>
         {places.map((place) => (
           <PlaceItem key={place.id} onPress={() => router.push('/place/place-detail')}>
-            <PlaceNumber>{place.id}</PlaceNumber>
             <PlaceInfo>
-              <PlaceTitle>{place.title}</PlaceTitle>
-              <PlaceSub>{place.category}, {place.distance}</PlaceSub>
+              <PlaceHeader>
+                <PlaceNumber>{place.id}</PlaceNumber>
+                <PlaceTitle>{place.title}</PlaceTitle>
+              </PlaceHeader>
+              <PlaceSub>{place.type}, {place.distance}</PlaceSub>
               <PlaceTime>{place.time}</PlaceTime>
               <PlaceAddress>{place.address}</PlaceAddress>
             </PlaceInfo>
-            <PlaceThumb source={{ uri: place.thumbnail }} />
+            <PlaceThumb source={ place.thumbnail } />
           </PlaceItem>
         ))}
       </PlaceList>
@@ -42,21 +44,6 @@ const Container = styled.ScrollView`
   background-color: white;
 `;
 
-const Header = styled.View`
-  flex-direction: row;
-  align-items: center;
-  padding: 16px;
-  background-color: #f8f8f8;
-`;
-
-const BackButton = styled.TouchableOpacity`
-  margin-right: 12px;
-`;
-
-const HeaderTitle = styled.Text`
-  font-size: 18px;
-  font-weight: bold;
-`;
 
 const MapImage = styled.Image`
   width: 100%;
@@ -110,38 +97,48 @@ const PlaceNumber = styled.Text`
   border-radius: 12px;
   margin-right: 10px;
   font-weight: bold;
+  line-height: 24px;
 `;
 
 const PlaceInfo = styled.View`
   flex: 1;
 `;
 
+const PlaceHeader = styled.View`
+  flex-direction: row;
+  margin-bottom: 4px;
+`;
+
 const PlaceTitle = styled.Text`
-  font-size: 15px;
+  font-size: 16px;
   font-weight: bold;
-  margin-bottom: 2px;
+  color: #0080FF;
 `;
 
 const PlaceSub = styled.Text`
   font-size: 13px;
-  color: #666;
+  color: #9d9d9d;
   margin-bottom: 2px;
 `;
 
 const PlaceTime = styled.Text`
   font-size: 12px;
-  color: #666;
+  background-color: #f0f8ff;
+  color: #0296e9;
+  padding: 2px 6px;
+  width: 50%;
+  border-radius: 4px;
 `;
 
 const PlaceAddress = styled.Text`
   font-size: 12px;
-  color: #999;
+  color: #333;
   margin-top: 4px;
 `;
 
 const PlaceThumb = styled.Image`
-  width: 60px;
-  height: 60px;
+  height: 80px;
+  width: 80px;
   border-radius: 8px;
   margin-left: 10px;
 `;

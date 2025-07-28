@@ -1,20 +1,15 @@
 // app/(tabs)/myroute.tsx
 import { FavoritePlace } from '@/components/mypage/favorite-place';
 import RouteCard from '@/components/mypage/route-card';
+import { places } from '@/data/dummyPlaces';
 import { Place } from '@/types/Place';
 import { router } from 'expo-router';
 import styled from 'styled-components/native';
 
+import { favoritePlaceList } from '@/data/favoritePlace';
 import { completedRoutes, inProgressRoutes, upcomingRoutes } from '@/data/routesInProgress';
 
-const favoritePlaces: Place[] = [
-  { id: 1, category: '', title: '명동문화 홍대점', address: '서울특별시', thumbnail: 'https://placehold.co/100x100?text=명동문화 홍대점' },
-  { id: 2, category: '', title: '케이메카 명동본점', address: '서울특별시', thumbnail: 'https://placehold.co/100x100?text=케이메카 명동본점' },
-  { id: 3, category: '', title: '일상생활 부천점 시연관', address: '경기도 부천시', thumbnail: 'https://placehold.co/100x100?text=일상생활 부천점 시연관' },
-  { id: 4, category: '', title: '선샤인 스튜디오', address: '서울특별시', thumbnail: 'https://placehold.co/100x100?text=선샤인 스튜디오' },
-  { id: 5, category: '', title: '지노 카페', address: '서울특별시', thumbnail: 'https://placehold.co/100x100?text=지노 카페' },
-  { id: 6, category: '', title: '올리브명 명동타운', address: '서울특별시', thumbnail: 'https://placehold.co/100x100?text=올리브명 명동타운' },
-];
+const favoritePlaces = places.filter((place: Place) => favoritePlaceList.includes(place.id));
 
 export default function MyPage() {
   return (
@@ -86,6 +81,7 @@ export default function MyPage() {
             <FavoritePlace
               key={place.id}
               id={place.id}
+              type={place.type}
               category={place.category}
               title={place.title}
               thumbnail={place.thumbnail}
@@ -175,23 +171,6 @@ const Grid = styled.View`
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-`;
-
-const PlaceBox = styled.View`
-  width: 30%;
-  align-items: center;
-`;
-
-const PlaceImage = styled.Image`
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 8px;
-`;
-
-const PlaceLabel = styled.Text`
-  font-size: 12px;
-  margin: 4px 0;
-  text-align: center;
 `;
 
 const SettingItem = styled.Text`
