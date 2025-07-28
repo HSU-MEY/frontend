@@ -1,10 +1,13 @@
 import { Place } from '@/types/Place';
+import { router } from 'expo-router';
 import styled from 'styled-components/native';
 
 export const FavoritePlace = ({title, address, thumbnail}: Place) => {
   const shortAddress = address.split(' ').slice(0, 2).join(' ');
   return (
-    <FavoritePlaceContainer>
+    <FavoritePlaceContainer
+      onPress={() => router.push(`/place/place-detail`)}
+    >
       <PlaceThumb source={ thumbnail } />
       <PlaceInfo>
         <Title numberOfLines={1} ellipsizeMode="tail">{title}</Title>
@@ -25,7 +28,7 @@ const PlaceInfo = styled.View`
   width: 100px;
 `;
 
-const FavoritePlaceContainer = styled.View`
+const FavoritePlaceContainer = styled.TouchableOpacity`
 `;
 
 const Title = styled.Text`

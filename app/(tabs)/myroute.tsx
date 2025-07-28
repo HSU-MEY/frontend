@@ -108,7 +108,9 @@ export default function MyPage() {
       </Section>
 
       <Section>
-        <SectionHeader>
+        <SectionHeader
+          onPress={() => router.push('/place/place-favorite')}
+        >
           <SectionIcon 
             source={ require('@/assets/images/icons/like.png') }
           />
