@@ -1,26 +1,28 @@
+import type { ThemeCategory } from '@/components/theme/ThemeRouteCards';
+import ThemeTabs from '@/components/theme/ThemeTabs';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import styled from 'styled-components/native';
 
 import { places } from '@/data/dummyPlaces';
 
-type TabProps = {
-  active: boolean;
-};
-
 
 export default function MapScreen() {
+  const [selectedCategory, setSelectedCategory] = useState<ThemeCategory>('K-Pop');
+
   return (
     <Container>
       <MapImage source={ require('@/assets/images/sample-map.png') } />
 
-      <TabRow>
-        <Tab active={true}>K-Pop</Tab>
-        <Tab active={false}>K-Drama</Tab>
-        <Tab active={false}>K-Beauty</Tab>
-      </TabRow>
+      <ThemeTabs 
+        selected={selectedCategory} 
+        onSelect={setSelectedCategory} 
+      />
 
       <PlaceList>
-        {places.map((place) => (
+        {places
+        .filter((place => place.category === selectedCategory))
+        .map((place) => (
           <PlaceItem key={place.id} onPress={() => router.push('/place/place-detail')}>
             <PlaceInfo>
               <PlaceHeader>
@@ -55,24 +57,6 @@ const TabRow = styled.View`
   justify-content: space-around;
   margin-vertical: 12px;
 `;
-
-const Tab = styled.Text<TabProps>`
-  padding: 8px 16px;
-  border-bottom-width: 2px;
-  border-color: ${(props: TabProps) => (props.active ? '#2680eb' : 'transparent')};
-  color: ${(props: TabProps) => (props.active ? '#2680eb' : '#999')};
-  font-weight: ${(props: TabProps) => (props.active ? 'bold' : 'normal')};
-`;
-
-/*
-const Tab = styled.Text`
-  padding: 8px 16px;
-  border-bottom-width: 2px;
-  border-color: ${(props) => (props.active ? '#2680eb' : 'transparent')};
-  color: ${(props) => (props.active ? '#2680eb' : '#999')};
-  font-weight: ${(props) => (props.active ? 'bold' : 'normal')};
-`;
-*/
 
 const PlaceList = styled.View`
   padding: 0 16px 16px 16px;
