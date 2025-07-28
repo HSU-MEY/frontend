@@ -1,4 +1,3 @@
-// app/(tabs)/chatbot.tsx
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
@@ -7,12 +6,25 @@ import styled from 'styled-components/native';
 
 export default function AiGuideScreen() {
   const [input, setInput] = useState('');
-
-  const messages = [
+  const [messages, setMessages] = useState([
     { id: '1', sender: 'ai', text: '안녕하세요, 저는 당신의 AI 가이드 MEY입니다! 무엇을 도와드릴까요?', suggestion: ["K-POP 루트 추천해줘", "주변 맛집 추천해줘"] },
     { id: '2', sender: 'user', text: 'K-POP 루트 추천해줘' },
-    { id: '3', sender: 'ai', text: '물론이죠, K-POP 루트를 추천해드릴게요' },
-  ];
+    { id: '3', sender: 'ai', text: '물론이죠, K-POP 루트를 추천해드릴게요', route: 1 },
+  ]);
+
+  const handleSend = () => {
+    if (input.trim() === '') return;
+
+    const userMessage = { id: Date.now().toString(), sender: 'user', text: input };
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+
+    setInput('');
+
+    setTimeout(() => {
+      const aiResponse = { id: Date.now().toString(), sender: 'ai', text: 'Lorem ipsum dolor sit amet.' };
+      setMessages((prevMessages) => [...prevMessages, aiResponse]);
+    }, 1000);
+  };
 
   return (
     <Container>
@@ -23,19 +35,35 @@ export default function AiGuideScreen() {
           item.sender === 'ai' ? (
             <AiMessage>
               <AvatarWrapper>
-                <Avatar source={{ uri: 'https://placehold.co/30x30' }} />
-                MEY
+                <Avatar source={require('@/assets/images/ai-bot.png')} />
+                <AvatarName>MEY</AvatarName>
               </AvatarWrapper>
               <MessageBubble>
                 <MessageText>{item.text}</MessageText>
               </MessageBubble>
-              <SuggestionBox>
-                {item.suggestion?.map((suggestion, index) => (
-                  <TagButton key={index} onPress={() => setInput(suggestion)}>
-                    <TagText>{suggestion}</TagText>
-                  </TagButton>
-                ))}
-              </SuggestionBox>
+              {item.suggestion && (
+                <SuggestionBox>
+                  {item.suggestion.map((suggestion, index) => (
+                    <TagButton key={index} onPress={() => setInput(suggestion)}>
+                      <TagText>{suggestion}</TagText>
+                    </TagButton>
+                  ))}
+                </SuggestionBox>
+              )}
+              {
+                item.route && (
+                  <CardWrapper>
+                    <ImageGrid>
+                      <Preview source={{ uri: 'https://placehold.co/100x60' }} />
+                      <Preview source={{ uri: 'https://placehold.co/100x60' }} />
+                      <Preview source={{ uri: 'https://placehold.co/100x60' }} />
+                      <Preview source={{ uri: 'https://placehold.co/100x60' }} />
+                    </ImageGrid>
+                    <CardTitle>K-POP 루트: M/V 촬영 장소 투어</CardTitle>
+                    <SeeMore>자세히 보기 →</SeeMore>
+                </CardWrapper>
+                )
+              }
             </AiMessage>
           ) : (
             <UserMessage>
@@ -49,18 +77,6 @@ export default function AiGuideScreen() {
             </UserMessage>
           )
         }
-        ListFooterComponent={
-          <CardWrapper>
-            <ImageGrid>
-              <Preview source={{ uri: 'https://placehold.co/100x60' }} />
-              <Preview source={{ uri: 'https://placehold.co/100x60' }} />
-              <Preview source={{ uri: 'https://placehold.co/100x60' }} />
-              <Preview source={{ uri: 'https://placehold.co/100x60' }} />
-            </ImageGrid>
-            <CardTitle>K-POP 루트: M/V 촬영 장소 투어</CardTitle>
-            <SeeMore>자세히 보기 →</SeeMore>
-          </CardWrapper>
-        }
         contentContainerStyle={{ padding: 16 }}
       />
 
@@ -70,7 +86,7 @@ export default function AiGuideScreen() {
           value={input}
           onChangeText={setInput}
         />
-        <SendButton>
+        <SendButton onPress={handleSend}>
           <Ionicons name="send" size={20} color="white" />
         </SendButton>
       </InputArea>
@@ -87,12 +103,10 @@ const styleSheet = StyleSheet.create({
   },
 });
 
-
 const Container = styled.View`
   flex: 1;
   background-color: #fff;
 `;
-
 
 const AiMessage = styled.View`
   flex-direction: column;
@@ -105,6 +119,10 @@ const AvatarWrapper = styled.View`
   flex-direction: row;
   align-items: center;
   margin-bottom: 8px;
+`;
+
+const AvatarName = styled.Text`
+  color: #9D9D9D;
 `;
 
 const Avatar = styled.Image`
@@ -151,6 +169,7 @@ const TagText = styled.Text`
   color: #2680eb;
   font-size: 14px;
 `;
+
 
 const CardWrapper = styled.View`
   margin-top: 16px;
@@ -210,4 +229,3 @@ const SendButton = styled.TouchableOpacity`
   justify-content: center;
   align-items: center;
 `;
-
