@@ -161,7 +161,7 @@ const Header = styled.View`
 
 const BackgroundImage = styled.Image`
   width: 100%;
-  height: 140px;
+  height: 120px;
 `;
 
 const AvatarWrapper = styled.View`

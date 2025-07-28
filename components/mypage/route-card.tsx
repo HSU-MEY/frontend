@@ -12,23 +12,25 @@ type Props = {
 
 const RouteCard = ({ thumbnail, title, date, progress }: Props) => {
   return (
-    <ImageBackground
-      source={{ uri: thumbnail }}
-      style={styleSheet.cardContainer}
-      imageStyle={styleSheet.imageStyle}
-      >
-      <LinearGradient
-        colors={['#000', 'transparent']}
-        start={[0, 1]}
-        end={[0, 0]}
-      >
-          <TextContainer>
-              <Title numberOfLines={1}>{title}</Title>
-              <DateText>{date}</DateText>
-              {progress && <ProgressText>{progress}</ProgressText>}
-          </TextContainer>
-      </LinearGradient>
-    </ImageBackground>
+    <CardContainer>
+      <ImageBackground
+        source={ thumbnail ? thumbnail : require('@/assets/images/sample-route-default.jpg') }
+        style={styleSheet.cardContainer}
+        imageStyle={styleSheet.imageStyle}
+        >
+        <LinearGradient
+          colors={['#000', 'transparent']}
+          start={[0, 1]}
+          end={[0, 0]}
+        >
+            <TextContainer>
+                <Title numberOfLines={1}>{title}</Title>
+                <DateText>{date}</DateText>
+                {progress && <ProgressText>{progress}</ProgressText>}
+            </TextContainer>
+        </LinearGradient>
+      </ImageBackground>
+    </CardContainer>
   );
 };
 
@@ -40,15 +42,18 @@ const styleSheet = StyleSheet.create({
     height: 120,
     borderRadius: 8,
     overflow: 'hidden',
-    justifyContent: 'flex-end',
-    maxWidth: '48%',
     marginBottom: 12,
+    justifyContent: 'flex-end',
   },
   imageStyle: {
     borderRadius: 8,
   },
 });
 
+const CardContainer = styled.TouchableOpacity`
+  flex: 1;
+  max-width: 48%;
+`;
 
 const TextContainer = styled.View`
   padding: 8px;
