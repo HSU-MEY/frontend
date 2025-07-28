@@ -23,7 +23,7 @@ const RouteCard = ({ thumbnail, title, date, progress }: Props) => {
         end={[0, 0]}
       >
           <TextContainer>
-              <Title numberOfLines={2}>{title}</Title>
+              <Title numberOfLines={1}>{title}</Title>
               <DateText>{date}</DateText>
               {progress && <ProgressText>{progress}</ProgressText>}
           </TextContainer>

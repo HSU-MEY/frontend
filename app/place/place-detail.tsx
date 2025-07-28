@@ -2,9 +2,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { Linking } from 'react-native';
 import styled from 'styled-components/native';
 
+import Header from '@/components/common/Header';
+
+
 export default function PlaceDetailScreen() {
   return (
     <Container>
+      <Header title="플레이스" />
       <TopImage source={{ uri: 'https://placehold.co/600x400' }} />
 
       <Section>

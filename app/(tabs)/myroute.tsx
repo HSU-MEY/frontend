@@ -15,9 +15,9 @@ export default function MyPage() {
   return (
     <Container>
       <Header>
-        <BackgroundImage source={{ uri: 'https://placehold.co/600x200?text=K-Route' }} />
+        <BackgroundImage source={ require('@/assets/images/header.png') } />
         <AvatarWrapper>
-          <Avatar source={{ uri: 'https://placehold.co/100x100?text=JD' }} />
+          <Avatar source={ require('@/assets/images/sample-profile.png') } />
           <UserName>John Doe</UserName>
           <UserEmail>johndoe@example.com</UserEmail>
           <EditButton onPress={() => router.push('/account/edit-profile')}>
@@ -27,7 +27,18 @@ export default function MyPage() {
       </Header>
 
       <Section>
-        <SectionTitle>🔗 진행중인 루트</SectionTitle>
+        <SectionHeader
+          onPress={() => router.push('/routehistory/ongoing')}
+        >
+          <SectionIcon 
+            source={ require('@/assets/images/icons/route.png') }
+          />
+          <SectionTitle>진행중인 루트</SectionTitle>
+          <SectionIcon
+            source={ require('@/assets/images/icons/arrow_forward.png') }
+            style={{ marginLeft: 'auto' }}
+          />
+        </SectionHeader>
         <Row>
           { inProgressRoutes.map((route, index) => (
             <RouteCard
@@ -43,7 +54,18 @@ export default function MyPage() {
       </Section>
 
       <Section>
-        <SectionTitle>⏳ 미진행 루트</SectionTitle>
+        <SectionHeader
+          onPress={() => router.push('/routehistory/pending')}
+        >
+          <SectionIcon 
+            source={ require('@/assets/images/icons/route.png') }
+          />
+          <SectionTitle>미진행 루트</SectionTitle>
+          <SectionIcon
+            source={ require('@/assets/images/icons/arrow_forward.png') }
+            style={{ marginLeft: 'auto' }}
+          />
+        </SectionHeader>
         <Row>
         { upcomingRoutes.map((route, index) => (
             <RouteCard
@@ -59,7 +81,18 @@ export default function MyPage() {
       </Section>
 
       <Section>
-        <SectionTitle>✅ 진행 완료 루트</SectionTitle>
+        <SectionHeader
+          onPress={() => router.push('/routehistory/completed')}
+        >
+          <SectionIcon 
+            source={ require('@/assets/images/icons/route.png') }
+          />
+          <SectionTitle>진행 완료 루트</SectionTitle>
+          <SectionIcon
+            source={ require('@/assets/images/icons/arrow_forward.png') }
+            style={{ marginLeft: 'auto' }}
+          />
+        </SectionHeader>
         <Row>
         { completedRoutes.map((route, index) => (
             <RouteCard
@@ -75,7 +108,16 @@ export default function MyPage() {
       </Section>
 
       <Section>
-        <SectionTitle>❤️ 좋아하는 장소</SectionTitle>
+        <SectionHeader>
+          <SectionIcon 
+            source={ require('@/assets/images/icons/like.png') }
+          />
+          <SectionTitle>좋아하는 장소</SectionTitle>
+          <SectionIcon
+            source={ require('@/assets/images/icons/arrow_forward.png') }
+            style={{ marginLeft: 'auto' }}
+          />
+        </SectionHeader>
         <Grid>
           {favoritePlaces.map((place) => (
             <FavoritePlace
@@ -92,7 +134,12 @@ export default function MyPage() {
       </Section>
 
       <Section>
-        <SectionTitle>⚙️ 설정</SectionTitle>
+        <SectionHeader>
+          <SectionIcon 
+            source={ require('@/assets/images/icons/settings.png') }
+          />
+          <SectionTitle>설정</SectionTitle>
+        </SectionHeader>
         <SettingItem>언어 설정</SettingItem>
         <SettingItem>로그아웃</SettingItem>
         <SettingItem>회원 탈퇴</SettingItem>
@@ -155,10 +202,23 @@ const Section = styled.View`
   padding: 0 16px;
 `;
 
+const SectionHeader = styled.TouchableOpacity`
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 12px 0;
+`;
+
+const SectionIcon = styled.Image`
+  width: 24px;
+  height: 24px;
+
+`;
+
 const SectionTitle = styled.Text`
   font-weight: bold;
   font-size: 16px;
-  margin-bottom: 12px;
+  margin-left: 8px;
 `;
 
 const Row = styled.View`
