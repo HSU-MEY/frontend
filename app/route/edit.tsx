@@ -149,7 +149,9 @@ export default function EditRouteScreen() {
             )}
 
             <View style={styles.bottomButtonWrapper}>
-                <TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => router.replace('/route/route-overview')}
+                >
                     <LinearGradient
                         colors={['#69E8D9', '#0080FF']}
                         start={{ x: 0, y: 0 }}
