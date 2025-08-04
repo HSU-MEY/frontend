@@ -23,7 +23,7 @@ export default function MapScreen() {
         {places
         .filter((place => place.category === selectedCategory))
         .map((place) => (
-          <PlaceItem key={place.id} onPress={() => router.push('/place/place-detail')}>
+          <PlaceItem key={place.id} onPress={() => router.push(`/place/place-detail/${place.id}`)}>
             <PlaceInfo>
               <PlaceHeader>
                 <PlaceNumber>{place.id}</PlaceNumber>

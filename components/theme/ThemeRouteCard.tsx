@@ -1,5 +1,6 @@
+import { router } from 'expo-router';
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ThemeRouteCardProps {
     image: any;
@@ -15,7 +16,10 @@ export default function ThemeRouteCard({
     description,
 }: ThemeRouteCardProps) {
     return (
-        <View style={styles.card}>
+        <TouchableOpacity 
+            style={styles.card}
+            onPress={() => router.push('/route/route-step')}
+            >
             <Image source={image} style={styles.image} />
 
             <View style={styles.content}>
@@ -35,7 +39,7 @@ export default function ThemeRouteCard({
                     {description}
                 </Text>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 }
 
