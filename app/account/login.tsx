@@ -1,7 +1,7 @@
 // app/account/login.tsx
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Button, Text } from 'react-native';
+import { Alert, Button, Text } from 'react-native';
 import styled from 'styled-components/native';
 
 LoginScreen.options = {
@@ -10,23 +10,62 @@ LoginScreen.options = {
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    // TODO: 여기에 로그인 API 호출 로직 추가
-    console.log('로그인 시도:', email, password);
-    router.push('/');
+  const handleLogin = async () => {
+    if (!username || !password) {
+      console.error('이름과 비밀번호를 입력해주세요.');
+      return;
+    }
+
+    console.log('로그인 시도:', username, password);
+    const isValid = await login(username, password);
+
+    if (!isValid) {
+      Alert.alert('로그인 실패', '이름 또는 비밀번호가 올바르지 않습니다.');
+      return;
+    } else {  
+      Alert.alert('로그인 성공', '환영합니다!');
+      router.push('/');
+    }
   };
+
+  const login = async (username: string, password: string) => {
+    try {
+      const response = await fetch('http://13.209.188.74:8080/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          username: username, 
+          password: password,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('로그인 실패:', errorData.message);
+        return false;
+      }
+
+      console.log('로그인 성공:', username);
+      return true;
+    } catch (error) {
+      console.error('로그인 실패:', error);
+      return false;
+    }
+  }
 
   return (
     <Container>
       <Title>로그인</Title>
 
       <Input
-        placeholder="이메일"
-        value={email}
-        onChangeText={setEmail}
+        placeholder="이름"
+        value={username}
+        onChangeText={setUsername}
       />
 
       <Input

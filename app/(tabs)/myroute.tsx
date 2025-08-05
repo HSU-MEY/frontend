@@ -142,9 +142,15 @@ export default function MyPage() {
           />
           <SectionTitle>설정</SectionTitle>
         </SectionHeader>
-        <SettingItem>언어 설정</SettingItem>
-        <SettingItem>로그아웃</SettingItem>
-        <SettingItem>회원 탈퇴</SettingItem>
+        <SettingItem onPress={() => router.push('/account/register')}>
+          <SettingText>언어 설정</SettingText>
+        </SettingItem>
+        <SettingItem>
+          <SettingText>로그아웃</SettingText>
+        </SettingItem>
+        <SettingItem>
+          <SettingText>회원 탈퇴</SettingText>
+        </SettingItem>
       </Section>
     </Container>
   );
@@ -235,9 +241,13 @@ const Grid = styled.View`
   gap: 12px;
 `;
 
-const SettingItem = styled.Text`
-  font-size: 15px;
+const SettingItem = styled.TouchableOpacity`
   padding: 12px 0;
   border-bottom-width: 0.5px;
   border-color: #eee;
+`;
+
+const SettingText = styled.Text`
+  font-size: 15px;
+  color: #333;
 `;
