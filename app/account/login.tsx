@@ -1,8 +1,10 @@
 // app/account/login.tsx
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Button, Text } from 'react-native';
 import styled from 'styled-components/native';
+
 
 LoginScreen.options = {
   name: "로그인"
@@ -50,13 +52,22 @@ export default function LoginScreen() {
         return false;
       }
 
+      const data = await response.json();
+      saveTokens(data.accessToken, data.refreshToken);
+
       console.log('로그인 성공:', username);
+      
       return true;
     } catch (error) {
       console.error('로그인 실패:', error);
       return false;
     }
   }
+
+  const saveTokens = async (accessToken: string, refreshToken: string) => {
+    await AsyncStorage.setItem('accessToken', accessToken);
+    await AsyncStorage.setItem('refreshToken', refreshToken);
+  };
 
   return (
     <Container>
