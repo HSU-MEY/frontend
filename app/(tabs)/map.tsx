@@ -30,7 +30,10 @@ export default function MapScreen() {
                 <PlaceTitle>{place.title}</PlaceTitle>
               </PlaceHeader>
               <PlaceSub>{place.type}, {place.distance}</PlaceSub>
+              { place.time ? 
               <PlaceTime>{place.time}</PlaceTime>
+              : <NoTime> </NoTime>
+              }
               <PlaceAddress>{place.address}</PlaceAddress>
             </PlaceInfo>
             <PlaceThumb source={ place.thumbnail } />
@@ -112,6 +115,12 @@ const PlaceTime = styled.Text`
   padding: 2px 6px;
   width: 50%;
   border-radius: 4px;
+`;
+
+const NoTime = styled.Text`
+  font-size: 12px;
+  background-color: transparent;
+  padding: 2px 6px;
 `;
 
 const PlaceAddress = styled.Text`

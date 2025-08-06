@@ -6,10 +6,6 @@ import { Alert, Button, Text } from 'react-native';
 import styled from 'styled-components/native';
 
 
-LoginScreen.options = {
-  name: "로그인"
-}
-
 export default function LoginScreen() {
   const router = useRouter();
   const [username, setUsername] = useState('');

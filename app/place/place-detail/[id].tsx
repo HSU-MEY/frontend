@@ -19,23 +19,31 @@ export default function PlaceDetailScreen() {
         <Title>{ place?.title }</Title>
 
         <InfoBox>
+          { place?.time &&
           <InfoItem>
             <Ionicons name="information-circle-outline" size={16} color="gray" />
             <InfoText>{ place?.time } </InfoText>
           </InfoItem>
+          }
+          { place?.address &&
           <InfoItem>
-            <Ionicons name="location-outline" size={16} color="gray" />
-            <InfoText>{ place?.address }</InfoText>
+              <Ionicons name="location-outline" size={16} color="gray" />
+              <InfoText>{ place?.address }</InfoText>
           </InfoItem>
+          }
+          { place?.price &&
           <InfoItem>
             <Ionicons name="pricetags-outline" size={16} color="gray" />
             <InfoText>{ place?.price }</InfoText>
           </InfoItem>
+          }
+          { place?.contact &&
           <InfoItem>
             <Ionicons name="call-outline" size={16} color="gray" />
             <InfoText>{ place?.contact } </InfoText>
             {/*<InfoText onPress={() => Linking.openURL('tel:02-541-9270')}>02-541-9270</InfoText>*/}
           </InfoItem>
+          }
         </InfoBox>
 
         <Description>
