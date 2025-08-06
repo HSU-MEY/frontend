@@ -1,5 +1,5 @@
 // app/data/dummyRoutes.ts
-export const dummyRoutes = [
+const dummyRoutes = [
   {
     id: '1',
     title: '제주도 한 바퀴',
@@ -25,3 +25,5 @@ export const dummyRoutes = [
     imageSource: require('@/assets/images/sample-beauty2.png'),
   },
 ];
+
+export default dummyRoutes;
