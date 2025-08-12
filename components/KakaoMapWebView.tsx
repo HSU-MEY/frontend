@@ -1,6 +1,6 @@
 // KakaoMapWebView.tsx
 import React, { useMemo, useRef } from 'react';
-import { ViewStyle } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 
 type Props = {
@@ -29,44 +29,54 @@ export default function KakaoMapWebView({
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <style>
-          html, body, #map { height:100%; margin:0; padding:0; }
+          body { height:100%; margin:0; padding:0; }
+          html { height: 100%; }
+          #map { width:100%; height:100%; }
         </style>
-        <script src="https://dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=${jsKey}"></script>
+        <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${jsKey}"></script>
       </head>
       <body>
-        <div id="map">MAP POSITION</div>
+        <div id="map">map</div>
         <script>
+          window.onload = function() {
+            if (typeof kakao !== 'undefined' && kakao.maps) {
+              const mapContainer = document.getElementById('map');
+              const mapOption = {
+                center: new kakao.maps.LatLng(${center.lat}, ${center.lng}),
+                level: ${level},
+              };
+              const map = new kakao.maps.Map(mapContainer, mapOption);
 
-          function post(msg){window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify(msg));}
+              // Ready event
+              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ready' }));
 
-
-            const container = document.getElementById('map');
-            const center = new kakao.maps.LatLng(${center.lat}, ${center.lng});
-            const map = new kakao.maps.Map(container, { center, level: ${level} });
-            window.__map = map;
-
-            // 클릭 이벤트 → RN으로 좌표 전송
-            kakao.maps.event.addListener(map, 'click', function(mouseEvent){
-              const latlng = mouseEvent.latLng;
-              post({ type: 'press', lat: latlng.getLat(), lng: latlng.getLng() });
-            });
-
-            post({ type: 'ready' });
-          });
-
-          // RN → Web 제어용 API
-          window.__api = {
-            setCenter(lat, lng, level){
-              if(!window.__map) return;
-              window.__map.setCenter(new kakao.maps.LatLng(lat, lng));
-              if(typeof level === 'number'){ window.__map.setLevel(level); }
-            },
-            addMarker(lat, lng){
-              if(!window.__map) return;
-              new kakao.maps.Marker({
-                position: new kakao.maps.LatLng(lat, lng),
-                map: window.__map
+              // Map click event
+              kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+                const latlng = mouseEvent.latLng;
+                window.ReactNativeWebView.postMessage(JSON.stringify({
+                  type: 'press',
+                  lat: latlng.getLat(),
+                  lng: latlng.getLng(),
+                }));
               });
+
+              // Expose API to RN
+              window.__api = {
+                setCenter: function(lat, lng, level) {
+                  const center = new kakao.maps.LatLng(lat, lng);
+                  map.setCenter(center);
+                  if (level) map.setLevel(level);
+                },
+                addMarker: function(lat, lng) {
+                  const markerPosition  = new kakao.maps.LatLng(lat, lng);
+                  const marker = new kakao.maps.Marker({
+                    position: markerPosition,
+                  });
+                  marker.setMap(map);
+                },
+              };
+            } else {
+              console.error("Kakao Maps is not available.");
             }
           };
         </script>
@@ -86,15 +96,17 @@ export default function KakaoMapWebView({
   };
 
   return (
-    <WebView
-      ref={webRef}
-      originWhitelist={['*']}
-      source={{ html }}
-      onMessage={onMessage}
-      javaScriptEnabled
-      domStorageEnabled
-      style={style}
-    />
+    <View style={style} >
+      <WebView
+        ref={webRef}
+        originWhitelist={['*']}
+        source={{ html }}
+        onMessage={onMessage}
+        javaScriptEnabled
+        domStorageEnabled
+        style={{ flex: 1 }}
+      />
+    </View>
   );
 }
 

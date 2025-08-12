@@ -9,13 +9,13 @@ import { places } from '@/data/dummyPlaces';
 import { View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-import { KAKAO_API_KEY } from '@env';
+import { KAKAO_JS_API_KEY } from '@env';
 
 
 export default function MapScreen() {
   const [selectedCategory, setSelectedCategory] = useState<ThemeCategory>('K-Pop');
   const ref = useRef<WebView>(null);
-  const JS_KEY = KAKAO_API_KEY;
+  const JS_KEY = KAKAO_JS_API_KEY;
 
 
   return (
@@ -24,7 +24,7 @@ export default function MapScreen() {
         <KakaoMapWebView
           //@ts-ignore - ref
           ref={ref}
-          style={{ width: '100%', height: 220 }}
+          style={{ width: '100%', height: 220, backgroundColor: 'lightgrey' }}
           jsKey={JS_KEY}
           center={{ lat: 37.5665, lng: 126.9780 }} // 서울시청 좌표
           level={4}
@@ -68,11 +68,6 @@ const Container = styled.ScrollView`
   background-color: white;
 `;
 
-
-const MapImage = styled.View`
-  width: 100%;
-  height: 220px;
-`;
 
 const TabRow = styled.View`
   flex-direction: row;

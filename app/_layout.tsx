@@ -9,7 +9,13 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { SelectedRouteProvider } from '@/contexts/SelectedRouteContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
+import { initializeKakaoSDK } from '@react-native-kakao/core';
+
+import { KAKAO_NATIVE_API_KEY } from '@env';
+
 export default function RootLayout() {
+  initializeKakaoSDK(KAKAO_NATIVE_API_KEY);
+
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
