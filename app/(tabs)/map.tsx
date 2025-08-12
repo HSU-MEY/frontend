@@ -19,12 +19,12 @@ export default function MapScreen() {
 
 
   return (
+
     <Container>
-      <View style={{ flex: 1}}>
+      <View style={{ width: '100%', height: 300, backgroundColor: 'lightgrey' }}>
         <KakaoMapWebView
           //@ts-ignore - ref
           ref={ref}
-          style={{ width: '100%', height: 220, backgroundColor: 'lightgrey' }}
           jsKey={JS_KEY}
           center={{ lat: 37.5665, lng: 126.9780 }} // 서울시청 좌표
           level={4}
@@ -34,40 +34,44 @@ export default function MapScreen() {
       </View>
 
       <ThemeTabs 
-        selected={selectedCategory} 
-        onSelect={setSelectedCategory} 
-      />
-
-      <PlaceList>
-        {places
-        .filter((place => place.category === selectedCategory))
-        .map((place) => (
-          <PlaceItem key={place.id} onPress={() => router.push(`/place/place-detail/${place.id}`)}>
-            <PlaceInfo>
-              <PlaceHeader>
-                <PlaceNumber>{place.id}</PlaceNumber>
-                <PlaceTitle>{place.title}</PlaceTitle>
-              </PlaceHeader>
-              <PlaceSub>{place.type}, {place.distance}</PlaceSub>
-              { place.time ? 
-              <PlaceTime>{place.time}</PlaceTime>
-              : <NoTime> </NoTime>
-              }
-              <PlaceAddress>{place.address}</PlaceAddress>
-            </PlaceInfo>
-            <PlaceThumb source={ place.thumbnail } />
-          </PlaceItem>
-        ))}
-      </PlaceList>
+          selected={selectedCategory} 
+          onSelect={setSelectedCategory} 
+        />
+      <ListContainer>
+        <PlaceList>
+          {places
+          .filter((place => place.category === selectedCategory))
+          .map((place) => (
+            <PlaceItem key={place.id} onPress={() => router.push(`/place/place-detail/${place.id}`)}>
+              <PlaceInfo>
+                <PlaceHeader>
+                  <PlaceNumber>{place.id}</PlaceNumber>
+                  <PlaceTitle>{place.title}</PlaceTitle>
+                </PlaceHeader>
+                <PlaceSub>{place.type}, {place.distance}</PlaceSub>
+                { place.time ? 
+                <PlaceTime>{place.time}</PlaceTime>
+                : <NoTime> </NoTime>
+                }
+                <PlaceAddress>{place.address}</PlaceAddress>
+              </PlaceInfo>
+              <PlaceThumb source={ place.thumbnail } />
+            </PlaceItem>
+          ))}
+        </PlaceList>
+      </ListContainer>
     </Container>
   );
 }
 
-const Container = styled.ScrollView`
+const Container = styled.View`
   flex: 1;
   background-color: white;
 `;
 
+const ListContainer = styled.ScrollView`
+  padding: 6px 0;
+`;
 
 const TabRow = styled.View`
   flex-direction: row;

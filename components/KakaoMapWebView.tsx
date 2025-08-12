@@ -1,6 +1,6 @@
 // KakaoMapWebView.tsx
 import React, { useMemo, useRef } from 'react';
-import { View, ViewStyle } from 'react-native';
+import { ViewStyle } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 
 type Props = {
@@ -10,6 +10,7 @@ type Props = {
   level?: number;                // Zoom Level
   onReady?: () => void;
   onPress?: (lat: number, lng: number) => void;
+  onDragChange?: (active: boolean) => void;
 };
 
 export default function KakaoMapWebView({
@@ -19,6 +20,7 @@ export default function KakaoMapWebView({
   level = 4,
   onReady,
   onPress,
+  onDragChange,
 }: Props) {
   const webRef = useRef<WebView>(null);
 
@@ -96,7 +98,6 @@ export default function KakaoMapWebView({
   };
 
   return (
-    <View style={style} >
       <WebView
         ref={webRef}
         originWhitelist={['*']}
@@ -106,7 +107,6 @@ export default function KakaoMapWebView({
         domStorageEnabled
         style={{ flex: 1 }}
       />
-    </View>
   );
 }
 
