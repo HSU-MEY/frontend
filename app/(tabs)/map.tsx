@@ -1,18 +1,37 @@
 import type { ThemeCategory } from '@/components/theme/ThemeRouteCards';
 import ThemeTabs from '@/components/theme/ThemeTabs';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import styled from 'styled-components/native';
 
+import KakaoMapWebView from '@/components/KakaoMapWebView';
 import { places } from '@/data/dummyPlaces';
+import { View } from 'react-native';
+import { WebView } from 'react-native-webview';
+
+import { KAKAO_API_KEY } from '@env';
 
 
 export default function MapScreen() {
   const [selectedCategory, setSelectedCategory] = useState<ThemeCategory>('K-Pop');
+  const ref = useRef<WebView>(null);
+  const JS_KEY = KAKAO_API_KEY;
+
 
   return (
     <Container>
-      <MapImage source={ require('@/assets/images/sample-map.png') } />
+      <View style={{ flex: 1}}>
+        <KakaoMapWebView
+          //@ts-ignore - ref
+          ref={ref}
+          style={{ width: '100%', height: 220 }}
+          jsKey={JS_KEY}
+          center={{ lat: 37.5665, lng: 126.9780 }} // 서울시청 좌표
+          level={4}
+          onReady={() => console.log('Map is ready') }
+          onPress={(lat, lng) => console.log('Map pressed at:', lat, lng) }
+        />
+      </View>
 
       <ThemeTabs 
         selected={selectedCategory} 
@@ -47,7 +66,7 @@ const Container = styled.ScrollView`
 `;
 
 
-const MapImage = styled.Image`
+const MapImage = styled.View`
   width: 100%;
   height: 220px;
 `;
