@@ -9,23 +9,45 @@ import styled from 'styled-components/native';
 import { favoritePlaceList } from '@/data/favoritePlace';
 import { completedRoutes, inProgressRoutes, upcomingRoutes } from '@/data/routesInProgress';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
+
 const favoritePlaces = places.filter((place: Place) => favoritePlaceList.includes(place.id));
 
 export default function MyPage() {
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem('accessToken').then(token => {
+      setAccessToken(token);
+    });
+  }, []);
+
   return (
     <Container>
       <Header>
         <BackgroundImage source={ require('@/assets/images/header.png') } />
         <AvatarWrapper>
-          <Avatar source={ require('@/assets/images/sample-profile.png') } />
-          <UserName>John Doe</UserName>
-          <UserEmail>johndoe@example.com</UserEmail>
+          <Avatar source={ 
+            accessToken ? 
+            require('@/assets/images/sample-profile.png') :
+            require('@/assets/images/sample-profile.png')
+          } />
+          <UserName>
+            { accessToken ? 'John Doe' : 'Guest'}
+          </UserName>
+          <UserEmail> { accessToken ? 'johndoe@example.com' : '' }</UserEmail>
+          { accessToken && 
           <EditButton onPress={() => router.push('/account/edit-profile')}>
             <EditText>프로필 수정</EditText>
           </EditButton>
+          }
         </AvatarWrapper>
       </Header>
 
+      { accessToken ? 
+      (
+      <>
       <Section>
         <SectionHeader
           onPress={() => router.push('/routehistory/ongoing')}
@@ -52,7 +74,6 @@ export default function MyPage() {
           ))}
         </Row>
       </Section>
-
       <Section>
         <SectionHeader
           onPress={() => router.push('/routehistory/pending')}
@@ -79,7 +100,6 @@ export default function MyPage() {
           ))}
         </Row>
       </Section>
-
       <Section>
         <SectionHeader
           onPress={() => router.push('/routehistory/completed')}
@@ -106,7 +126,6 @@ export default function MyPage() {
           ))}
         </Row>
       </Section>
-
       <Section>
         <SectionHeader
           onPress={() => router.push('/place/place-favorite')}
@@ -134,7 +153,16 @@ export default function MyPage() {
           ))}
         </Grid>
       </Section>
-
+      </>
+      ) : (
+        <Section>
+          <LoginButton onPress={() => router.push('/account/login')}>
+            <SectionTitle>
+              <LoginButtonText>로그인</LoginButtonText>
+            </SectionTitle>
+          </LoginButton>
+        </Section>
+      )}
       <Section>
         <SectionHeader>
           <SectionIcon 
@@ -142,7 +170,7 @@ export default function MyPage() {
           />
           <SectionTitle>설정</SectionTitle>
         </SectionHeader>
-        <SettingItem onPress={() => router.push('/account/register')}>
+        <SettingItem>
           <SettingText>언어 설정</SettingText>
         </SettingItem>
         <SettingItem>
@@ -155,6 +183,21 @@ export default function MyPage() {
     </Container>
   );
 }
+
+const LoginButton = styled.TouchableOpacity`
+  background-color: #007AFF;
+  padding: 12px;
+  border-radius: 8px;
+  align-items: center;
+  color: white;
+`;
+
+const LoginButtonText = styled.Text`
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+`;
+
 
 const Container = styled.ScrollView`
   flex: 1;
