@@ -1,3 +1,5 @@
+import { refreshTokenApi } from '@/api/auth.service';
+import { getExp, isExpSoon } from '@/utils/jwt';
 import { clearTokens } from '@/utils/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { usePathname, useRouter } from 'expo-router';
@@ -30,5 +32,32 @@ export const useAuthSession = () => {
     }
   }, []);
 
-  return { accessToken, setAccessToken, logout };
+  const ensureValidAccessToken = async (): Promise<string | null> => {
+    let token = await AsyncStorage.getItem("accessToken");
+    if (!token) return null;
+
+    if (isExpSoon(getExp(token))) {
+      const refresh = await AsyncStorage.getItem("refreshToken");
+      if (!refresh) return null;
+
+      try {
+        const res = await refreshTokenApi(refresh);
+        if (!res.isSuccess) return null;
+
+        const { accessToken, refreshToken } = res.result;
+
+        await AsyncStorage.setItem("accessToken", accessToken);
+        await AsyncStorage.setItem("refreshToken", refreshToken);
+
+        token = accessToken;
+      } catch (e) {
+        console.error("토큰 갱신 실패:", e);
+        return null;
+      }
+    }
+
+    return token;
+  };
+
+  return { accessToken, setAccessToken, logout, ensureValidAccessToken };
 };

@@ -3,7 +3,7 @@ import { FavoritePlace } from '@/components/mypage/favorite-place';
 import RouteCard from '@/components/mypage/route-card';
 import { places } from '@/data/dummyPlaces';
 import { Place } from '@/types/Place';
-import { router, useFocusEffect, usePathname } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import styled from 'styled-components/native';
 
 import { favoritePlaceList } from '@/data/favoritePlace';
@@ -14,21 +14,40 @@ import { useCallback, useState } from 'react';
 
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { Alert } from 'react-native';
-
 const favoritePlaces = places.filter((place: Place) => favoritePlaceList.includes(place.id));
 
 export default function MyPage() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const { logout } = useAuthSession();
-  const pathname = usePathname();
+  const { logout, ensureValidAccessToken } = useAuthSession();
+  const [nickname, setNickname] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+
+  if (accessToken) {
+    AsyncStorage.getItem('nickname').then(name => setNickname(name));
+    AsyncStorage.getItem('email').then(email => setEmail(email));
+  }
 
   useFocusEffect(
     useCallback(() => {
       let mounted = true;
-      AsyncStorage.getItem('accessToken').then(t => {
-        if (mounted) setAccessToken(t);
-      });
-      return () => { mounted = false; };
+      const checkAndRefresh = async () => {
+        const token = await AsyncStorage.getItem("accessToken");
+        if (!token) {
+          if (mounted) setAccessToken(null);
+          return;
+        }
+
+        // 토큰 만료 확인
+        const newToken = await ensureValidAccessToken();
+        
+        if (mounted) setAccessToken(newToken);
+      };
+
+      checkAndRefresh();
+
+      return () => {
+        mounted = false;
+      };
     }, [])
   );
 
@@ -62,9 +81,9 @@ export default function MyPage() {
             require('@/assets/images/sample-profile.png')
           } />
           <UserName>
-            { accessToken ? 'John Doe' : 'Guest'}
+            { accessToken ? nickname : 'Guest'}
           </UserName>
-          <UserEmail> { accessToken ? 'johndoe@example.com' : '' }</UserEmail>
+          <UserEmail> { accessToken ? email : '' }</UserEmail>
           { accessToken && 
           <EditButton onPress={() => router.push('/account/edit-profile')}>
             <EditText>프로필 수정</EditText>
