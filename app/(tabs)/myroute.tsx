@@ -3,26 +3,53 @@ import { FavoritePlace } from '@/components/mypage/favorite-place';
 import RouteCard from '@/components/mypage/route-card';
 import { places } from '@/data/dummyPlaces';
 import { Place } from '@/types/Place';
-import { router } from 'expo-router';
+import { router, useFocusEffect, usePathname } from 'expo-router';
 import styled from 'styled-components/native';
 
 import { favoritePlaceList } from '@/data/favoritePlace';
 import { completedRoutes, inProgressRoutes, upcomingRoutes } from '@/data/routesInProgress';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+
+import { useAuthSession } from '@/hooks/useAuthSession';
+import { Alert } from 'react-native';
 
 const favoritePlaces = places.filter((place: Place) => favoritePlaceList.includes(place.id));
 
 export default function MyPage() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const { logout } = useAuthSession();
+  const pathname = usePathname();
 
-  useEffect(() => {
-    AsyncStorage.getItem('accessToken').then(token => {
-      setAccessToken(token);
-      console.log("Access Token:", token);
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      let mounted = true;
+      AsyncStorage.getItem('accessToken').then(t => {
+        if (mounted) setAccessToken(t);
+      });
+      return () => { mounted = false; };
+    }, [])
+  );
+
+  const handleLogout = async () => {
+    Alert.alert("로그아웃", "정말 로그아웃하시겠습니까?", [
+      {
+        text: "취소",
+        style: "cancel"
+      },
+      {
+        text: "로그아웃",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          router.replace('/');
+          Alert.alert("로그아웃 완료");
+        }
+      }
+    ]
+    )
+  }
 
   return (
     <Container>
@@ -174,12 +201,17 @@ export default function MyPage() {
         <SettingItem>
           <SettingText>언어 설정</SettingText>
         </SettingItem>
-        <SettingItem>
+        { accessToken &&
+        <>
+        <SettingItem onPress={handleLogout}>
           <SettingText>로그아웃</SettingText>
         </SettingItem>
         <SettingItem>
           <SettingText>회원 탈퇴</SettingText>
         </SettingItem>
+        </>
+        }
+        
       </Section>
     </Container>
   );

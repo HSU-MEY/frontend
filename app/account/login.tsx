@@ -75,7 +75,29 @@ export default function LoginScreen() {
   const saveTokens = async (accessToken: string, refreshToken: string) => {
     await AsyncStorage.setItem('accessToken', accessToken);
     await AsyncStorage.setItem('refreshToken', refreshToken);
+    await AsyncStorage.setItem('email', email);
+    const nickname = await getNickname();
+    if (nickname) {
+      await AsyncStorage.setItem('nickname', nickname);
+    }
   };
+
+  const getNickname = async () => {
+    try {
+      const response = await fetch('http://13.209.188.74:8080/api/users/profiles', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await AsyncStorage.getItem('accessToken')}`,
+        }
+      });
+      const data = await response.json();
+      return data.result.nickname;
+
+    } catch (error) {
+
+    }
+  }
 
   return (
     <Container>
