@@ -1,18 +1,40 @@
-import { refreshTokenApi } from '@/api/auth.service';
+import { loginApi, refreshTokenApi } from '@/api/auth.service';
 import { getExp, isExpSoon } from '@/utils/jwt';
 import { clearTokens } from '@/utils/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { usePathname, useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
+
+const ACCESS_KEY = 'accessToken';
+const REFRESH_KEY = 'refreshToken';
 
 export const useAuthSession = () => {
   const [accessToken, setAccessToken] = useState<string|null>(null);
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const router = useRouter();
-  const pathname = usePathname();
 
   const clearTimers = () => {
     if (refreshTimer.current) { clearTimeout(refreshTimer.current); refreshTimer.current = null; }
+  };
+
+  const saveTokens = async (access: string, refresh: string) => {
+    await AsyncStorage.setItem(ACCESS_KEY, access);
+    await AsyncStorage.setItem(REFRESH_KEY, refresh);
+  };    
+
+  const login = async (email: string, password: string) => {
+    try {
+      const res = await loginApi({ email, password }); // ApiEnvelope<AuthTokens>
+
+      if (!res.isSuccess) throw new Error(res.message);
+      const { accessToken, refreshToken } = res.result;
+
+      await saveTokens(accessToken, refreshToken);
+
+      //const exp = getExp(accessToken);
+
+      return { ok: true };
+    } catch (e: any) {
+      return { ok: false, error: e?.message ?? "로그인 실패" };
+    }
   };
 
   const logout = useCallback(async () => {
@@ -59,5 +81,5 @@ export const useAuthSession = () => {
     return token;
   };
 
-  return { accessToken, setAccessToken, logout, ensureValidAccessToken };
+  return { accessToken, setAccessToken, login, logout, ensureValidAccessToken };
 };

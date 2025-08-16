@@ -1,4 +1,5 @@
 // app/account/login.tsx
+import { useAuthSession } from '@/hooks/useAuthSession';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -10,6 +11,7 @@ export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuthSession();
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -41,37 +43,6 @@ export default function LoginScreen() {
     }
   };
 
-  const login = async (email: string, password: string) => {
-    try {
-      const response = await fetch('http://13.209.188.74:8080/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          email: email, 
-          password: password,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('로그인 실패:', errorData.message);
-        return false;
-      }
-
-      const data = await response.json();
-      saveTokens(data.result.accessToken, data.result.refreshToken);
-      
-      console.log('로그인 성공:', email);
-      
-      return true;
-    } catch (error) {
-      console.error('로그인 실패:', error);
-      return false;
-    }
-  }
-
   const saveTokens = async (accessToken: string, refreshToken: string) => {
     await AsyncStorage.setItem('accessToken', accessToken);
     await AsyncStorage.setItem('refreshToken', refreshToken);
@@ -92,6 +63,7 @@ export default function LoginScreen() {
         }
       });
       const data = await response.json();
+      console.log('닉네임 가져오기 성공:', data.result.nickname);
       return data.result.nickname;
 
     } catch (error) {

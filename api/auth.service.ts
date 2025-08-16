@@ -74,7 +74,7 @@ export async function refreshTokenApi(
   });
 }
 
-// 3) 로그아웃
+// 로그아웃
 // export async function logoutApi(refreshToken: string): Promise<ApiEnvelope<null>> {
 //   return fetchJson<ApiEnvelope<null>>("/auth/logout", {
 //     method: "POST",
