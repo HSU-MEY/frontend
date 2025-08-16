@@ -1,23 +1,73 @@
 // app/account/login.tsx
+import { useAuthSession } from '@/hooks/useAuthSession';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Button, Text } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, Button, Text } from 'react-native';
 import styled from 'styled-components/native';
 
-LoginScreen.options = {
-  name: "로그인"
-}
 
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuthSession();
 
-  const handleLogin = () => {
-    // TODO: 여기에 로그인 API 호출 로직 추가
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      if (accessToken) {
+        router.push('/');
+        Alert.alert('이미 로그인되어 있습니다.', '메인 화면으로 이동합니다.');
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      console.error('이름과 비밀번호를 입력해주세요.');
+      return;
+    }
+
     console.log('로그인 시도:', email, password);
-    router.push('/');
+    const isValid = await login(email, password);
+    await saveProfile();
+
+    if (!isValid) {
+      Alert.alert('로그인 실패', '이름 또는 비밀번호가 올바르지 않습니다.');
+      return;
+    } else {  
+      Alert.alert('로그인 성공', '환영합니다!');
+      router.push('/');
+    }
   };
+
+  const saveProfile = async () => {
+    await AsyncStorage.setItem('email', email);
+    const nickname = await getNickname();
+    if (nickname) {
+      await AsyncStorage.setItem('nickname', nickname);
+    }
+  };
+
+  const getNickname = async () => {
+    try {
+      const response = await fetch('http://13.209.188.74:8080/api/users/profiles', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await AsyncStorage.getItem('accessToken')}`,
+        }
+      });
+      const data = await response.json();
+      return data.result.nickname;
+
+    } catch (error) {
+
+    }
+  }
 
   return (
     <Container>

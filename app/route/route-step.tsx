@@ -77,10 +77,10 @@ export default function RouteStepScreen() {
       </StepsContainer>
 
       <BottomButtons>
-        <InactiveButton>
+        <InactiveButton onPress={() => router.push('/route/route-step')} >
           <InactiveText>이전 플레이스</InactiveText>
         </InactiveButton>
-        <ActiveButton>
+        <ActiveButton onPress={() => router.push('/route/route-step')}>
           <ActiveText>다음 플레이스</ActiveText>
         </ActiveButton>
       </BottomButtons>

@@ -3,29 +3,98 @@ import { FavoritePlace } from '@/components/mypage/favorite-place';
 import RouteCard from '@/components/mypage/route-card';
 import { places } from '@/data/dummyPlaces';
 import { Place } from '@/types/Place';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import styled from 'styled-components/native';
 
 import { favoritePlaceList } from '@/data/favoritePlace';
 import { completedRoutes, inProgressRoutes, upcomingRoutes } from '@/data/routesInProgress';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCallback, useState } from 'react';
+
+import { useAuthSession } from '@/hooks/useAuthSession';
+import { Alert } from 'react-native';
 const favoritePlaces = places.filter((place: Place) => favoritePlaceList.includes(place.id));
 
 export default function MyPage() {
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const { logout, ensureValidAccessToken } = useAuthSession();
+  const [nickname, setNickname] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+
+  if (accessToken) {
+    AsyncStorage.getItem('nickname').then(name => setNickname(name));
+    AsyncStorage.getItem('email').then(email => setEmail(email));
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      let mounted = true;
+      const checkAndRefresh = async () => {
+        const token = await AsyncStorage.getItem("accessToken");
+        if (!token) {
+          if (mounted) setAccessToken(null);
+          return;
+        }
+
+        // 토큰 만료 확인
+        const newToken = await ensureValidAccessToken();
+        
+        if (mounted) setAccessToken(newToken);
+      };
+
+      checkAndRefresh();
+
+      return () => {
+        mounted = false;
+      };
+    }, [])
+  );
+
+  const handleLogout = async () => {
+    Alert.alert("로그아웃", "정말 로그아웃하시겠습니까?", [
+      {
+        text: "취소",
+        style: "cancel"
+      },
+      {
+        text: "로그아웃",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          router.replace('/');
+          Alert.alert("로그아웃 완료");
+        }
+      }
+    ]
+    )
+  }
+
   return (
     <Container>
       <Header>
         <BackgroundImage source={ require('@/assets/images/header.png') } />
         <AvatarWrapper>
-          <Avatar source={ require('@/assets/images/sample-profile.png') } />
-          <UserName>John Doe</UserName>
-          <UserEmail>johndoe@example.com</UserEmail>
+          <Avatar source={ 
+            accessToken ? 
+            require('@/assets/images/sample-profile.png') :
+            require('@/assets/images/sample-profile.png')
+          } />
+          <UserName>
+            { accessToken ? nickname : 'Guest'}
+          </UserName>
+          <UserEmail> { accessToken ? email : '' }</UserEmail>
+          { accessToken && 
           <EditButton onPress={() => router.push('/account/edit-profile')}>
             <EditText>프로필 수정</EditText>
           </EditButton>
+          }
         </AvatarWrapper>
       </Header>
 
+      { accessToken ? 
+      (
+      <>
       <Section>
         <SectionHeader
           onPress={() => router.push('/routehistory/ongoing')}
@@ -52,7 +121,6 @@ export default function MyPage() {
           ))}
         </Row>
       </Section>
-
       <Section>
         <SectionHeader
           onPress={() => router.push('/routehistory/pending')}
@@ -79,7 +147,6 @@ export default function MyPage() {
           ))}
         </Row>
       </Section>
-
       <Section>
         <SectionHeader
           onPress={() => router.push('/routehistory/completed')}
@@ -106,7 +173,6 @@ export default function MyPage() {
           ))}
         </Row>
       </Section>
-
       <Section>
         <SectionHeader
           onPress={() => router.push('/place/place-favorite')}
@@ -134,7 +200,16 @@ export default function MyPage() {
           ))}
         </Grid>
       </Section>
-
+      </>
+      ) : (
+        <Section>
+          <LoginButton onPress={() => router.push('/account/login')}>
+            <SectionTitle>
+              <LoginButtonText>로그인</LoginButtonText>
+            </SectionTitle>
+          </LoginButton>
+        </Section>
+      )}
       <Section>
         <SectionHeader>
           <SectionIcon 
@@ -142,13 +217,39 @@ export default function MyPage() {
           />
           <SectionTitle>설정</SectionTitle>
         </SectionHeader>
-        <SettingItem>언어 설정</SettingItem>
-        <SettingItem>로그아웃</SettingItem>
-        <SettingItem>회원 탈퇴</SettingItem>
+        <SettingItem>
+          <SettingText>언어 설정</SettingText>
+        </SettingItem>
+        { accessToken &&
+        <>
+        <SettingItem onPress={handleLogout}>
+          <SettingText>로그아웃</SettingText>
+        </SettingItem>
+        <SettingItem>
+          <SettingText>회원 탈퇴</SettingText>
+        </SettingItem>
+        </>
+        }
+        
       </Section>
     </Container>
   );
 }
+
+const LoginButton = styled.TouchableOpacity`
+  background-color: #007AFF;
+  padding: 12px;
+  border-radius: 8px;
+  align-items: center;
+  color: white;
+`;
+
+const LoginButtonText = styled.Text`
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+`;
+
 
 const Container = styled.ScrollView`
   flex: 1;
@@ -235,9 +336,13 @@ const Grid = styled.View`
   gap: 12px;
 `;
 
-const SettingItem = styled.Text`
-  font-size: 15px;
+const SettingItem = styled.TouchableOpacity`
   padding: 12px 0;
   border-bottom-width: 0.5px;
   border-color: #eee;
+`;
+
+const SettingText = styled.Text`
+  font-size: 15px;
+  color: #333;
 `;

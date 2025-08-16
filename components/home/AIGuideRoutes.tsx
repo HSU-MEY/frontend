@@ -69,7 +69,7 @@ export default function AIGuideRoutes() {
           <TouchableOpacity
             key={item.id}
             style={styles.cardContainer}
-            // onPress={() => router.push(`/route/${item.id}`)} // ← 클릭 시 이동
+            onPress={() => router.push(`/route/route-overview`)}
           >
 
             <ImageBackground

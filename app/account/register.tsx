@@ -7,7 +7,7 @@ import styled from 'styled-components/native';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,11 +28,69 @@ export default function RegisterScreen() {
       return;
     }
 
+    if (!email || !nickname || !password || !selectedLanguage) {
+      Alert.alert('모든 필드를 입력해주세요.');
+      return;
+    }
+
+    if (!email.includes('@')) {
+      Alert.alert('유효한 이메일 주소를 입력해주세요.');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('비밀번호는 6자 이상이어야 합니다.');
+      return;
+    }
+
+    if (nickname.length < 2) {
+      Alert.alert('이름은 2자 이상이어야 합니다.');
+      return;
+    }
+
     console.log('회원가입 시도:', email, password);
-    // TODO: 여기에 회원가입 API 호출 로직 추가
-    Alert.alert('회원가입 완료!', '이제 로그인해주세요.');
-    router.replace('/account/login');
+    
+    signup(email, nickname, password)
+      .then(() => {
+        Alert.alert('회원가입 완료!', '이제 로그인해주세요.');
+        router.replace('/account/login');
+      })
+      .catch((error) => {
+        console.error('회원가입 에러:', error);
+        Alert.alert('회원가입 실패', '다시 시도해주세요.');
+      });
+
   };
+
+  const signup = async (email: string, nickname: string, password: string) => {
+    try {
+      const response = await fetch('http://13.209.188.74:8080/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          nickname: nickname,
+          password: password,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || '회원가입 실패');
+      }
+
+      const data = await response.json();
+      console.log('회원가입 성공:', data);
+
+      return data;
+
+    } catch (error: any) {
+      console.error('회원가입 에러:', error);
+      throw error;
+    }
+  }
 
   return (
     <Container>
@@ -40,8 +98,8 @@ export default function RegisterScreen() {
 
       <Input
         placeholder="이름"
-        value={username}
-        onChangeText={setUsername}
+        value={nickname}
+        onChangeText={setNickname}
       />
 
       <Input
@@ -81,7 +139,7 @@ export default function RegisterScreen() {
       <Button title="회원가입" onPress={handleRegister} />
 
       <Text style={{ textAlign: 'center', marginBottom: 20 }}>
-        이미 계정이 있나요? <Text onPress={() => router.push('/account/register')} style={{ color: 'blue' }}>로그인</Text>
+        이미 계정이 있나요? <Text onPress={() => router.push('/account/login')} style={{ color: 'blue' }}>로그인</Text>
       </Text>
     </Container>
   );

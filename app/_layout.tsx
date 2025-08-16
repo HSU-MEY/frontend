@@ -9,7 +9,13 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { SelectedRouteProvider } from '@/contexts/SelectedRouteContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
+import { initializeKakaoSDK } from '@react-native-kakao/core';
+
+import { KAKAO_NATIVE_API_KEY } from '@env';
+
 export default function RootLayout() {
+  initializeKakaoSDK(KAKAO_NATIVE_API_KEY);
+
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -41,10 +47,13 @@ export default function RootLayout() {
                 <Stack.Screen name="route/start" options={{ headerShown: false }} />
                 <Stack.Screen name="route/edit" options={{ headerShown: false }} />
                 <Stack.Screen name="route/add" options={{ headerShown: false }} />
+                <Stack.Screen name="route/route-overview" options={{ headerShown: false }} />
+                <Stack.Screen name="route/route-step" options={{ headerShown: false }} />
                 <Stack.Screen name="routehistory/ongoing" options={{ headerShown: false }} />
                 <Stack.Screen name="routehistory/pending" options={{ headerShown: false }} />
                 <Stack.Screen name="routehistory/completed" options={{ headerShown: false }} />
                 <Stack.Screen name="place/place-detail" options={{ headerShown: false }} />
+                <Stack.Screen name="place/place-detail/[id]" options={{ headerShown: false }} />
                 <Stack.Screen name="place/place-favorite" options={{ headerShown: false }} />
                 <Stack.Screen name="+not-found" />
               </Stack>

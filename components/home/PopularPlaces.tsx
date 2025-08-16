@@ -1,5 +1,6 @@
+import { router } from 'expo-router';
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function PopularPlaces() {
   return (
@@ -43,14 +44,14 @@ function PopularPlaceCard({
   description: string;
 }) {
   return (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={() => router.push('place/place-detail')}>
       <Image source={image} style={styles.cardImage} />
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{title}</Text>
         <Text style={styles.cardLocation}>{location}</Text>
         <Text style={styles.cardDescription}>{description}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

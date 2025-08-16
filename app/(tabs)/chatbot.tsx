@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import styled from 'styled-components/native';
@@ -52,7 +53,7 @@ export default function AiGuideScreen() {
               )}
               {
                 item.route && (
-                  <CardWrapper>
+                  <CardWrapper onPress={() => router.push('/route/route-overview')}>
                     <ImageGrid>
                       <Preview source={{ uri: 'https://placehold.co/100x60' }} />
                       <Preview source={{ uri: 'https://placehold.co/100x60' }} />
@@ -171,7 +172,7 @@ const TagText = styled.Text`
 `;
 
 
-const CardWrapper = styled.View`
+const CardWrapper = styled.TouchableOpacity`
   margin-top: 16px;
   background-color: #fff;
   border-radius: 12px;
