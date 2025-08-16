@@ -1,24 +1,36 @@
 // app/account/login.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Button, Text } from 'react-native';
 import styled from 'styled-components/native';
 
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      if (accessToken) {
+        router.push('/');
+        Alert.alert('이미 로그인되어 있습니다.', '메인 화면으로 이동합니다.');
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
+
   const handleLogin = async () => {
-    if (!username || !password) {
+    if (!email || !password) {
       console.error('이름과 비밀번호를 입력해주세요.');
       return;
     }
 
-    console.log('로그인 시도:', username, password);
-    const isValid = await login(username, password);
+    console.log('로그인 시도:', email, password);
+    const isValid = await login(email, password);
 
     if (!isValid) {
       Alert.alert('로그인 실패', '이름 또는 비밀번호가 올바르지 않습니다.');
@@ -29,7 +41,7 @@ export default function LoginScreen() {
     }
   };
 
-  const login = async (username: string, password: string) => {
+  const login = async (email: string, password: string) => {
     try {
       const response = await fetch('http://13.209.188.74:8080/api/auth/login', {
         method: 'POST',
@@ -37,7 +49,7 @@ export default function LoginScreen() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          username: username, 
+          email: email, 
           password: password,
         }),
       });
@@ -49,9 +61,9 @@ export default function LoginScreen() {
       }
 
       const data = await response.json();
-      saveTokens(data.accessToken, data.refreshToken);
-
-      console.log('로그인 성공:', username);
+      saveTokens(data.result.accessToken, data.result.refreshToken);
+      
+      console.log('로그인 성공:', email);
       
       return true;
     } catch (error) {
@@ -70,9 +82,9 @@ export default function LoginScreen() {
       <Title>로그인</Title>
 
       <Input
-        placeholder="이름"
-        value={username}
-        onChangeText={setUsername}
+        placeholder="이메일"
+        value={email}
+        onChangeText={setEmail}
       />
 
       <Input

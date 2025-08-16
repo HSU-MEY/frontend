@@ -20,6 +20,7 @@ export default function MyPage() {
   useEffect(() => {
     AsyncStorage.getItem('accessToken').then(token => {
       setAccessToken(token);
+      console.log("Access Token:", token);
     });
   }, []);
 
