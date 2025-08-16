@@ -33,6 +33,7 @@ export default function LoginScreen() {
 
     console.log('로그인 시도:', email, password);
     const isValid = await login(email, password);
+    await saveProfile();
 
     if (!isValid) {
       Alert.alert('로그인 실패', '이름 또는 비밀번호가 올바르지 않습니다.');
@@ -43,9 +44,7 @@ export default function LoginScreen() {
     }
   };
 
-  const saveTokens = async (accessToken: string, refreshToken: string) => {
-    await AsyncStorage.setItem('accessToken', accessToken);
-    await AsyncStorage.setItem('refreshToken', refreshToken);
+  const saveProfile = async () => {
     await AsyncStorage.setItem('email', email);
     const nickname = await getNickname();
     if (nickname) {
@@ -63,7 +62,6 @@ export default function LoginScreen() {
         }
       });
       const data = await response.json();
-      console.log('닉네임 가져오기 성공:', data.result.nickname);
       return data.result.nickname;
 
     } catch (error) {
