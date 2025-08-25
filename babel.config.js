@@ -19,3 +19,5 @@ module.exports = function (api) {
     ],
   };
 };
+
+process.env.EXPO_ROUTER_APP_ROOT = "../../app"; 
