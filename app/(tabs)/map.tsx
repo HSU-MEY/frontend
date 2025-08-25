@@ -6,11 +6,9 @@ import styled from 'styled-components/native';
 
 import KakaoMapWebView from '@/components/KakaoMapWebView';
 import { places } from '@/data/dummyPlaces';
+import { KAKAO_JS_API_KEY } from '@/src/env';
 import { View } from 'react-native';
 import { WebView } from 'react-native-webview';
-
-import { KAKAO_JS_API_KEY } from '@env';
-
 
 export default function MapScreen() {
   const [selectedCategory, setSelectedCategory] = useState<ThemeCategory>('K-Pop');
@@ -28,36 +26,36 @@ export default function MapScreen() {
           jsKey={JS_KEY}
           center={{ lat: 37.5665, lng: 126.9780 }} // 서울시청 좌표
           level={4}
-          onReady={() => console.log('Map is ready') }
-          onPress={(lat, lng) => console.log('Map pressed at:', lat, lng) }
+          onReady={() => console.log('Map is ready')}
+          onPress={(lat, lng) => console.log('Map pressed at:', lat, lng)}
         />
       </View>
 
-      <ThemeTabs 
-          selected={selectedCategory} 
-          onSelect={setSelectedCategory} 
-        />
+      <ThemeTabs
+        selected={selectedCategory}
+        onSelect={setSelectedCategory}
+      />
       <ListContainer>
         <PlaceList>
           {places
-          .filter((place => place.category === selectedCategory))
-          .map((place) => (
-            <PlaceItem key={place.id} onPress={() => router.push(`/place/place-detail/${place.id}`)}>
-              <PlaceInfo>
-                <PlaceHeader>
-                  <PlaceNumber>{place.id}</PlaceNumber>
-                  <PlaceTitle>{place.title}</PlaceTitle>
-                </PlaceHeader>
-                <PlaceSub>{place.type}, {place.distance}</PlaceSub>
-                { place.time ? 
-                <PlaceTime>{place.time}</PlaceTime>
-                : <NoTime> </NoTime>
-                }
-                <PlaceAddress>{place.address}</PlaceAddress>
-              </PlaceInfo>
-              <PlaceThumb source={ place.thumbnail } />
-            </PlaceItem>
-          ))}
+            .filter((place => place.category === selectedCategory))
+            .map((place) => (
+              <PlaceItem key={place.id} onPress={() => router.push(`/place/place-detail/${place.id}`)}>
+                <PlaceInfo>
+                  <PlaceHeader>
+                    <PlaceNumber>{place.id}</PlaceNumber>
+                    <PlaceTitle>{place.title}</PlaceTitle>
+                  </PlaceHeader>
+                  <PlaceSub>{place.type}, {place.distance}</PlaceSub>
+                  {place.time ?
+                    <PlaceTime>{place.time}</PlaceTime>
+                    : <NoTime> </NoTime>
+                  }
+                  <PlaceAddress>{place.address}</PlaceAddress>
+                </PlaceInfo>
+                <PlaceThumb source={place.thumbnail} />
+              </PlaceItem>
+            ))}
         </PlaceList>
       </ListContainer>
     </Container>
