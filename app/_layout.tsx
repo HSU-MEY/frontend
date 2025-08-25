@@ -11,7 +11,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 
 import { initializeKakaoSDK } from '@react-native-kakao/core';
 
-import { KAKAO_NATIVE_API_KEY } from '@env';
+import { KAKAO_NATIVE_API_KEY } from '@/src/env';
 
 export default function RootLayout() {
   initializeKakaoSDK(KAKAO_NATIVE_API_KEY);
