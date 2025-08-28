@@ -46,6 +46,21 @@ export type Routes = {
   routePlaces: RoutePlace[];
 };
 
+// 루트 생성 요청 타입
+export type CreateRouteRequest = {
+  regionId: number;
+  titleKo: string;
+  titleEn: string;
+  descriptionKo: string;
+  descriptionEn: string;
+  imageUrl: string;
+  cost: number;
+  totalDurationMinutes: number;
+  totalDistance: number;
+  themes: string[];
+  routeType: string;
+};
+
 // ===== 내부 유틸 =====
 const jsonHeaders = (token?: string): HeadersInit => {
   const h: Record<string, string> = { "Content-Type": "application/json" };
@@ -76,8 +91,27 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
 export async function getRouteApi(
   routeId: number
 ): Promise<ApiEnvelope<Routes>> {
-  return fetchJson<ApiEnvelope<Routes>>(`/api/routes/${routeId}`, {
+  return fetchJson<ApiEnvelope<Routes>>(`/routes/${routeId}`, {
     method: "GET",
     headers: jsonHeaders(),
+  });
+}
+
+// 추천 Route 조회
+export async function getRecommendRouteApi(): Promise<ApiEnvelope<Routes>> {
+  return fetchJson<ApiEnvelope<Routes>>(`/routes/recommend`, {
+    method: "GET",
+    headers: jsonHeaders(),
+  });
+}
+
+// Route 생성(TEST ONLY)
+export async function createRouteApi(
+  routeData: CreateRouteRequest
+): Promise<ApiEnvelope<Routes>> {
+  return fetchJson<ApiEnvelope<Routes>>(`/routes`, {
+    method: "POST",
+    headers: jsonHeaders(),
+    body: JSON.stringify(routeData),
   });
 }

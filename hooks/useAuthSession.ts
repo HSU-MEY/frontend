@@ -55,11 +55,11 @@ export const useAuthSession = () => {
   }, []);
 
   const ensureValidAccessToken = async (): Promise<string | null> => {
-    let token = await AsyncStorage.getItem("accessToken");
+    let token = await AsyncStorage.getItem(ACCESS_KEY);
     if (!token) return null;
 
     if (isExpSoon(getExp(token))) {
-      const refresh = await AsyncStorage.getItem("refreshToken");
+      const refresh = await AsyncStorage.getItem(REFRESH_KEY);
       if (!refresh) return null;
 
       try {
@@ -68,8 +68,8 @@ export const useAuthSession = () => {
 
         const { accessToken, refreshToken } = res.result;
 
-        await AsyncStorage.setItem("accessToken", accessToken);
-        await AsyncStorage.setItem("refreshToken", refreshToken);
+        await AsyncStorage.setItem(ACCESS_KEY, accessToken);
+        await AsyncStorage.setItem(REFRESH_KEY, refreshToken);
 
         token = accessToken;
       } catch (e) {

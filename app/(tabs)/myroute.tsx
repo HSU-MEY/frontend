@@ -253,6 +253,9 @@ export default function MyPage() {
         <SettingItem>
           <SettingText>언어 설정</SettingText>
         </SettingItem>
+        <SettingItem onPress={handleLogout}>
+              <SettingText>로그아웃</SettingText>
+          </SettingItem>
         {profile &&
           <>
             <SettingItem onPress={handleLogout}>
