@@ -3,84 +3,100 @@ import { FavoritePlace } from '@/components/mypage/favorite-place';
 import RouteCard from '@/components/mypage/route-card';
 import { places } from '@/data/dummyPlaces';
 import { Place } from '@/types/Place';
-import { router, useFocusEffect } from 'expo-router';
+import { router } from 'expo-router';
 import styled from 'styled-components/native';
 
 import { favoritePlaceList } from '@/data/favoritePlace';
 import { completedRoutes, inProgressRoutes, upcomingRoutes } from '@/data/routesInProgress';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 import { getMyProfile, type UserProfile } from '@/api/user';
 import { useAuthSession } from '@/hooks/useAuthSession';
+import { useIsFocused } from '@react-navigation/native';
+import { useEffect, useRef } from 'react';
 import { Alert } from 'react-native';
 
 const favoritePlaces = places.filter((place: Place) => favoritePlaceList.includes(place.id));
 
 export default function MyPage() {
-  // const [accessToken, setAccessToken] = useState<string | null>(null);
-  // const { logout, ensureValidAccessToken } = useAuthSession();
-  // const [nickname, setNickname] = useState<string | null>(null);
-  // const [email, setEmail] = useState<string | null>(null);
   const { logout, ensureValidAccessToken } = useAuthSession();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // if (accessToken) {
-  //   AsyncStorage.getItem('nickname').then(name => setNickname(name));
-  //   AsyncStorage.getItem('email').then(email => setEmail(email));
-  // }
+  // 화면 포커스 감지
+  const isFocused = useIsFocused();
 
-  useFocusEffect(
-    useCallback(() => {
-      let mounted = true;
-      const checkAndRefresh = async () => {
-        // const token = await AsyncStorage.getItem("accessToken");
-        // if (!token) {
-        //   if (mounted) setAccessToken(null);
-        //   return;
-        // }
+  // 중복 실행 방지 플래그
+  const fetchingRef = useRef(false);
 
-        // // 토큰 만료 확인
-        // const newToken = await ensureValidAccessToken();
+  // 함수 레퍼런스 안정화
+  const ensureRef = useRef(ensureValidAccessToken);
+  useEffect(() => {
+    ensureRef.current = ensureValidAccessToken;
+  }, [ensureValidAccessToken]);
 
-        // if (mounted) setAccessToken(newToken);
+  useEffect(() => {
+    if (!isFocused) return;          // 화면이 보일 때만
+    if (fetchingRef.current) return; // 이미 실행 중이면 무시
+    let mounted = true;
+    fetchingRef.current = true;
 
+    const run = async () => {
+      try {
         setLoading(true);
         setError(null);
+
         const token = await AsyncStorage.getItem('accessToken');
         if (!token) {
-          if (mounted) { setProfile(null); setLoading(false); }
+          if (mounted) setProfile(null);
           return;
         }
-        // 액세스 토큰 유효화(필요시 리프레시)
-        await ensureValidAccessToken();
-        try {
-          const me = await getMyProfile();     // ← 서버에서 내 정보 조회
-          if (mounted) setProfile(me);
-        } catch (e: any) {
-          if (mounted) setError(e?.message ?? '불러오기 실패');
-        } finally {
-          if (mounted) setLoading(false);
+
+        // 1) 토큰 검증/갱신 (ref 통해 안정적으로)
+        await ensureRef.current();
+
+        // 2) 프로필 조회
+        const me = await getMyProfile();
+        if (mounted) setProfile(me);
+      } catch (e: any) {
+        const msg = String(e?.message ?? '');
+        // getMyProfile()에서 `(HTTP 403)` 같은 메시지 던지고 있을 가능성
+        if (msg.includes('HTTP 403') || msg.includes('403')) {
+          Alert.alert(
+            '세션 재인증 필요',
+            '이메일이 변경되어 다시 로그인해야 합니다.',
+            [
+              {
+                text: '확인',
+                onPress: async () => {
+                  await logout();
+                  router.replace('/account/login');
+                }
+              }
+            ]
+          );
+          return; // 더 진행하지 않음
         }
-      };
+        if (mounted) setError(msg || '불러오기 실패');
+      } finally {
+        if (mounted) setLoading(false);
+        fetchingRef.current = false;
+      }
+    };
 
-      checkAndRefresh();
+    run();
 
-      return () => {
-        mounted = false;
-      };
-    }, [])
-  );
+    return () => {
+      mounted = false;
+    };
+  }, [isFocused]); // 포커스 변화에만 반응
 
   const handleLogout = async () => {
     Alert.alert("로그아웃", "정말 로그아웃하시겠습니까?", [
-      {
-        text: "취소",
-        style: "cancel"
-      },
+      { text: "취소", style: "cancel" },
       {
         text: "로그아웃",
         style: "destructive",
@@ -90,8 +106,26 @@ export default function MyPage() {
           Alert.alert("로그아웃 완료");
         }
       }
-    ]
-    )
+    ]);
+  };
+
+  if (loading) {
+    return (
+      <LoadingContainer>
+        <LoadingText>불러오는 중...</LoadingText>
+      </LoadingContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <ErrorContainer>
+        <ErrorText>{error}</ErrorText>
+        <RetryButton onPress={() => router.replace('/(tabs)/myroute')}>
+          <RetryButtonText>다시 시도</RetryButtonText>
+        </RetryButton>
+      </ErrorContainer>
+    );
   }
 
   return (
@@ -99,29 +133,14 @@ export default function MyPage() {
       <Header>
         <BackgroundImage source={require('@/assets/images/header.png')} />
         <AvatarWrapper>
-          {/* <Avatar source={
-            accessToken ?
-              require('@/assets/images/sample-profile.png') :
-              require('@/assets/images/sample-profile.png')
-          } />
-          <UserName>
-            {accessToken ? nickname : 'Guest'}
-          </UserName>
-          <UserEmail> {accessToken ? email : ''}</UserEmail>
-          {accessToken &&
+          <Avatar source={require('@/assets/images/sample-profile.png')} />
+          <UserName>{profile ? profile.nickname : 'Guest'}</UserName>
+          <UserEmail>{profile ? profile.email : ''}</UserEmail>
+          {profile && (
             <EditButton onPress={() => router.push('/account/edit-profile')}>
               <EditText>프로필 수정</EditText>
             </EditButton>
-          } */}
-
-          <Avatar source={require('@/assets/images/sample-profile.png')} />
-          <UserName>
-            {profile ? profile.nickname : 'Guest'}
-          </UserName>
-          <UserEmail>
-            {profile ? profile.email : ''}
-          </UserEmail>
-          {profile && <EditButton onPress={() => router.push('/account/edit-profile')}><EditText>프로필 수정</EditText></EditButton>}
+          )}
         </AvatarWrapper>
       </Header>
 
@@ -245,18 +264,18 @@ export default function MyPage() {
         )}
       <Section>
         <SectionHeader>
-          <SectionIcon
-            source={require('@/assets/images/icons/settings.png')}
-          />
+          <SectionIcon source={require('@/assets/images/icons/settings.png')} />
           <SectionTitle>설정</SectionTitle>
         </SectionHeader>
+
         <SettingItem>
           <SettingText>언어 설정</SettingText>
         </SettingItem>
         <SettingItem onPress={handleLogout}>
               <SettingText>로그아웃</SettingText>
           </SettingItem>
-        {profile &&
+
+        {profile && (
           <>
             <SettingItem onPress={handleLogout}>
               <SettingText>로그아웃</SettingText>
@@ -265,12 +284,42 @@ export default function MyPage() {
               <SettingText>회원 탈퇴</SettingText>
             </SettingItem>
           </>
-        }
-
+        )}
       </Section>
     </Container>
   );
 }
+
+const LoadingContainer = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+`;
+
+const LoadingText = styled.Text`
+  font-size: 16px;
+  color: #333;
+`;
+
+const ErrorContainer = styled(LoadingContainer)``;
+
+const ErrorText = styled.Text`
+  font-size: 14px;
+  color: #d00;
+  margin-bottom: 12px;
+`;
+
+const RetryButton = styled.TouchableOpacity`
+  background-color: #007AFF;
+  padding: 10px 16px;
+  border-radius: 8px;
+`;
+
+const RetryButtonText = styled.Text`
+  color: white;
+  font-weight: 600;
+`;
 
 const LoginButton = styled.TouchableOpacity`
   background-color: #007AFF;
