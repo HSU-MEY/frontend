@@ -98,10 +98,21 @@ export async function getRouteApi(
 }
 
 // 추천 Route 조회
-export async function getRecommendRouteApi(): Promise<ApiEnvelope<Routes>> {
+export async function getRecommendRouteApi(
+  themes: string[] = ["KDRAMA", "KPOP", "KFOOD", "KFASHION"],
+  region: string,
+  limit: number = 10,
+  offset: number = 0
+): Promise<ApiEnvelope<Routes>> {
   return fetchJson<ApiEnvelope<Routes>>(`/routes/recommend`, {
     method: "GET",
     headers: jsonHeaders(),
+    body: JSON.stringify({
+      themes,
+      region,
+      limit,
+      offset,
+    }),
   });
 }
 
