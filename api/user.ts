@@ -1,5 +1,6 @@
 // api/user.ts
 import { apiGet, type ApiEnvelope } from '@/api/http';
+import { ROUTES } from './routes';
 
 export type UserProfile = {
   id: number;
@@ -15,7 +16,7 @@ export type UserProfile = {
  */
 export async function getMyProfile(): Promise<UserProfile> {
   const data = await apiGet<ApiEnvelope<UserProfile>>(
-    '/users/profiles',
+    ROUTES.users.profile,
     'GET /users/profiles'
   );
 
