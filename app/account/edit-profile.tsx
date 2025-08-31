@@ -6,6 +6,7 @@ import { Alert, Button, Pressable } from 'react-native';
 import styled from 'styled-components/native';
 
 import { apiPut, type ApiEnvelope } from '@/api/http';
+import { ROUTES } from '@/api/routes';
 import { getMyProfile, type UserProfile } from '@/api/user';
 import { useAuthSession } from '@/hooks/useAuthSession';
 
@@ -108,15 +109,13 @@ export default function EditProfileScreen() {
       setSaving(true);
       await ensureValidAccessToken(); // 갱신/확보
 
-      // 서버 스펙: { email, password? }
       const payload: { email: string; password?: string } = {
         email: emailChanged ? trimmedEmail : originalEmail,
       };
       if (pwdChanged) payload.password = trimmedPwd;
 
-      // URL/토큰 헤더는 http 유틸이 처리
       const resp = await apiPut<ApiEnvelope<unknown>>(
-        '/users/profiles',
+        ROUTES.users.profile,
         payload,
         'PUT /users/profiles'
       );

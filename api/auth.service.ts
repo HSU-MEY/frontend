@@ -1,5 +1,6 @@
 // @/api/auth.service.ts
 import { apiPost, type ApiEnvelope } from '@/api/http';
+import { ROUTES } from './routes';
 
 export type AuthTokens = {
   accessToken: string;
@@ -21,7 +22,7 @@ export async function loginApi(params: {
   password: string;
 }): Promise<ApiEnvelope<AuthTokens>> {
   return apiPost<ApiEnvelope<AuthTokens>>(
-    '/auth/login',
+    ROUTES.auth.login,
     { email: trim(params.email), password: trim(params.password) },
     'POST /auth/login'
   );
@@ -31,7 +32,7 @@ export async function refreshTokenApi(
   refreshToken: string
 ): Promise<ApiEnvelope<AuthTokens>> {
   return apiPost<ApiEnvelope<AuthTokens>>(
-    '/auth/refresh',
+    ROUTES.auth.refresh,
     { refreshToken },
     'POST /auth/refresh'
   );
@@ -43,7 +44,7 @@ export async function signupApi(params: {
   nickname: string;
 }): Promise<ApiEnvelope<{ userId: string }>> {
   return apiPost<ApiEnvelope<{ userId: string }>>(
-    '/auth/signup',
+    ROUTES.auth.signup,
     {
       email: trim(params.email),
       password: trim(params.password),
