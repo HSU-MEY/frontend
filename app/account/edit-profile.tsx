@@ -1,4 +1,3 @@
-// app/account/edit-profile.tsx
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
@@ -10,13 +9,14 @@ import styled from 'styled-components/native';
 import { getMyProfile, type UserProfile } from '@/api/user';
 import { useAuthSession } from '@/hooks/useAuthSession';
 
+const API_BASE =
+  (process.env.EXPO_PUBLIC_API_BASE_URL?.replace(/\/+$/, '').replace(/\/api\/?$/, '')
+    || 'http://13.209.188.74:8080');
+
 export default function EditProfileScreen() {
-  const { ensureValidAccessToken, logout } = useAuthSession(); //  logout도 사용
+  const { ensureValidAccessToken, logout } = useAuthSession();
 
-  // 화면 표시용 상태
   const [profileImage, setProfileImage] = useState<string | null>(null);
-
-  // 원래 이메일 따로 보관
   const [originalEmail, setOriginalEmail] = useState('');
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -28,9 +28,7 @@ export default function EditProfileScreen() {
   const isFocused = useIsFocused();
 
   const ensureRef = useRef(ensureValidAccessToken);
-  useEffect(() => {
-    ensureRef.current = ensureValidAccessToken;
-  }, [ensureValidAccessToken]);
+  useEffect(() => { ensureRef.current = ensureValidAccessToken; }, [ensureValidAccessToken]);
 
   const fetchingRef = useRef(false);
 
@@ -46,13 +44,10 @@ export default function EditProfileScreen() {
         await ensureRef.current();
         const me: UserProfile = await getMyProfile();
         if (!mounted) return;
-        // 원래 이메일과 현재 입력값 모두 세팅
         setOriginalEmail(me.email ?? '');
         setEmail(me.email ?? '');
       } catch (e: any) {
-        if (mounted) {
-          Alert.alert('프로필 불러오기 실패', e?.message ?? '잠시 후 다시 시도해주세요.');
-        }
+        if (mounted) Alert.alert('프로필 불러오기 실패', e?.message ?? '잠시 후 다시 시도해주세요.');
       } finally {
         if (mounted) setLoading(false);
         fetchingRef.current = false;
@@ -80,7 +75,7 @@ export default function EditProfileScreen() {
   const handleSave = async () => {
     const trimmedEmail = email.trim();
     const trimmedPwd = newPassword.trim();
-    const emailChanged = trimmedEmail !== originalEmail;   // 진짜 변경 여부
+    const emailChanged = trimmedEmail !== originalEmail;
     const pwdChanged = trimmedPwd.length > 0;
 
     // 변경 없음
@@ -95,11 +90,13 @@ export default function EditProfileScreen() {
       return;
     }
 
-    // 비번 검증 (이메일 바뀌면 비번 필수)
+    // 이메일만 변경하려는 경우: 서버 정책상 새 비번도 요구(사용자 안내)
     if (emailChanged && !pwdChanged) {
       Alert.alert('안내', '이메일을 변경하려면 새 비밀번호도 함께 입력해주세요.');
       return;
     }
+
+    // 비번 유효성
     if (pwdChanged) {
       if (trimmedPwd.length < 6) {
         Alert.alert('비밀번호는 6자 이상이어야 합니다.');
@@ -120,16 +117,16 @@ export default function EditProfileScreen() {
         return;
       }
 
-      // 서버 호환: 항상 email은 포함
-      // - 이메일만 변경: 새 이메일 + 새 비번(필수)
-      // - 비번만 변경: 원래 이메일 + 새 비번
-      // - 둘 다: 새 이메일 + 새 비번
-      const payload: Record<string, string> = {
+      // === 서버 스펙에 맞춘 payload ===
+      // - 비번만 변경: email=originalEmail, password=newPassword
+      // - 이메일만 변경: (허용 X) → 위에서 가드
+      // - 둘 다 변경: email=newEmail, password=newPassword
+      const payload: { email: string; password?: string } = {
         email: emailChanged ? trimmedEmail : originalEmail,
       };
       if (pwdChanged) payload.password = trimmedPwd;
 
-      const res = await fetch('http://13.209.188.74:8080/api/users/profiles', {
+      const res = await fetch(`${API_BASE}/api/users/profiles`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -137,35 +134,31 @@ export default function EditProfileScreen() {
         },
         body: JSON.stringify(payload),
       });
+
       const raw = await res.text();
-      console.log('PUT /profiles status:', res.status, 'raw:', raw);
-      let data: any = {};
-      try { data = JSON.parse(raw); } catch { }
+      console.log('PUT /api/users/profiles status:', res.status, 'raw:', raw);
+
+      // 서버 응답은 ApiEnvelope
+      let data: { isSuccess?: boolean; code?: string; message?: string } = {};
+      try { data = JSON.parse(raw); } catch { /* not json */ }
+
       if (!res.ok || !data?.isSuccess) {
-        throw new Error((data?.message || raw || `업데이트 실패`) + ` (HTTP ${res.status})`);
+        throw new Error((data?.message || raw || '업데이트 실패') + ` (HTTP ${res.status})`);
       }
 
-      // 민감 정보 변경 시 재로그인 권장 (이메일/비번 둘 중 하나라도 바뀌면)
-      if (emailChanged || pwdChanged) {
-        const shownEmail = emailChanged ? trimmedEmail : originalEmail;
-        Alert.alert(
-          '프로필 저장 완료',
-          `변경된 계정 정보로 다시 로그인해주세요.\n이메일: ${shownEmail}`,
-          [
-            {
-              text: '확인',
-              onPress: async () => {
-                await logout(); // 토큰/타이머 정리
-                router.replace('/account/login');
-              }
-            }
-          ]
-        );
-      } else {
-        Alert.alert('프로필이 저장되었습니다!');
-        setNewPassword('');
-        setConfirmPassword('');
-      }
+      // === 민감정보 변경 성공 → 즉시 로그아웃(레이스 방지) ===
+      await logout();
+
+      const shownEmail = emailChanged ? trimmedEmail : originalEmail;
+      Alert.alert(
+        '프로필 저장 완료',
+        `변경된 계정 정보로 다시 로그인해주세요.\n이메일: ${shownEmail}`,
+        [{ text: '확인', onPress: () => router.replace('/account/login') }]
+      );
+
+      // 입력창 초기화
+      setNewPassword('');
+      setConfirmPassword('');
     } catch (e: any) {
       Alert.alert('저장 실패', e?.message ?? '잠시 후 다시 시도해주세요.');
     } finally {
@@ -197,7 +190,6 @@ export default function EditProfileScreen() {
         </Pressable>
       </ProfileImageContainer>
 
-      {/* 이메일 */}
       <Input
         placeholder="이메일"
         value={email}
@@ -206,7 +198,6 @@ export default function EditProfileScreen() {
         keyboardType="email-address"
       />
 
-      {/* 새 비밀번호 (선택) */}
       <Input
         placeholder="새 비밀번호 (선택)"
         value={newPassword}
@@ -214,7 +205,6 @@ export default function EditProfileScreen() {
         secureTextEntry
       />
 
-      {/* 비밀번호 확인 (선택) */}
       <Input
         placeholder="새 비밀번호 확인"
         value={confirmPassword}
@@ -228,23 +218,17 @@ export default function EditProfileScreen() {
 }
 
 /* ===== styled ===== */
-// ... (스타일 동일)
-
-
-/* ===== styled ===== */
 const Container = styled.ScrollView`
   flex: 1;
   padding: 24px 20px 40px;
   background-color: white;
 `;
-
 const Title = styled.Text`
   font-size: 24px;
   margin-bottom: 20px;
   text-align: center;
   font-weight: 700;
 `;
-
 const Input = styled.TextInput`
   height: 44px;
   border: 1px solid #cfcfcf;
@@ -253,18 +237,15 @@ const Input = styled.TextInput`
   border-radius: 8px;
   font-size: 15px;
 `;
-
 const ProfileImageContainer = styled.View`
   align-items: center;
   margin-bottom: 20px;
 `;
-
 const ProfileImage = styled.Image`
   width: 100px;
   height: 100px;
   border-radius: 50px;
 `;
-
 const Placeholder = styled.View`
   width: 100px;
   height: 100px;
@@ -273,18 +254,15 @@ const Placeholder = styled.View`
   justify-content: center;
   align-items: center;
 `;
-
 const PlaceholderText = styled.Text`
   color: gray;
 `;
-
 const Center = styled.View`
   flex: 1;
   align-items: center;
   justify-content: center;
   background-color: white;
 `;
-
 const CenterText = styled.Text`
   font-size: 16px;
   color: #333;
