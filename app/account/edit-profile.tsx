@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
@@ -6,12 +5,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, Button, Pressable } from 'react-native';
 import styled from 'styled-components/native';
 
+import { apiPut, type ApiEnvelope } from '@/api/http';
 import { getMyProfile, type UserProfile } from '@/api/user';
 import { useAuthSession } from '@/hooks/useAuthSession';
-
-const API_BASE =
-  (process.env.EXPO_PUBLIC_API_BASE_URL?.replace(/\/+$/, '').replace(/\/api\/?$/, '')
-    || 'http://13.209.188.74:8080');
 
 export default function EditProfileScreen() {
   const { ensureValidAccessToken, logout } = useAuthSession();
@@ -90,7 +86,7 @@ export default function EditProfileScreen() {
       return;
     }
 
-    // 이메일만 변경하려는 경우: 서버 정책상 새 비번도 요구(사용자 안내)
+    // 이메일만 변경은 비번 필수(정책 가드)
     if (emailChanged && !pwdChanged) {
       Alert.alert('안내', '이메일을 변경하려면 새 비밀번호도 함께 입력해주세요.');
       return;
@@ -110,43 +106,26 @@ export default function EditProfileScreen() {
 
     try {
       setSaving(true);
-      await ensureValidAccessToken();
-      const token = await AsyncStorage.getItem('accessToken');
-      if (!token) {
-        Alert.alert('로그인이 필요합니다.');
-        return;
-      }
+      await ensureValidAccessToken(); // 갱신/확보
 
-      // === 서버 스펙에 맞춘 payload ===
-      // - 비번만 변경: email=originalEmail, password=newPassword
-      // - 이메일만 변경: (허용 X) → 위에서 가드
-      // - 둘 다 변경: email=newEmail, password=newPassword
+      // 서버 스펙: { email, password? }
       const payload: { email: string; password?: string } = {
         email: emailChanged ? trimmedEmail : originalEmail,
       };
       if (pwdChanged) payload.password = trimmedPwd;
 
-      const res = await fetch(`${API_BASE}/api/users/profiles`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      // URL/토큰 헤더는 http 유틸이 처리
+      const resp = await apiPut<ApiEnvelope<unknown>>(
+        '/users/profiles',
+        payload,
+        'PUT /users/profiles'
+      );
 
-      const raw = await res.text();
-      console.log('PUT /api/users/profiles status:', res.status, 'raw:', raw);
-
-      // 서버 응답은 ApiEnvelope
-      let data: { isSuccess?: boolean; code?: string; message?: string } = {};
-      try { data = JSON.parse(raw); } catch { /* not json */ }
-
-      if (!res.ok || !data?.isSuccess) {
-        throw new Error((data?.message || raw || '업데이트 실패') + ` (HTTP ${res.status})`);
+      if (!resp?.isSuccess) {
+        throw new Error(resp?.message || '업데이트 실패');
       }
 
-      // === 민감정보 변경 성공 → 즉시 로그아웃(레이스 방지) ===
+      // 성공 → 즉시 로그아웃(자동갱신 레이스 방지)
       await logout();
 
       const shownEmail = emailChanged ? trimmedEmail : originalEmail;
@@ -156,7 +135,6 @@ export default function EditProfileScreen() {
         [{ text: '확인', onPress: () => router.replace('/account/login') }]
       );
 
-      // 입력창 초기화
       setNewPassword('');
       setConfirmPassword('');
     } catch (e: any) {
