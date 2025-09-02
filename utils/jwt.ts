@@ -31,7 +31,7 @@ export const getExp = (token?: string): number | null => {
 };
 
 export const isExpSoon = (exp?: number | null, skewSec = 90) => {
-  if (!exp) return true;
+  if (exp == null) return false;
   const now = Math.floor(Date.now() / 1000);
   return exp - now <= skewSec;
 };

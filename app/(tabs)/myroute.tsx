@@ -16,7 +16,7 @@ import { getMyProfile, type UserProfile } from '@/api/user';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { useIsFocused } from '@react-navigation/native';
 import { useEffect, useRef } from 'react';
-import { Alert } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 
 const favoritePlaces = places.filter((place: Place) => favoritePlaceList.includes(place.id));
 
@@ -131,7 +131,11 @@ export default function MyPage() {
   return (
     <Container>
       <Header>
-        <BackgroundImage source={require('@/assets/images/header.png')} />
+        <BackgroundImage
+          source={require('@/assets/images/header.png')}
+          style={styles.headerImage}
+          resizeMode="contain"
+        />
         <AvatarWrapper>
           <Avatar source={require('@/assets/images/sample-profile.png')} />
           <UserName>{profile ? profile.nickname : 'Guest'}</UserName>
@@ -289,6 +293,14 @@ export default function MyPage() {
     </Container>
   );
 }
+
+const styles = StyleSheet.create({
+  headerImage: {
+    width: '100%',
+    height: 120,
+  },
+});
+
 
 const LoadingContainer = styled.View`
   flex: 1;
