@@ -7,7 +7,7 @@ import styled from 'styled-components/native';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,7 +28,7 @@ export default function RegisterScreen() {
       return;
     }
 
-    if (!email || !username || !password || !selectedLanguage) {
+    if (!email || !nickname || !password || !selectedLanguage) {
       Alert.alert('모든 필드를 입력해주세요.');
       return;
     }
@@ -43,14 +43,14 @@ export default function RegisterScreen() {
       return;
     }
 
-    if (username.length < 2) {
+    if (nickname.length < 2) {
       Alert.alert('이름은 2자 이상이어야 합니다.');
       return;
     }
 
     console.log('회원가입 시도:', email, password);
     
-    signup(email, username, password)
+    signup(email, nickname, password)
       .then(() => {
         Alert.alert('회원가입 완료!', '이제 로그인해주세요.');
         router.replace('/account/login');
@@ -62,7 +62,7 @@ export default function RegisterScreen() {
 
   };
 
-  const signup = async (email: string, username: string, password: string) => {
+  const signup = async (email: string, nickname: string, password: string) => {
     try {
       const response = await fetch('http://13.209.188.74:8080/api/auth/signup', {
         method: 'POST',
@@ -71,7 +71,7 @@ export default function RegisterScreen() {
         },
         body: JSON.stringify({
           email: email,
-          username: username,
+          nickname: nickname,
           password: password,
         }),
       });
@@ -98,8 +98,8 @@ export default function RegisterScreen() {
 
       <Input
         placeholder="이름"
-        value={username}
-        onChangeText={setUsername}
+        value={nickname}
+        onChangeText={setNickname}
       />
 
       <Input
