@@ -81,9 +81,8 @@ export default function LoginScreen() {
         onChangeText={setPassword}
         secureTextEntry
       />
-  
-    <Text onPress={() => router.push('/account/reset-password')} style={{ color: 'grey' }}>비밀번호를 잊으셨나요?</Text>
 
+    <ForgotPassword onPress={() => router.push('/account/reset-password')}><Text>비밀번호를 잊으셨나요?</Text></ForgotPassword>
       <Button title="로그인" onPress={handleLogin} />
 
       <Text style={{ textAlign: 'center', marginBottom: 20 }}>
@@ -112,4 +111,8 @@ const Input = styled.TextInput`
   margin-bottom: 12px;
   padding: 0 8px;
   border-radius: 4px;
+`;
+
+const ForgotPassword = styled.TouchableOpacity`
+  color: grey;
 `;
