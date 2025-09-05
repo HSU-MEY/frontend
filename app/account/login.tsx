@@ -127,3 +127,7 @@ const Input = styled.TextInput`
   padding: 0 8px;
   border-radius: 4px;
 `;
+
+const ForgotPassword = styled.TouchableOpacity`
+  color: grey;
+`;
