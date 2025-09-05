@@ -42,9 +42,15 @@ export type Routes = {
   totalDistanceKm: number;
   totalDurationMinutes: number;
   estimatedCost: number;
+  thumbnailUrl: string;
+  popularityScore?: number;
   suggestedStartTimes: string[];
   routePlaces: RoutePlace[];
 };
+
+export type RecommendedRoutes = {
+  routes: Routes[];
+}
 
 // 루트 생성 요청 타입
 export type CreateRouteRequest = {
@@ -103,8 +109,8 @@ export async function getRecommendRouteApi(
   region: string,
   limit: number = 10,
   offset: number = 0
-): Promise<ApiEnvelope<Routes>> {
-  return fetchJson<ApiEnvelope<Routes>>(`/routes/recommend`, {
+): Promise<ApiEnvelope<RecommendedRoutes>> {
+  return fetchJson<ApiEnvelope<RecommendedRoutes>>(`/routes/recommend`, {
     method: "GET",
     headers: jsonHeaders(),
     body: JSON.stringify({

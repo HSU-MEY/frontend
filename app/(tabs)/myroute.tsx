@@ -26,6 +26,7 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+
   // 화면 포커스 감지
   const isFocused = useIsFocused();
 

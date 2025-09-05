@@ -1,5 +1,6 @@
 // src/api/users.service.ts
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+import { ROUTES } from './routes';
 
 // ===== 공통 타입 =====
 export type ApiEnvelope<T> = {
@@ -60,6 +61,57 @@ export async function getUserRoutes(
   status?: string
 ): Promise<ApiEnvelope<SavedRoutes>> {
   const query = status ? `?status=${encodeURIComponent(status)}` : '';
-  return fetchJson<ApiEnvelope<SavedRoutes>>(`/users/my-routes${query}`);
+  return fetchJson<ApiEnvelope<SavedRoutes>>(
+    ROUTES.users.routes + query,
+    {
+      method: 'GET',
+      headers: jsonHeaders(),
+    }
+  );
 }
 
+export async function editUserRoutes(
+  id: number,
+  preferredStartDate: Date,
+  preferredStartTime: string
+): Promise<ApiEnvelope<null>> {
+  return fetchJson<ApiEnvelope<null>>(
+    ROUTES.users.routes + "/" + id, {
+    method: 'PUT',
+    headers: jsonHeaders(),
+    body: JSON.stringify({
+      preferredStartDate: preferredStartDate.toISOString().split('T')[0], // "YYYY-MM-DD"
+      preferredStartTime,
+    }),
+    }
+  );
+}
+
+export async function deleteUserRoutes(
+  id: number
+): Promise<ApiEnvelope<null>> {
+  return fetchJson<ApiEnvelope<null>>(
+    ROUTES.users.routes + "/" + id, {
+    method: 'DELETE',
+    headers: jsonHeaders(),
+    }
+  );
+}
+
+export async function saveUserRoutes(
+  routeId: number,
+  preferredStartDate: Date,
+  preferredStartTime: string
+): Promise<ApiEnvelope<{ savedRouteId: number }>> {
+  return fetchJson<ApiEnvelope<{ savedRouteId: number }>>(
+    ROUTES.users.routes, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify({
+      routeId,
+      preferredStartDate: preferredStartDate.toISOString().split('T')[0], // "YYYY-MM-DD"
+      preferredStartTime,
+    }),
+    }
+  );
+}
