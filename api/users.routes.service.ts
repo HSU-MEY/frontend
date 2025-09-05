@@ -1,6 +1,8 @@
 // src/api/users.service.ts
-const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+import { getAccess } from '@/utils/storage';
 import { ROUTES } from './routes';
+const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+
 
 // ===== 공통 타입 =====
 export type ApiEnvelope<T> = {
@@ -45,7 +47,6 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   } catch {
     // JSON이 아니면 그대로 던짐
   }
-
   if (!res.ok) {
     const msg =
       (data && (data.message || data.error || data.msg)) ||
@@ -65,7 +66,7 @@ export async function getUserRoutes(
     ROUTES.users.routes + query,
     {
       method: 'GET',
-      headers: jsonHeaders(),
+      headers: jsonHeaders((await getAccess()) ?? undefined),
     }
   );
 }
@@ -78,7 +79,7 @@ export async function editUserRoutes(
   return fetchJson<ApiEnvelope<null>>(
     ROUTES.users.routes + "/" + id, {
     method: 'PUT',
-    headers: jsonHeaders(),
+    headers: jsonHeaders((await getAccess()) ?? undefined),
     body: JSON.stringify({
       preferredStartDate: preferredStartDate.toISOString().split('T')[0], // "YYYY-MM-DD"
       preferredStartTime,
@@ -93,7 +94,7 @@ export async function deleteUserRoutes(
   return fetchJson<ApiEnvelope<null>>(
     ROUTES.users.routes + "/" + id, {
     method: 'DELETE',
-    headers: jsonHeaders(),
+    headers: jsonHeaders((await getAccess()) ?? undefined),
     }
   );
 }
@@ -106,7 +107,7 @@ export async function saveUserRoutes(
   return fetchJson<ApiEnvelope<{ savedRouteId: number }>>(
     ROUTES.users.routes, {
     method: 'POST',
-    headers: jsonHeaders(),
+    headers: jsonHeaders((await getAccess()) ?? undefined),
     body: JSON.stringify({
       routeId,
       preferredStartDate: preferredStartDate.toISOString().split('T')[0], // "YYYY-MM-DD"

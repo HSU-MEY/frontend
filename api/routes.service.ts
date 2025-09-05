@@ -1,5 +1,4 @@
 // src/api/routes.service.ts
-
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 // ===== 공통 타입 =====

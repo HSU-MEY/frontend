@@ -6,8 +6,11 @@ import { Place } from '@/types/Place';
 import { router } from 'expo-router';
 import styled from 'styled-components/native';
 
+import { Route } from '@/api/users.routes.service';
+
 import { favoritePlaceList } from '@/data/favoritePlace';
-import { completedRoutes, inProgressRoutes, upcomingRoutes } from '@/data/routesInProgress';
+//import { completedRoutes, inProgressRoutes, upcomingRoutes } from '@/data/routesInProgress';
+import { useUserRoutes } from "@/hooks/useUserRoutes";
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from 'react';
@@ -26,6 +29,40 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const {
+    data: upcomingData,
+    loading: upcomingLoading,
+    error: upcomingError,
+    refetch: refetchUpcoming,
+  } = useUserRoutes("NOT_STARTED");
+  
+  const {
+    data: inProgressData,
+    loading: inProgressLoading,
+    error: inProgressError,
+    refetch: refetchInProgress,
+  } = useUserRoutes("ON_GOING");
+  
+  const {
+    data: completedData,
+    loading: completedLoading,
+    error: completedError,
+    refetch: refetchCompleted,
+  } = useUserRoutes("COMPLETED");
+  
+  const upcomingRoutes   = upcomingData?.savedRoutes   ?? [];
+  const inProgressRoutes = inProgressData?.savedRoutes ?? [];
+  const completedRoutes  = completedData?.savedRoutes  ?? [];
+
+
+  const loadingAll = upcomingLoading || inProgressLoading || completedLoading;
+  const errorAll   = upcomingError || inProgressError || completedError;
+  const refetchAll = () => Promise.all([
+    refetchUpcoming(), refetchInProgress(), refetchCompleted(),
+  ]);
+  
+
+  console.log(upcomingRoutes);
 
   // 화면 포커스 감지
   const isFocused = useIsFocused();
@@ -110,6 +147,7 @@ export default function MyPage() {
     ]);
   };
 
+
   if (loading) {
     return (
       <LoadingContainer>
@@ -166,16 +204,19 @@ export default function MyPage() {
                 />
               </SectionHeader>
               <Row>
-                {inProgressRoutes.map((route, index) => (
+                {
+                inProgressRoutes.map((route: Route, index: number) => (
                   <RouteCard
                     key={index}
-                    thumbnail={route.thumbnail}
+                    thumbnail=""
                     title={route.title}
-                    date={route.date}
-                    progress={route.progress}
+                    date={route.preferredStartDate}
+                    onPress={() => router.push(`/route/route-overview/${route.routeId}`)}
+                    //progress={route.progress}
                   /*onPress={() => router.push(`/route/${route.id}`)}*/
                   />
-                ))}
+                ))
+                }
               </Row>
             </Section>
             <Section>
@@ -192,14 +233,14 @@ export default function MyPage() {
                 />
               </SectionHeader>
               <Row>
-                {upcomingRoutes.map((route, index) => (
+                {upcomingRoutes.map((route: Route, index: number) => (
                   <RouteCard
                     key={index}
-                    thumbnail={route.thumbnail}
+                    thumbnail=""
                     title={route.title}
-                    date={route.date}
-                    progress={route.progress}
-                  /*onPress={() => router.push(`/route/${route.id}`)}*/
+                    date={route.preferredStartDate}
+                    onPress={() => router.push(`/route/route-overview/${route.routeId}`)}
+                    //progress={route.progress}
                   />
                 ))}
               </Row>
@@ -218,14 +259,13 @@ export default function MyPage() {
                 />
               </SectionHeader>
               <Row>
-                {completedRoutes.map((route, index) => (
+                {completedRoutes.map((route: Route, index: number) => (
                   <RouteCard
-                    key={index}
-                    thumbnail={route.thumbnail}
+                    onPress={() => router.push(`/route/route-overview/${route.routeId}`)}
+                    thumbnail=""
                     title={route.title}
-                    date={route.date}
-                    progress={route.progress}
-                  /*onPress={() => router.push(`/route/${route.id}`)}*/
+                    date={route.preferredStartDate}
+                    //progress={route.progress}
                   />
                 ))}
               </Row>
