@@ -1,16 +1,8 @@
 // components/RouteListPage.tsx
+import { Route } from '@/api/users.routes.service';
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import TicketCard from './../TicketCard';
-
-interface Route {
-    id: string;
-    title: string;
-    location: string;
-    startDate: string;
-    progress: number;
-    imageSource: any;
-}
 
 interface RouteListPageProps {
     title: string;
@@ -30,10 +22,14 @@ export default function RouteListPage({ title, routes, onDelete }: RouteListPage
             </View>
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 {routes.map((route) => (
-                    <View key={route.id} style={styles.cardWrapper}>
+                    <View key={route.routeId} style={styles.cardWrapper}>
                         <TicketCard
-                            {...route}
-                            onDelete={onDelete ? () => onDelete(route.id) : undefined}
+                            title={route.title}
+                            location={'Seoul'}
+                            startDate={route.preferredStartDate}
+                            progress={10}
+                            imageSource={require('@/assets/images/sample-route-default.jpg')}
+                            onDelete={onDelete ? () => onDelete(route.routeId.toString()) : undefined}
                         />
                     </View>
                 ))}

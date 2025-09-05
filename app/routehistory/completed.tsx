@@ -8,7 +8,13 @@ export default function CompletedRoutesPage() {
   const { data, remove, loading } = useUserRoutes("COMPLETED");
   const completedRoutes = data?.savedRoutes ?? [];
 
-  
+  const handleDelete = async (id: string) => {
+    try {
+      await remove(Number(id));
+    } catch (e) {
+      // 삭제 실패 처리 (예: 알림 표시)
+    }
+  }
 
   return (
     <View style={styles.container}>

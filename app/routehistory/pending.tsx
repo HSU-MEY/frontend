@@ -7,6 +7,14 @@ export default function PendingRoutesPage() {
   const { data, remove, loading } = useUserRoutes("NOT_STARTED");
   const pendingRoutes = data?.savedRoutes ?? [];
 
+  const handleDelete = async (id: string) => {
+    try {
+      await remove(Number(id));
+    } catch (e) {
+      // 삭제 실패 처리 (예: 알림 표시)
+    }
+  }
+
   return (
       <View style={styles.container}>
         <Header title="미진행 루트" />

@@ -8,12 +8,12 @@ type Props = {
   title: string;
   date: string;
   progress?: string; // ex: 88%
-  onPress: () => void;
+  onPress?: () => void;
 };
 
 const RouteCard = ({ thumbnail, title, date, progress, onPress }: Props) => {
   return (
-    <CardContainer>
+    <CardContainer onPress={onPress}>
       <ImageBackground
         source={ thumbnail ? thumbnail : require('@/assets/images/sample-route-default.jpg') }
         style={styleSheet.cardContainer}

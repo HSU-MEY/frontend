@@ -7,6 +7,14 @@ export default function OngoingRoutesPage() {
   const { data, remove, loading } = useUserRoutes("ON_GOING");
   const ongoingRoutes = data?.savedRoutes ?? [];
 
+  const handleDelete = async (id: string) => {
+    try {
+      await remove(Number(id));
+    } catch (e) {
+      // 삭제 실패 처리 (예: 알림 표시)
+    }
+  }
+  
   return (
     <View style={styles.container}>
       <Header title="진행중인 루트" />
