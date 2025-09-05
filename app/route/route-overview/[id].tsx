@@ -1,5 +1,6 @@
 // app/route/route
 import { getRouteApi, Routes } from '@/api/routes.service';
+import { fetchWeather } from '@/api/weather.service';
 import Header from '@/components/common/Header';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect } from 'react';
@@ -12,6 +13,8 @@ export default function RouteOverviewScreen() {
   const [distance, setDistance] = React.useState<string>("");
   const [estimatedTime, setEstimatedTime] = React.useState<string>("");
   const [estimatedCost, setEstimatedCost] = React.useState<string>("");
+  const [weatherDescription, setWeatherDescription] = React.useState<string>("");
+  const [temperature, setTemperature] = React.useState<string>("");
 
   useEffect(() => {
     async function fetchRoute() {
@@ -32,8 +35,23 @@ export default function RouteOverviewScreen() {
         setEstimatedCost(
           response_f.estimatedCost.toString() + "원"
         );
+        fetchCurrentWeather(response_f.routePlaces[0].place.latitude, response_f.routePlaces[0].place.longitude);
       }
       //setRoute(response.result);
+    }
+
+    async function fetchCurrentWeather(lat: number, lon: number) {
+      try {
+        const weather = await fetchWeather(lat, lon);
+
+        setWeatherDescription(weather.weather[0].description);
+        setTemperature(weather.main.temp.toFixed(1) + "°C");
+        
+        console.log("Current weather:", weather);
+      } catch (error) {
+        console.error("Failed to fetch weather data:", error);
+      }
+      
     }
 
     fetchRoute();
@@ -68,7 +86,7 @@ export default function RouteOverviewScreen() {
             <InfoBox style={{ flex: 2 }}>
               <InfoTitle>우리가 둘러볼 곳은...</InfoTitle>
               <InfoHighlight><Highlight>{ route?.routePlaces.length }개</Highlight>의 장소를 둘러볼 예정이에요</InfoHighlight>
-              <InfoSubtext>{ route?.routePlaces[0].place.name }에서 { route?.routePlaces[route?.routePlaces.length - 1].place.name }까지</InfoSubtext>
+              <InfoSubtext>{ route?.routePlaces[0].place.name }에서 {"\n"} { route?.routePlaces[route?.routePlaces.length - 1].place.name }까지</InfoSubtext>
               <InfoImage source={{ uri: 'https://placehold.co/300x300' }} />
 
               <InfoHighlight>예상 총 이동 시간은 <Highlight>{ estimatedTime }</Highlight>이에요</InfoHighlight>
@@ -84,7 +102,7 @@ export default function RouteOverviewScreen() {
 
             <InfoBox style={{ flex: 1 }}>
               <InfoTitle>날씨</InfoTitle>
-              <InfoHighlight>오늘의 온도는 30도에요 </InfoHighlight>
+              <InfoHighlight>오늘의 날씨는 <Highlight>{ weatherDescription }, { temperature }</Highlight>입니다. </InfoHighlight>
             </InfoBox>
           </Column>
         </Row>

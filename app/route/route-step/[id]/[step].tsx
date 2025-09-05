@@ -23,7 +23,7 @@ export default function RouteStepScreen() {
       <MapImage source={{ uri: 'https://placehold.co/600x400' }} />
 
       <Section>
-        <PlaceName>케이팝 스퀘어 홍대 {stepNum}</PlaceName>
+        <PlaceName>케이팝 스퀘어 홍대</PlaceName>
         <InfoButton onPress={() => router.push("/place/place-detail")}>
           <InfoText>이 플레이스에 대한 정보</InfoText>
           <Ionicons name="chevron-forward" size={16} color="white" />
