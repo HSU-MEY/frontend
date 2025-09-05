@@ -32,8 +32,7 @@ export async function refreshTokenApi(
   refreshToken: string
 ): Promise<ApiEnvelope<AuthTokens>> {
   return apiPost<ApiEnvelope<AuthTokens>>(
-    ROUTES.auth.refresh,
-    { refreshToken },
+    ROUTES.auth.refresh + `?refreshToken=${encodeURIComponent(refreshToken)}`,
     'POST /auth/refresh'
   );
 }

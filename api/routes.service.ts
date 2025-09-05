@@ -1,4 +1,6 @@
 // src/api/routes.service.ts
+import { getAccess } from "@/utils/storage";
+
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 // ===== 공통 타입 =====
@@ -96,9 +98,10 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
 export async function getRouteApi(
   routeId: number
 ): Promise<ApiEnvelope<Routes>> {
-  return fetchJson<ApiEnvelope<Routes>>(`/routes/${routeId}`, {
+  return fetchJson<ApiEnvelope<Routes>>(
+    `/routes/${routeId}`, {
     method: "GET",
-    headers: jsonHeaders(),
+    headers: jsonHeaders(await getAccess() || undefined),
   });
 }
 
@@ -111,7 +114,7 @@ export async function getRecommendRouteApi(
 ): Promise<ApiEnvelope<RecommendedRoutes>> {
   return fetchJson<ApiEnvelope<RecommendedRoutes>>(`/routes/recommend`, {
     method: "GET",
-    headers: jsonHeaders(),
+    headers: jsonHeaders(await getAccess() || undefined),
     body: JSON.stringify({
       themes,
       region,
@@ -127,7 +130,7 @@ export async function createRouteApi(
 ): Promise<ApiEnvelope<Routes>> {
   return fetchJson<ApiEnvelope<Routes>>(`/routes`, {
     method: "POST",
-    headers: jsonHeaders(),
+    headers: jsonHeaders(await getAccess() || undefined),
     body: JSON.stringify(routeData),
   });
 }
