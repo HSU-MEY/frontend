@@ -9,12 +9,29 @@ import styled from 'styled-components/native';
 export default function RouteOverviewScreen() {
   const id = Number(useLocalSearchParams().id);
   const [route, setRoute] = React.useState<Routes | null>(null);
+  const [distance, setDistance] = React.useState<string>("");
+  const [estimatedTime, setEstimatedTime] = React.useState<string>("");
+  const [estimatedCost, setEstimatedCost] = React.useState<string>("");
 
   useEffect(() => {
     async function fetchRoute() {
       if (!isNaN(id)) {
         const response = await getRouteApi(id);
-        setRoute(response.result);
+        const response_f = Array.isArray(response.result) ? response.result[0] : response.result;
+        setRoute(response_f);
+        setDistance(
+          response_f.totalDistanceKm.toString()
+          ? (response_f.totalDistanceKm / 1000).toFixed(1) + "km"
+          : "0"
+        );
+        const hours = Math.floor(response_f.totalDurationMinutes / 60);
+        const minutes = response_f.totalDurationMinutes % 60;
+        setEstimatedTime(
+          `${hours}시간 ${minutes}분`
+        );
+        setEstimatedCost(
+          response_f.estimatedCost.toString() + "원"
+        );
       }
       //setRoute(response.result);
     }
@@ -27,7 +44,7 @@ export default function RouteOverviewScreen() {
       <Header title="여행 개요" />
 
       <ImageBackground
-        source={{ uri: /*route?.imageUrl*/ '' }}
+        source={{ uri: 'https://placehold.co/300x300' }}
         style={ styleSheet.HeaderSection }
       >
         <Title>{ route?.title }</Title>
@@ -41,7 +58,7 @@ export default function RouteOverviewScreen() {
         <Row>
           <InfoBox>
             <InfoTitle>이 여정은...</InfoTitle>
-            <InfoHighlight>총 <Highlight>{ route?.totalDistanceKm }</Highlight>를 여행해요</InfoHighlight>
+            <InfoHighlight>총 <Highlight>{ distance }</Highlight>를 여행해요</InfoHighlight>
             <InfoImage source={{ uri: 'https://placehold.co/300x300' }} />
           </InfoBox>
         </Row>
@@ -51,17 +68,17 @@ export default function RouteOverviewScreen() {
             <InfoBox style={{ flex: 2 }}>
               <InfoTitle>우리가 둘러볼 곳은...</InfoTitle>
               <InfoHighlight><Highlight>{ route?.routePlaces.length }개</Highlight>의 장소를 둘러볼 예정이에요</InfoHighlight>
-              <InfoSubtext>케이팝 스폿의 핫한 10곳 장소 포함</InfoSubtext>
+              <InfoSubtext>{ route?.routePlaces[0].place.name }에서 { route?.routePlaces[route?.routePlaces.length - 1].place.name }까지</InfoSubtext>
               <InfoImage source={{ uri: 'https://placehold.co/300x300' }} />
 
-              <InfoHighlight>예상 총 이동 시간은 <Highlight>{ route?.totalDurationMinutes }</Highlight>이에요</InfoHighlight>
+              <InfoHighlight>예상 총 이동 시간은 <Highlight>{ estimatedTime }</Highlight>이에요</InfoHighlight>
               <InfoImage source={{ uri: 'https://placehold.co/300x300' }} />
             </InfoBox>
           </Column>
           <Column style={{ flex: 1 }}>
             <InfoBox style={{ flex: 1}}>
               <InfoTitle>예상 비용</InfoTitle>
-              <InfoHighlight>교통비로 약 <Highlight>{ route?.estimatedCost }</Highlight>을 소모할 것 같아요</InfoHighlight>
+              <InfoHighlight>교통비로 약 <Highlight>{ estimatedCost }</Highlight>을 소모할 것 같아요</InfoHighlight>
               <InfoImage source={{ uri: 'https://placehold.co/300x300' }} />
             </InfoBox>
 

@@ -60,9 +60,6 @@ export default function MyPage() {
   const refetchAll = () => Promise.all([
     refetchUpcoming(), refetchInProgress(), refetchCompleted(),
   ]);
-  
-
-  console.log(upcomingRoutes);
 
   // 화면 포커스 감지
   const isFocused = useIsFocused();
