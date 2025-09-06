@@ -69,7 +69,7 @@ export default function AIGuideRoutes() {
           <TouchableOpacity
             key={item.id}
             style={styles.cardContainer}
-            onPress={() => router.push(`/route/route-overview`)}
+            onPress={() => router.push(`/route/route-overview/1`)}
           >
 
             <ImageBackground

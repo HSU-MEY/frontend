@@ -105,6 +105,7 @@ export default ({ config }) => ({
     API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL,
     KAKAO_JS_API_KEY: process.env.KAKAO_JS_API_KEY,
     KAKAO_NATIVE_API_KEY: process.env.KAKAO_NATIVE_API_KEY,
+    OPEN_WEATHER_API_KEY: process.env.OPEN_WEATHER_API_KEY,
   },
 
   plugins: [

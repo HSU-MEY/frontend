@@ -1,20 +1,25 @@
 import Header from '@/components/common/Header';
 import RouteListPage from '@/components/common/RouteListPage';
-import { useState } from 'react';
+import { useUserRoutes } from '@/hooks/useUserRoutes';
 import { StyleSheet, View } from 'react-native';
-import { dummyRoutes } from '../data/dummyRoutes';
+
 
 export default function CompletedRoutesPage() {
-  const [routes, setRoutes] = useState(dummyRoutes.filter(r => r.progress === 100));
+  const { data, remove, loading } = useUserRoutes("COMPLETED");
+  const completedRoutes = data?.savedRoutes ?? [];
 
-  const handleDelete = (id: string) => {
-    setRoutes(prev => prev.filter(route => route.id !== id));
-  };
+  const handleDelete = async (id: string) => {
+    try {
+      await remove(Number(id));
+    } catch (e) {
+      // 삭제 실패 처리 (예: 알림 표시)
+    }
+  }
 
   return (
     <View style={styles.container}>
       <Header title="진행 완료 루트" />
-      <RouteListPage title="진행 완료 루트" routes={routes} onDelete={handleDelete} />
+      <RouteListPage title="진행 완료 루트" routes={completedRoutes} onDelete={handleDelete} />
     </View>
   );
 }

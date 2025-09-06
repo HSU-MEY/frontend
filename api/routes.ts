@@ -9,6 +9,7 @@ export const ROUTES = {
     },
     users: {
         profile: '/users/profiles',
+        routes: '/users/routes',
     },
     places: {
         popular: '/places/popular',
