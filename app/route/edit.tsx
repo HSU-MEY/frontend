@@ -140,7 +140,11 @@ export default function EditRouteScreen() {
                                 </View>
 
                                 <View style={styles.iconBackground}>
-                                    <Ionicons name="chevron-forward" size={24} color="#1C5BD8" />
+                                    <TouchableOpacity
+                                        onPress={() => router.push({ pathname: '/place/place-detail', params: { id: String(item.id) } })}
+                                    >
+                                        <Ionicons name="chevron-forward" size={24} color="#1C5BD8" />
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
@@ -235,7 +239,7 @@ const styles = StyleSheet.create({
         //marginTop: 12,
         alignItems: 'center',
         width: screenWidth - 32,
-        paddingVertical: 12,
+        paddingVertical: 20,
         paddingHorizontal: 12
     },
     closeBtn: {
@@ -257,6 +261,8 @@ const styles = StyleSheet.create({
     },
     info: {
         flex: 1,
+        marginRight: 10,
+        // backgroundColor: 'black'
     },
     name: {
         fontSize: 14,
