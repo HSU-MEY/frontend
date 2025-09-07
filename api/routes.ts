@@ -13,5 +13,6 @@ export const ROUTES = {
     },
     places: {
         popular: '/places/popular',
+        search: '/places/search',
     },
 } as const;

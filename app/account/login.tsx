@@ -45,16 +45,12 @@ export default function LoginScreen() {
     }
     setSubmitting(true);
     try {
-      const ok = await login(email, password); // 훅 내부에서 accessToken 저장하는 구조 권장
+      const normalizedEmail = email.trim().toLowerCase(); // ★ 중요
+      const ok = await login(normalizedEmail, password);   // 훅으로 위임
       if (!ok) {
         Alert.alert('로그인 실패', '이메일 또는 비밀번호가 올바르지 않습니다.');
         return;
       }
-
-      // (선택) 여기서 프로필을 읽어 환영 메시지에 사용하고 싶다면:
-      // const me = await getMyProfile();
-      // Alert.alert('로그인 성공', `${me.nickname}님 환영합니다!`);
-
       Alert.alert('로그인 성공', '환영합니다!');
       router.replace('/(tabs)/myroute');
     } catch (e: any) {

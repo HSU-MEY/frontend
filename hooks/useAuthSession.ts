@@ -1,100 +1,10 @@
-// import { loginApi, refreshTokenApi } from '@/api/auth.service';
-// import { getExp, isExpSoon } from '@/utils/jwt';
-// import { clearTokens } from '@/utils/storage';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { useCallback, useRef, useState } from 'react';
-
-// const ACCESS_KEY = 'accessToken';
-// const REFRESH_KEY = 'refreshToken';
-
-// export const useAuthSession = () => {
-//   const [accessToken, setAccessToken] = useState<string|null>(null);
-//   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-//   const clearTimers = () => {
-//     if (refreshTimer.current) { clearTimeout(refreshTimer.current); refreshTimer.current = null; }
-//   };
-
-//   const saveTokens = async (access: string, refresh: string) => {
-//     await AsyncStorage.setItem(ACCESS_KEY, access);
-//     await AsyncStorage.setItem(REFRESH_KEY, refresh);
-//   };    
-
-//   const login = async (email: string, password: string) => {
-//     try {
-//       const res = await loginApi({ email, password }); // ApiEnvelope<AuthTokens>
-
-//       if (!res.isSuccess) throw new Error(res.message);
-//       const { accessToken, refreshToken } = res.result;
-
-//       await saveTokens(accessToken, refreshToken);
-
-//       //const exp = getExp(accessToken);
-
-//       return { ok: true };
-//     } catch (e: any) {
-//       return { ok: false, error: e?.message ?? "로그인 실패" };
-//     }
-//   };
-
-//   const logout = useCallback(async () => {
-//     try {
-//       const refresh = await AsyncStorage.getItem('refreshToken');
-
-//       clearTimers();
-//       await clearTokens();
-//       setAccessToken(null);
-
-//       console.log("로그아웃 성공");
-
-//     } catch (e) {
-//       await clearTokens();
-//       setAccessToken(null);
-//       //router.replace('/auth/login');
-//     }
-//   }, []);
-
-//   const ensureValidAccessToken = async (): Promise<string | null> => {
-//     let token = await AsyncStorage.getItem("accessToken");
-//     if (!token) return null;
-
-//     if (isExpSoon(getExp(token))) {
-//       const refresh = await AsyncStorage.getItem("refreshToken");
-//       if (!refresh) return null;
-
-//       try {
-//         const res = await refreshTokenApi(refresh);
-//         if (!res.isSuccess) return null;
-
-//         const { accessToken, refreshToken } = res.result;
-
-//         await AsyncStorage.setItem("accessToken", accessToken);
-//         await AsyncStorage.setItem("refreshToken", refreshToken);
-
-//         token = accessToken;
-//       } catch (e) {
-//         console.error("토큰 갱신 실패:", e);
-//         return null;
-//       }
-//     }
-
-//     return token;
-//   };
-
-//   return { accessToken, setAccessToken, login, logout, ensureValidAccessToken };
-// };
-
-// /hooks/useAuthSession.ts
+// hooks/useAuthSession.ts
 import { loginApi, refreshTokenApi } from '@/api/auth.service';
 import { getExp, isExpSoon } from '@/utils/jwt';
-import { clearTokens } from '@/utils/storage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { clearTokens, getAccess, getRefresh, setTokens } from '@/utils/storage';
 import { useCallback, useRef, useState } from 'react';
 
-const ACCESS_KEY = 'accessToken';
-const REFRESH_KEY = 'refreshToken';
-
-// 만료 몇 초 전에 미리 갱신할지(버퍼)
+// 만료 몇 초 전에 미리 갱신(버퍼)
 const REFRESH_SKEW_SEC = 30;
 
 export const useAuthSession = () => {
@@ -108,15 +18,9 @@ export const useAuthSession = () => {
     }
   };
 
-  const saveTokens = async (access: string, refresh: string) => {
-    // 순수 토큰 문자열만 저장 (Bearer 포함 X)
-    await AsyncStorage.setItem(ACCESS_KEY, access);
-    await AsyncStorage.setItem(REFRESH_KEY, refresh);
-  };
-
   const scheduleRefresh = useCallback((access: string) => {
     clearTimers();
-    const exp = getExp(access); // exp(초 단위 Unix epoch) 리턴한다고 가정
+    const exp = getExp(access); // exp(초) 반환 가정
     if (!exp) return;
 
     const nowSec = Math.floor(Date.now() / 1000);
@@ -124,18 +28,25 @@ export const useAuthSession = () => {
 
     refreshTimer.current = setTimeout(async () => {
       try {
-        const refresh = await AsyncStorage.getItem(REFRESH_KEY);
+        const refresh = await getRefresh();
         if (!refresh) throw new Error('no refresh token');
 
         const res = await refreshTokenApi(refresh);
-        if (!res?.isSuccess) throw new Error(res?.message || 'refresh failed');
+        const data: any = res; // auth.service가 반환하는 값을 일괄 수용
+        const ok = data?.isSuccess ?? true; // 래핑 없으면 true로 간주
+        const payload = data?.result ?? data;
 
-        const { accessToken: newAccess, refreshToken: newRefresh } = res.result;
-        await saveTokens(newAccess, newRefresh);
+        if (!ok) throw new Error(data?.message || 'refresh failed');
+
+        const newAccess = payload?.accessToken;
+        const newRefresh = payload?.refreshToken;
+
+        if (!newAccess) throw new Error('no accessToken in refresh response');
+
+        await setTokens(newAccess, newRefresh);
         setAccessToken(newAccess);
         scheduleRefresh(newAccess); // 다음 갱신 예약
       } catch (err) {
-        // 갱신 실패: 토큰 정리(앱 정책에 따라 바로 로그아웃해도 됨)
         console.error('토큰 자동갱신 실패:', err);
         await clearTokens();
         setAccessToken(null);
@@ -144,14 +55,25 @@ export const useAuthSession = () => {
     }, delayMs);
   }, []);
 
-  // boolean 리턴으로 단순화 (UI 코드와 맞추기 쉬움)
+  /** boolean 리턴으로 단순화 (UI 입장 편의) */
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
-      const res = await loginApi({ email, password }); // ApiEnvelope<{accessToken, refreshToken}>
-      if (!res.isSuccess) throw new Error(res.message);
+      // 안전하게 정규화 (상위에서 했더라도 이중 방어)
+      const payload = { email: email.trim().toLowerCase(), password };
 
-      const { accessToken: access, refreshToken: refresh } = res.result;
-      await saveTokens(access, refresh);
+      const res = await loginApi(payload); // auth.service가 axios 호출
+      const data: any = res;
+      const ok = data?.isSuccess ?? true;
+      const body = data?.result ?? data;
+
+      if (!ok) throw new Error(data?.message || 'login failed');
+
+      const access = body?.accessToken;
+      const refresh = body?.refreshToken;
+
+      if (!access) throw new Error('로그인 응답에 accessToken 없음');
+
+      await setTokens(access, refresh);
       setAccessToken(access);
       scheduleRefresh(access);
       return true;
@@ -167,26 +89,26 @@ export const useAuthSession = () => {
   const logout = useCallback(async () => {
     try {
       clearTimers();
-      await clearTokens(); // 내부에서 ACCESS_KEY/REFRESH_KEY 삭제한다고 가정
+      await clearTokens();
       setAccessToken(null);
       console.log('로그아웃 성공');
-    } catch (e) {
+    } catch {
       await clearTokens();
       setAccessToken(null);
     }
   }, []);
 
-  // 화면 진입 시/호출 시 토큰 유효화 (만료 임박하면 갱신)
+  /** 진입 시 토큰 유효화 (임박 시 선제 갱신) */
   const ensureValidAccessToken = useCallback(async (): Promise<string | null> => {
-    let token = await AsyncStorage.getItem(ACCESS_KEY);
+    let token = await getAccess();
     if (!token) {
       setAccessToken(null);
       return null;
     }
 
-    // exp 체크해서 임박 시 갱신
-    if (isExpSoon(getExp(token), REFRESH_SKEW_SEC)) {
-      const refresh = await AsyncStorage.getItem(REFRESH_KEY);
+    const exp = getExp(token);
+    if (isExpSoon(exp, REFRESH_SKEW_SEC)) {
+      const refresh = await getRefresh();
       if (!refresh) {
         await clearTokens();
         setAccessToken(null);
@@ -194,10 +116,18 @@ export const useAuthSession = () => {
       }
       try {
         const res = await refreshTokenApi(refresh);
-        if (!res.isSuccess) throw new Error(res.message);
+        const data: any = res;
+        const ok = data?.isSuccess ?? true;
+        const body = data?.result ?? data;
 
-        const { accessToken: newAccess, refreshToken: newRefresh } = res.result;
-        await saveTokens(newAccess, newRefresh);
+        if (!ok) throw new Error(data?.message || 'refresh failed');
+
+        const newAccess = body?.accessToken;
+        const newRefresh = body?.refreshToken;
+
+        if (!newAccess) throw new Error('refresh 응답에 accessToken 없음');
+
+        await setTokens(newAccess, newRefresh);
         setAccessToken(newAccess);
         scheduleRefresh(newAccess);
         token = newAccess;
@@ -209,7 +139,7 @@ export const useAuthSession = () => {
         return null;
       }
     } else {
-      // 아직 여유 있으면 스케줄은 존재하는지 보장
+      // 여유가 있으면 스케줄 보장
       setAccessToken(token);
       scheduleRefresh(token);
     }

@@ -1,4 +1,4 @@
-import { fetchPopularPlaces, PopularPlaceDTO } from '@/api/places.service';
+import { fetchPopularPlaces, PopularPlaceDTO, SearchPlaceDTO, searchPlaces } from '@/api/places.service';
 import { useSelectedRoute } from '@/contexts/SelectedRouteContext';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -32,6 +32,56 @@ type UiPlace = {
 
 const PLACEHOLDER = require('@/assets/images/placeholder-place.png');
 
+// 요일 한글 맵
+const KR_DAYS: Record<string, string> = {
+    monday: '월', tuesday: '화', wednesday: '수',
+    thursday: '목', friday: '금', saturday: '토', sunday: '일',
+};
+
+function formatOpeningHours(hours: any): string {
+    if (!hours) return '운영시간 정보 없음';
+    if (typeof hours === 'string') return hours;
+    if (Array.isArray(hours)) return hours.filter(Boolean).join(', ');
+
+    if (typeof hours === 'object') {
+        // 예: { monday: "09:00~18:00", tuesday: { open: "09:00", close: "18:00" }, ... }
+        const parts = Object.entries(hours)
+            .map(([day, val]) => {
+                const d = KR_DAYS[day.toLowerCase()] ?? day;
+                if (typeof val === 'string') return `${d} ${val}`;
+                if (val && typeof val === 'object') {
+                    const open = (val as any).open ?? (val as any).start ?? '';
+                    const close = (val as any).close ?? (val as any).end ?? '';
+                    if (open && close) return `${d} ${open}~${close}`;
+                    if (open || close) return `${d} ${open || close}`;
+                    return `${d} 영업`;
+                }
+                return `${d}`;
+            })
+            .filter(Boolean);
+
+        if (parts.length === 0) return '운영시간 정보 없음';
+        // 너무 길면 축약
+        return parts.length <= 2 ? parts.join(' · ') : `${parts.slice(0, 2).join(' · ')} 외`;
+    }
+
+    // 그 외 타입(숫자 등) 방어
+    return String(hours);
+}
+
+function formatThemes(themes: any): string {
+    if (!themes) return '명소';
+    if (typeof themes === 'string') return themes;
+    if (Array.isArray(themes)) return themes.filter(Boolean).join(', ');
+    if (typeof themes === 'object') {
+        // 값 합치기 시도 -> 값이 없으면 키를 합침
+        const vals = Object.values(themes).filter((v) => typeof v === 'string' && v.trim().length > 0) as string[];
+        if (vals.length) return vals.join(', ');
+        return Object.keys(themes).join(', ');
+    }
+    return String(themes);
+}
+
 export default function AiGuideTab() {
     const insets = useSafeAreaInsets();
     const router = useRouter();
@@ -45,6 +95,10 @@ export default function AiGuideTab() {
     const [error, setError] = useState<string | null>(null);
     const [apiPlaces, setApiPlaces] = useState<PopularPlaceDTO[]>([]);
     const [selectedPlaceId, setSelectedPlaceId] = useState<number | null>(null);
+
+    const [searchResults, setSearchResults] = useState<SearchPlaceDTO[]>([]);
+    const [searching, setSearching] = useState(false);        // 검색 API 로딩 상태
+    const [searchError, setSearchError] = useState<string | null>(null);
 
     const mapRef = useRef<KakaoMapHandle>(null);
     const JS_KEY = KAKAO_JS_API_KEY;
@@ -67,43 +121,87 @@ export default function AiGuideTab() {
         load();
     }, []);
 
+    useEffect(() => {
+        const q = search.trim();
+        setSearchError(null);
+        setSearching(false);
+        setSearchResults([]);
+
+        if (q.length < 2) return; // 한 글자일 땐 서버 안 두드림
+
+        const controller = new AbortController();
+        const t = setTimeout(async () => {
+            try {
+                setSearching(true);
+                const data = await searchPlaces(q, undefined, controller.signal);
+                setSearchResults(data);
+            } catch (e: any) {
+                if (e?.code !== 'ERR_CANCELED') setSearchError('검색에 실패했어요.');
+            } finally {
+                setSearching(false);
+            }
+        }, 300); // 300ms 디바운스
+
+        return () => {
+            controller.abort();
+            clearTimeout(t);
+        };
+    }, [search]);
+
     const onRefresh = async () => {
         setRefreshing(true);
         await load();
     };
 
-    const uiPlaces: UiPlace[] = useMemo(() => {
+    const uiPopular: UiPlace[] = useMemo(() => {
         return apiPlaces.map((p) => {
             const name = p.nameKo || p.nameEn || `장소 #${p.id}`;
-            const address = p.address || (p.regionId ? `Region ${p.regionId}` : '주소 정보 없음');
-            const time = p.openingHours || '운영시간 정보 없음';
-            const tag = p.themes || '명소';
+            const address = typeof p.address === 'string' ? p.address : (p.regionId ? `Region ${p.regionId}` : '주소 정보 없음');
+            const time = formatOpeningHours(p.openingHours);
+            const tag = formatThemes(p.themes);
             const image = p.imageUrl ? { uri: p.imageUrl } : PLACEHOLDER;
 
-            return {
-                id: p.id,
-                name,
-                address,
-                time,
-                tag,
-                image,
-                isRecommended: true,
-                raw: p,
-            };
+            return { id: p.id, name, address, time, tag, image, isRecommended: true, raw: p };
         });
     }, [apiPlaces]);
 
+    const uiSearched: UiPlace[] = useMemo(() => {
+        return searchResults.map((s) => {
+            const name = s.nameKo || s.nameEn || `장소 #${s.id}`;
+            const address = s.regionId ? `Region ${s.regionId}` : '주소 정보 없음';
+            const time = '운영시간 정보 없음';
+            const tag = '검색결과';
+            const image = PLACEHOLDER; // 검색 결과엔 imageUrl이 없으므로
+            // PopularPlaceDTO와 타입 맞추기 위해 최소 필드만 채워 넣기
+            const raw: PopularPlaceDTO = {
+                id: s.id,
+                nameKo: s.nameKo,
+                nameEn: s.nameEn,
+                latitude: s.latitude,
+                longitude: s.longitude,
+                regionId: s.regionId,
+            };
+            return { id: s.id, name, address, time, tag, image, isRecommended: true, raw };
+        });
+    }, [searchResults]);
+
+    // const filteredPlaces = useMemo(() => {
+    //     return (search.trim() === ''
+    //         ? uiPlaces.filter((p) => p.isRecommended)
+    //         : uiPlaces.filter(
+    //             (p) =>
+    //                 p.name.includes(search) ||
+    //                 p.address.includes(search) ||
+    //                 p.tag.includes(search)
+    //         )
+    //     );
+    // }, [uiPlaces, search]);
+
+    const showingSearch = search.trim().length >= 2;
     const filteredPlaces = useMemo(() => {
-        return (search.trim() === ''
-            ? uiPlaces.filter((p) => p.isRecommended)
-            : uiPlaces.filter(
-                (p) =>
-                    p.name.includes(search) ||
-                    p.address.includes(search) ||
-                    p.tag.includes(search)
-            )
-        );
-    }, [uiPlaces, search]);
+        if (showingSearch) return uiSearched;           // 서버 검색 결과 그대로
+        return uiPopular.filter((p) => p.isRecommended); // 기본은 인기
+    }, [showingSearch, uiSearched, uiPopular]);
 
     const handleAddPlace = (place: UiPlace) => {
         if (!selectedPlaces.some((p) => p.id === place.id)) {
@@ -115,15 +213,30 @@ export default function AiGuideTab() {
         setLocalSelectedPlaces((prev) => prev.filter((p) => p.id !== id));
     };
 
+    // 대한민국 대략 범위
+    const inKR = (lat: number, lng: number) =>
+        lat >= 33 && lat <= 39 && lng >= 124 && lng <= 132;
+
+    const normalizeCoord = (lat: number, lng: number) => {
+        if (inKR(lat, lng)) return [lat, lng] as const;
+        // 뒤바뀐 듯하면 스왑
+        if (inKR(lng, lat)) return [lng, lat] as const;
+        // 둘 다 아니면 받은 그대로 (백엔드 데이터 확인 필요)
+        return [lat, lng] as const;
+    };
+
     const handleSelectOnMap = (place: UiPlace) => {
-        const { latitude, longitude } = place.raw;
-        if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+        let { latitude, longitude } = place.raw;
+        // 문자열로 올 수도 있으니 숫자화
+        const lat = Number(latitude);
+        const lng = Number(longitude);
+        if (Number.isNaN(lat) || Number.isNaN(lng)) {
             Alert.alert('안내', '이 장소에는 좌표 정보가 없어요.');
             return;
         }
+        const [finalLat, finalLng] = normalizeCoord(lat, lng);
         setSelectedPlaceId(place.id);
-        // 중심 이동 + 단일 마커
-        mapRef.current?.focusTo(latitude, longitude, 4);
+        mapRef.current?.focusTo(finalLat, finalLng, 4);
     };
 
     if (loading) {
@@ -180,11 +293,13 @@ export default function AiGuideTab() {
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             >
                 <Text style={styles.sectionTitle}>
-                    {search.trim() === ''
-                        ? 'K-Route가 추천해주는 장소'
-                        : filteredPlaces.length === 0
-                            ? '검색 결과가 없습니다.'
-                            : `검색한 장소 (${filteredPlaces.length}개)`}
+                    {showingSearch
+                        ? (searching
+                            ? '검색 중…'
+                            : (searchError
+                                ? '검색 실패'
+                                : (filteredPlaces.length === 0 ? '검색 결과가 없습니다.' : `검색 결과 (${filteredPlaces.length}개)`)))
+                        : 'K-Route가 추천해주는 장소'}
                 </Text>
 
                 {filteredPlaces.map((place) => {
@@ -203,7 +318,6 @@ export default function AiGuideTab() {
                                 <Text style={styles.time}>{place.time}</Text>
                                 <Text style={styles.tag}>{place.tag}</Text>
                             </View>
-
                             <TouchableOpacity style={styles.plusButton} onPress={() => handleAddPlace(place)}>
                                 <Image source={require('@/assets/images/icons/plus.png')} style={styles.plusIcon} />
                             </TouchableOpacity>
