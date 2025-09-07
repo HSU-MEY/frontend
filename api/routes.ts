@@ -14,5 +14,6 @@ export const ROUTES = {
     places: {
         popular: '/places/popular',
         search: '/places/search',
+        byId: '/places',
     },
 } as const;
