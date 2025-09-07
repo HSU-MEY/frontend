@@ -15,5 +15,6 @@ export const ROUTES = {
         popular: '/places/popular',
         search: '/places/search',
         byId: '/places',
+        theme: '/places/theme',
     },
 } as const;

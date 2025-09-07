@@ -71,3 +71,11 @@ export async function fetchPlaceDetail(placeId: number) {
   const { data } = await client.get<PlaceDetailDTO>(`${ROUTES.places.byId}/${placeId}`);
   return data;
 }
+
+export async function fetchThemePlaces(keyword: string, limit?: number, signal?: AbortSignal) {
+  const { data } = await client.get<PopularPlaceDTO[]>(
+    ROUTES.places.theme,
+    { params: { keyword, ...(limit ? { limit } : {}) }, signal }
+  );
+  return data;
+}
