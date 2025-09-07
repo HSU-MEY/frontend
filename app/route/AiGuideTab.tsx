@@ -1,9 +1,12 @@
+import { fetchPopularPlaces, PopularPlaceDTO } from '@/api/places.service';
 import { useSelectedRoute } from '@/contexts/SelectedRouteContext';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     Image,
+    RefreshControl,
     ScrollView,
     StyleSheet,
     Text,
@@ -13,100 +16,150 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-type Place = {
+import KakaoMapWebView, { KakaoMapHandle } from '@/components/KakaoMapWebView';
+import { KAKAO_JS_API_KEY } from '@/src/env';
+
+type UiPlace = {
     id: number;
     name: string;
     address: string;
     time: string;
     tag: string;
-    image: any; // require로 불러온 이미지이므로 any로 처리
+    image: any;
     isRecommended: boolean;
+    raw: PopularPlaceDTO;
 };
 
-const allPlaces = [
-    {
-        id: 1,
-        name: '설화수 플래그십 스토어',
-        address: '서울시 강남구 도산대로',
-        time: '11:00 ~ 20:00',
-        tag: '스토어',
-        image: require('@/assets/images/sample-beauty.png'),
-        isRecommended: true,
-    },
-    {
-        id: 2,
-        name: '별다방 커피점',
-        address: '서울시 마포구 양화로',
-        time: '08:00 ~ 22:00',
-        tag: '카페',
-        image: require('@/assets/images/sample-beauty2.png'),
-        isRecommended: true,
-    },
-    {
-        id: 3,
-        name: '한강공원 뚝섬지구',
-        address: '서울시 성동구',
-        time: '24시간',
-        tag: '공원',
-        image: require('@/assets/images/sample-beauty3.png'),
-        isRecommended: false,
-    },
-    {
-        id: 4,
-        name: '이태원 앤틱 가구 거리',
-        address: '서울시 용산구',
-        time: '10:00 ~ 18:00',
-        tag: '쇼핑',
-        image: require('@/assets/images/sample-stage.png'),
-        isRecommended: true,
-    },
-    {
-        id: 5,
-        name: 'DDP 디자인 플라자',
-        address: '서울시 중구 을지로',
-        time: '10:00 ~ 19:00',
-        tag: '전시',
-        image: require('@/assets/images/sample-stage2.png'),
-        isRecommended: false,
-    },
-];
+const PLACEHOLDER = require('@/assets/images/placeholder-place.png');
 
 export default function AiGuideTab() {
     const insets = useSafeAreaInsets();
-    const [search, setSearch] = useState('');
-    const [input, setInput] = useState('');
     const router = useRouter();
-    const [selectedPlaces, setLocalSelectedPlaces] = useState<Place[]>([]);
+
+    const [search, setSearch] = useState('');
+    const [selectedPlaces, setLocalSelectedPlaces] = useState<UiPlace[]>([]);
     const { setSelectedPlaces: setGlobalSelectedPlaces } = useSelectedRoute();
 
-    const handleAddPlace = (place: Place) => {
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [apiPlaces, setApiPlaces] = useState<PopularPlaceDTO[]>([]);
+    const [selectedPlaceId, setSelectedPlaceId] = useState<number | null>(null);
+
+    const mapRef = useRef<KakaoMapHandle>(null);
+    const JS_KEY = KAKAO_JS_API_KEY;
+    const DEFAULT_CENTER = { lat: 37.5665, lng: 126.9780 }; // 서울시청
+
+    const load = async () => {
+        try {
+            setError(null);
+            const data = await fetchPopularPlaces();
+            setApiPlaces(data);
+        } catch (e) {
+            setError('인기 장소를 불러오지 못했어요.');
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
+
+    useEffect(() => {
+        load();
+    }, []);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await load();
+    };
+
+    const uiPlaces: UiPlace[] = useMemo(() => {
+        return apiPlaces.map((p) => {
+            const name = p.nameKo || p.nameEn || `장소 #${p.id}`;
+            const address = p.address || (p.regionId ? `Region ${p.regionId}` : '주소 정보 없음');
+            const time = p.openingHours || '운영시간 정보 없음';
+            const tag = p.themes || '명소';
+            const image = p.imageUrl ? { uri: p.imageUrl } : PLACEHOLDER;
+
+            return {
+                id: p.id,
+                name,
+                address,
+                time,
+                tag,
+                image,
+                isRecommended: true,
+                raw: p,
+            };
+        });
+    }, [apiPlaces]);
+
+    const filteredPlaces = useMemo(() => {
+        return (search.trim() === ''
+            ? uiPlaces.filter((p) => p.isRecommended)
+            : uiPlaces.filter(
+                (p) =>
+                    p.name.includes(search) ||
+                    p.address.includes(search) ||
+                    p.tag.includes(search)
+            )
+        );
+    }, [uiPlaces, search]);
+
+    const handleAddPlace = (place: UiPlace) => {
         if (!selectedPlaces.some((p) => p.id === place.id)) {
-            setLocalSelectedPlaces([...selectedPlaces, place]);
+            setLocalSelectedPlaces((prev) => [...prev, place]);
         }
     };
 
     const handleRemovePlace = (id: number) => {
-        setLocalSelectedPlaces(selectedPlaces.filter((p) => p.id !== id));
+        setLocalSelectedPlaces((prev) => prev.filter((p) => p.id !== id));
     };
 
-    const filteredPlaces =
-        search.trim() === ''
-            ? allPlaces.filter((place) => place.isRecommended)
-            : allPlaces.filter((place) =>
-                place.name.includes(search) ||
-                place.address.includes(search) ||
-                place.tag.includes(search)
-            );
+    const handleSelectOnMap = (place: UiPlace) => {
+        const { latitude, longitude } = place.raw;
+        if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+            Alert.alert('안내', '이 장소에는 좌표 정보가 없어요.');
+            return;
+        }
+        setSelectedPlaceId(place.id);
+        // 중심 이동 + 단일 마커
+        mapRef.current?.focusTo(latitude, longitude, 4);
+    };
+
+    if (loading) {
+        return (
+            <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
+                <ActivityIndicator />
+                <Text style={{ marginTop: 8 }}>불러오는 중…</Text>
+            </View>
+        );
+    }
+
+    if (error) {
+        return (
+            <View style={[styles.container, { alignItems: 'center', justifyContent: 'center', padding: 16 }]}>
+                <Text style={{ marginBottom: 12 }}>{error}</Text>
+                <TouchableOpacity style={styles.button} onPress={load}>
+                    <Text style={styles.buttonText}>다시 시도</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
-            {/* 지도 이미지 */}
+            {/* 지도 영역: KakaoMapWebView 사용 */}
             <View style={styles.mapContainer}>
-                <Image
-                    source={require('@/assets/images/sample-map.png')} // 지도 이미지
-                    style={styles.map}
+                <KakaoMapWebView
+                    ref={mapRef}
+                    jsKey={JS_KEY}
+                    center={DEFAULT_CENTER}
+                    level={4}
+                    onReady={() => {
+                        // 초기 포커스가 필요하면 여기에 추가
+                        // if (uiPlaces[0]?.raw) handleSelectOnMap(uiPlaces[0]);
+                    }}
                 />
-
                 {/* 검색창 */}
                 <View style={styles.searchBox}>
                     <TextInput
@@ -116,49 +169,47 @@ export default function AiGuideTab() {
                         style={styles.searchInput}
                         placeholderTextColor="#666"
                     />
-                    <Image
-                        source={require('@/assets/images/icons/search.png')}
-                        style={styles.searchIcon}
-                    />
+                    <Image source={require('@/assets/images/icons/search.png')} style={styles.searchIcon} />
                 </View>
             </View>
 
-
             {/* 장소 리스트 */}
             <ScrollView
-                contentContainerStyle={{
-                    paddingBottom: insets.bottom + 100,
-                }}
+                contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
                 style={styles.scrollContent}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             >
                 <Text style={styles.sectionTitle}>
                     {search.trim() === ''
                         ? 'K-Route가 추천해주는 장소'
                         : filteredPlaces.length === 0
-                            ? `검색 결과가 없습니다.`
+                            ? '검색 결과가 없습니다.'
                             : `검색한 장소 (${filteredPlaces.length}개)`}
                 </Text>
 
-                {filteredPlaces.map((place) => (
-                    <View key={place.id} style={styles.card}>
-                        <Image
-                            source={place.image}
-                            style={styles.placeImage}
-                        />
-                        <View style={styles.info}>
-                            <Text style={styles.title}>{place.name}</Text>
-                            <Text style={styles.subtitle}>{place.address}</Text>
-                            <Text style={styles.time}>{place.time}</Text>
-                            <Text style={styles.tag}>{place.tag}</Text>
-                        </View>
-                        <TouchableOpacity style={styles.plusButton} onPress={() => handleAddPlace(place)}>
-                            <Image
-                                source={require('@/assets/images/icons/plus.png')}
-                                style={styles.plusIcon}
-                            />
+                {filteredPlaces.map((place) => {
+                    const isSelected = selectedPlaceId === place.id;
+                    return (
+                        <TouchableOpacity
+                            key={place.id}
+                            style={[styles.card, isSelected && styles.cardSelected]}
+                            activeOpacity={0.85}
+                            onPress={() => handleSelectOnMap(place)}
+                        >
+                            <Image source={place.image} style={styles.placeImage} />
+                            <View style={styles.info}>
+                                <Text style={styles.title}>{place.name}</Text>
+                                <Text style={styles.subtitle}>{place.address}</Text>
+                                <Text style={styles.time}>{place.time}</Text>
+                                <Text style={styles.tag}>{place.tag}</Text>
+                            </View>
+
+                            <TouchableOpacity style={styles.plusButton} onPress={() => handleAddPlace(place)}>
+                                <Image source={require('@/assets/images/icons/plus.png')} style={styles.plusIcon} />
+                            </TouchableOpacity>
                         </TouchableOpacity>
-                    </View>
-                ))}
+                    );
+                })}
             </ScrollView>
 
             {selectedPlaces.length > 0 && (
@@ -167,10 +218,7 @@ export default function AiGuideTab() {
                         {selectedPlaces.map((place) => (
                             <View key={place.id} style={styles.selectedItem}>
                                 <Image source={place.image} style={styles.selectedImage} />
-                                <TouchableOpacity
-                                    style={styles.removeButton}
-                                    onPress={() => handleRemovePlace(place.id)}
-                                >
+                                <TouchableOpacity style={styles.removeButton} onPress={() => handleRemovePlace(place.id)}>
                                     <Text style={styles.removeText}>×</Text>
                                 </TouchableOpacity>
                                 <Text style={styles.selectedLabel} numberOfLines={1}>
@@ -191,9 +239,7 @@ export default function AiGuideTab() {
                             Alert.alert('안내', '장소를 한 개 이상 선택해주세요.');
                             return;
                         }
-
-                        // 장소 선택됨 → 전역 상태에 저장 후 페이지 이동
-                        setGlobalSelectedPlaces(selectedPlaces)
+                        setGlobalSelectedPlaces(selectedPlaces);
                         router.push('/route/edit');
                     }}
                 >
@@ -237,7 +283,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: 'Pretendard-Bold',
         marginTop: 20,
-        marginBottom: 0,
+        marginBottom: 10,
         color: '#000',
         paddingHorizontal: 16
     },
@@ -373,4 +419,5 @@ const styles = StyleSheet.create({
         width: 100,
     },
 
+    cardSelected: { backgroundColor: '#E7F1FF' },
 });
