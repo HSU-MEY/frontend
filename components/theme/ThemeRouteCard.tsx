@@ -3,6 +3,7 @@ import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ThemeRouteCardProps {
+    id: number;
     image: any;
     title: string;
     location: string;
@@ -10,6 +11,7 @@ interface ThemeRouteCardProps {
 }
 
 export default function ThemeRouteCard({
+    id,
     image,
     title,
     location,
@@ -18,7 +20,7 @@ export default function ThemeRouteCard({
     return (
         <TouchableOpacity 
             style={styles.card}
-            onPress={() => router.push('/route/route-step')}
+            onPress={() => router.push(`/route/route-overview/${id}`)}
             >
             <Image source={image} style={styles.image} />
 

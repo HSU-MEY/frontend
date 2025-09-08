@@ -84,6 +84,8 @@ export default function MyPage() {
         setLoading(true);
         setError(null);
 
+        await refetchAll();
+
         const token = await AsyncStorage.getItem('accessToken');
         if (!token) {
           if (mounted) setProfile(null);

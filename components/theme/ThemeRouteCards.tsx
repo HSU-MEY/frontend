@@ -60,6 +60,7 @@ export default function ThemeRouteCards({ category, limit = Infinity }: ThemeRou
       {routes.map((route, index) => (
         <ThemeRouteCard
           key={route.routeId}
+          id={route.routeId}
           image={{uri: route.imageUrl}}
           title={route.title}
           location={route.regionNameKo || ''}
