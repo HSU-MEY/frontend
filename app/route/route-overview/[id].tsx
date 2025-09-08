@@ -1,7 +1,7 @@
 // app/route/route
 import { getRouteApi, Routes } from '@/api/routes.service';
-import { fetchWeather } from '@/api/weather.service';
 import Header from '@/components/common/Header';
+import { useWeather } from '@/hooks/useWeathers';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect } from 'react';
 import { ImageBackground, StyleSheet } from 'react-native';
@@ -13,8 +13,9 @@ export default function RouteOverviewScreen() {
   const [distance, setDistance] = React.useState<string>("");
   const [estimatedTime, setEstimatedTime] = React.useState<string>("");
   const [estimatedCost, setEstimatedCost] = React.useState<string>("");
-  const [weatherDescription, setWeatherDescription] = React.useState<string>("");
-  const [temperature, setTemperature] = React.useState<string>("");
+  // const [weatherDescription, setWeatherDescription] = React.useState<string>("");
+  // const [temperature, setTemperature] = React.useState<string>("");
+
 
   useEffect(() => {
     async function fetchRoute() {
@@ -35,27 +36,27 @@ export default function RouteOverviewScreen() {
         setEstimatedCost(
           response_f.estimatedCost.toString() + "원"
         );
-        fetchCurrentWeather(response_f.routePlaces[0].place.latitude, response_f.routePlaces[0].place.longitude);
       }
       //setRoute(response.result);
     }
 
-    async function fetchCurrentWeather(lat: number, lon: number) {
-      try {
-        const weather = await fetchWeather(lat, lon);
-
-        setWeatherDescription(weather.weather[0].description);
-        setTemperature(weather.main.temp.toFixed(1) + "°C");
-        
-        console.log("Current weather:", weather);
-      } catch (error) {
-        console.error("Failed to fetch weather data:", error);
-      }
-      
-    }
-
     fetchRoute();
   }, [id]);
+
+  const lat = route?.routePlaces[0]?.place.latitude;
+  const lon = route?.routePlaces[0]?.place.longitude;
+
+  const {
+    data: weatherData,
+    loading: weatherLoading,
+    error: weatherError,
+    refresh: refreshWeather,
+  } = useWeather(lat, lon, { precision: 4 });
+
+  const weatherDescription =
+  weatherData?.weather?.[0]?.description ?? (weatherLoading ? "..." : weatherError ? "정보 없음" : "");
+const temperature =
+  weatherData?.main?.temp != null ? `${weatherData.main.temp.toFixed(1)}°C` : "";
 
   return (
     <Container>
