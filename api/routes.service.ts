@@ -43,10 +43,12 @@ export type Routes = {
   totalDistanceKm: number;
   totalDurationMinutes: number;
   estimatedCost: number;
-  thumbnailUrl: string;
+  imageUrl: string;
   popularityScore?: number;
   suggestedStartTimes: string[];
   routePlaces: RoutePlace[];
+  regionNameKo?: string;
+  regionNameEn?: string;
 };
 
 export type RecommendedRoutes = {
@@ -107,20 +109,22 @@ export async function getRouteApi(
 
 // 추천 Route 조회
 export async function getRecommendRouteApi(
-  themes: string[] = ["KDRAMA", "KPOP", "KFOOD", "KFASHION"],
-  region: string,
+  themes?: string[],  //KPOP, KDRAMA, KFASHION, KFOOD
+  region?: string,
   limit: number = 10,
   offset: number = 0
 ): Promise<ApiEnvelope<RecommendedRoutes>> {
-  return fetchJson<ApiEnvelope<RecommendedRoutes>>(`/routes/recommend`, {
+  const params = new URLSearchParams();
+  if (themes && themes.length > 0) params.append("themes", themes.join(","));
+  if (region) params.append("region", region);
+  params.append("limit", String(limit));
+  params.append("offset", String(offset));
+
+  return fetchJson<ApiEnvelope<RecommendedRoutes>>(
+    `/routes/recommend` + `?${params.toString()}`,
+    {
     method: "GET",
     headers: jsonHeaders(await getAccess() || undefined),
-    body: JSON.stringify({
-      themes,
-      region,
-      limit,
-      offset,
-    }),
   });
 }
 
