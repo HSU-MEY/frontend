@@ -87,6 +87,7 @@ export default function RouteOverviewScreen() {
 
     if(route) {
       segments = route.segments;
+      console.log("Using existing segments for route:", id);
     } else {
       const res = await startRoute();
       segments = res.result.segments ?? [];
@@ -162,7 +163,7 @@ export default function RouteOverviewScreen() {
         <ButtonOutline>
           <ButtonText>다음에 할래요</ButtonText>
         </ButtonOutline>
-        <ButtonPrimary onPress={handleStartRoute()}>
+        <ButtonPrimary onPress={handleStartRoute}>
           <ButtonTextPrimary>여행 시작하기</ButtonTextPrimary>
         </ButtonPrimary>
       </ButtonRow>
