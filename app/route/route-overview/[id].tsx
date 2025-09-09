@@ -4,10 +4,12 @@ import Header from '@/components/common/Header';
 import { useUserRoutes } from '@/hooks/useUserRoutes';
 import { useWeather } from '@/hooks/useWeathers';
 import { useRouteRunStore } from '@/store/useRouteRunStore';
+import * as Location from "expo-location";
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect } from 'react';
 import { ImageBackground, StyleSheet } from 'react-native';
 import styled from 'styled-components/native';
+
 
 export default function RouteOverviewScreen() {
   const id = Number(useLocalSearchParams().id);
@@ -62,18 +64,42 @@ export default function RouteOverviewScreen() {
   const temperature =
   weatherData?.main?.temp != null ? `${weatherData.main.temp.toFixed(1)}°C` : "";
 
-  const handleStartRoute = async () => {
-    //루트 시작 API 호출
-    const res = await startRouteApi(id, 1, 1);
-    const segments = res.result.segments ?? [];
-    upsertRoute({ id: String(id), segments, startedAt: Date.now() });
-    setCurrent(String(id));
+  const startRoute = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if(status !== "granted") {
+      throw new Error("위치 권한이 거부되었습니다.");
+    }
 
-    //유저 루트 저장
-    const { save } = useUserRoutes();
-    save(id, new Date(), "09:00").catch((error) => {
-      console.error("Failed to save route:", error);
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.High,
     });
+
+    const lat = location.coords.latitude;
+    const lon = location.coords.longitude;
+
+    const res = await startRouteApi(id, lat, lon);
+    return res;
+  }
+
+  const handleStartRoute = async () => {
+    const route = useRouteRunStore.getState().routes[String(id)];
+    let segments;
+
+    if(route) {
+      segments = route.segments;
+    } else {
+      const res = await startRoute();
+      segments = res.result.segments ?? [];
+
+      upsertRoute({ id: String(id), segments, startedAt: Date.now() });
+      setCurrent(String(id));
+
+      const { save } = useUserRoutes();
+      save(id, new Date(), "09:00").catch((error) => {
+        console.error("Failed to save route:", error);
+      });
+    }
+
     
     //페이지 이동
     router.replace(`/route/route-step/${id}/1`);
