@@ -101,6 +101,23 @@ export interface RouteRun {
   startedAt: number;         // Date.now()
 }
 
+// AI 가이드 루트 생성 응답 타입
+export type CreateRouteByAiGuideResponse = {
+  routeId: number;
+  titleKo: string;
+  titleEn: string;
+  descriptionKo: string;
+  descriptionEn: string;
+  imageUrl: string;
+  totalDurationMinutes: number;
+  totalDistance: number;
+  totalCost: number;
+  themes: string[];
+  routeType: string;
+  regionName: string;
+  order: number[];
+  orderedPlaceIds: number[];
+};
 
 // ===== 내부 유틸 =====
 const jsonHeaders = (token?: string): HeadersInit => {
@@ -181,5 +198,17 @@ export async function startRouteApi(
     `/routes/${routeId}/start?latitude=${lat}&longitude=${lon}`, {
     method: "POST",
     headers: jsonHeaders(await getAccess() || undefined),
+  });
+}
+
+// AI 가이드 루트 생성
+export async function createRouteByAiGuideApi(
+  placeIds: number[]
+): Promise<ApiEnvelope<CreateRouteByAiGuideResponse>> {
+  return fetchJson<ApiEnvelope<CreateRouteByAiGuideResponse>>(
+    `/routes/ai-recommend`, {
+    method: "POST",
+    headers: jsonHeaders(await getAccess() || undefined),
+    body: JSON.stringify({ placeIds }),
   });
 }
