@@ -43,10 +43,12 @@ export type Routes = {
   totalDistanceKm: number;
   totalDurationMinutes: number;
   estimatedCost: number;
-  thumbnailUrl: string;
+  imageUrl: string;
   popularityScore?: number;
   suggestedStartTimes: string[];
   routePlaces: RoutePlace[];
+  regionNameKo?: string;
+  regionNameEn?: string;
 };
 
 export type RecommendedRoutes = {
@@ -66,6 +68,55 @@ export type CreateRouteRequest = {
   totalDistance: number;
   themes: string[];
   routeType: string;
+};
+
+// 루트 시작 타입
+
+export type StepMode = 'WALK' | 'BUS' | 'SUBWAY';
+
+export interface PolyPoint { lat: number; lng: number }
+export interface Step {
+  mode: StepMode;
+  instruction: string;
+  distanceMeters: number;
+  durationSeconds: number;
+  lineName?: string;
+  headsign?: string;
+  numStops?: number;
+  polyline?: PolyPoint[];
+}
+export interface Segment {
+  fromName: string;
+  fromLat: number; fromLng: number;
+  toName: string;   toLat: number; toLng: number;
+  distanceMeters: number;
+  durationSeconds: number;
+  fare: number;
+  summary: string;
+  steps: Step[];
+}
+export interface RouteRun {
+  id: string;                // routeId
+  segments: Segment[];
+  startedAt: number;         // Date.now()
+}
+
+// AI 가이드 루트 생성 응답 타입
+export type CreateRouteByAiGuideResponse = {
+  routeId: number;
+  titleKo: string;
+  titleEn: string;
+  descriptionKo: string;
+  descriptionEn: string;
+  imageUrl: string;
+  totalDurationMinutes: number;
+  totalDistance: number;
+  totalCost: number;
+  themes: string[];
+  routeType: string;
+  regionName: string;
+  order: number[];
+  orderedPlaceIds: number[];
 };
 
 // ===== 내부 유틸 =====
@@ -107,20 +158,22 @@ export async function getRouteApi(
 
 // 추천 Route 조회
 export async function getRecommendRouteApi(
-  themes: string[] = ["KDRAMA", "KPOP", "KFOOD", "KFASHION"],
-  region: string,
+  themes?: string[],  //KPOP, KDRAMA, KFASHION, KFOOD
+  region?: string,
   limit: number = 10,
   offset: number = 0
 ): Promise<ApiEnvelope<RecommendedRoutes>> {
-  return fetchJson<ApiEnvelope<RecommendedRoutes>>(`/routes/recommend`, {
+  const params = new URLSearchParams();
+  if (themes && themes.length > 0) params.append("themes", themes.join(","));
+  if (region) params.append("region", region);
+  params.append("limit", String(limit));
+  params.append("offset", String(offset));
+
+  return fetchJson<ApiEnvelope<RecommendedRoutes>>(
+    `/routes/recommend` + `?${params.toString()}`,
+    {
     method: "GET",
     headers: jsonHeaders(await getAccess() || undefined),
-    body: JSON.stringify({
-      themes,
-      region,
-      limit,
-      offset,
-    }),
   });
 }
 
@@ -132,5 +185,30 @@ export async function createRouteApi(
     method: "POST",
     headers: jsonHeaders(await getAccess() || undefined),
     body: JSON.stringify(routeData),
+  });
+}
+
+// Route 시작
+export async function startRouteApi(
+  routeId: number,
+  lat: number,
+  lon: number
+): Promise<ApiEnvelope<{segments: Segment[]}>> {
+  return fetchJson<ApiEnvelope<{segments: Segment[]}>>(
+    `/routes/${routeId}/start?latitude=${lat}&longitude=${lon}`, {
+    method: "POST",
+    headers: jsonHeaders(await getAccess() || undefined),
+  });
+}
+
+// AI 가이드 루트 생성
+export async function createRouteByAiGuideApi(
+  placeIds: number[]
+): Promise<ApiEnvelope<CreateRouteByAiGuideResponse>> {
+  return fetchJson<ApiEnvelope<CreateRouteByAiGuideResponse>>(
+    `/routes/ai-recommend`, {
+    method: "POST",
+    headers: jsonHeaders(await getAccess() || undefined),
+    body: JSON.stringify({ placeIds }),
   });
 }

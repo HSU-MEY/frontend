@@ -1,17 +1,32 @@
 import Header from '@/components/common/Header';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import KakaoMapWebView from '@/components/KakaoMapWebView';
+import { KAKAO_JS_API_KEY } from '@/src/env';
+import { useRouteRunStore } from '@/store/useRouteRunStore';
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { ScrollView } from 'react-native';
+import { WebView } from 'react-native-webview';
 import styled from 'styled-components/native';
 
 export default function RouteStepScreen() {
   const { id, step = "1" } = useLocalSearchParams<{ id: string; step: string }>();
+  const ref = useRef<WebView>(null);
+  const JS_KEY = KAKAO_JS_API_KEY;
 
   const stepNum = useMemo(() => {
     const num = Number(step);
     return Number.isFinite(num) && num > 0 ? num : 1;
   }, [step]);
+
+  const getSegment = useRouteRunStore((s) => s.getSegment);
+  const segment = getSegment(String(id), stepNum - 1);
+  const segmentCount = useRouteRunStore((s) => s.routes[id]?.segments.length ?? 0);
+
+  if(!segment) {
+    router.replace(`/route/route-overview/${id}`);
+    return null;
+  }
 
   const goNext = () => router.replace(`/route/route-step/${id}/${stepNum + 1}`);
   const goPrev = () => router.replace(`/route/route-step/${id}/${Math.max(1, stepNum - 1)}`);
@@ -20,10 +35,17 @@ export default function RouteStepScreen() {
     <Container>
     <Header title="루트" />
     <ScrollView>
-      <MapImage source={{ uri: 'https://placehold.co/600x400' }} />
+      <KakaoMapWebView 
+          //@ts-ignore - ref
+          ref={ref}
+          jsKey={JS_KEY}
+          center={{ lat: 37.5665, lng: 126.9780 }}
+          level={4}
+          onPress={(lat, lng) => console.log('Map pressed at:', lat, lng)}
+      ></KakaoMapWebView>
 
       <Section>
-        <PlaceName>케이팝 스퀘어 홍대</PlaceName>
+        <PlaceName>{segment.toName}</PlaceName>
         <InfoButton onPress={() => router.push("/place/place-detail")}>
           <InfoText>이 플레이스에 대한 정보</InfoText>
           <Ionicons name="chevron-forward" size={16} color="white" />
@@ -32,15 +54,15 @@ export default function RouteStepScreen() {
         <StatsRow>
           <Stat>
             <StatLabel>총 거리</StatLabel>
-            <StatValue>6.1km</StatValue>
+            <StatValue>{(segment.distanceMeters / 1000).toFixed(1)}km</StatValue>
           </Stat>
           <Stat>
             <StatLabel>예상 시간</StatLabel>
-            <StatValue>24분</StatValue>
+            <StatValue>{(Math.round(segment.durationSeconds / 60))}분</StatValue>
           </Stat>
           <Stat>
             <StatLabel>예상 비용</StatLabel>
-            <StatValue>1,550원</StatValue>
+            <StatValue>{segment.fare.toLocaleString()}원</StatValue>
           </Stat>
         </StatsRow>
       </Section>
@@ -48,55 +70,47 @@ export default function RouteStepScreen() {
       <RouteLine />
 
       <StepsContainer>
-        <Step>
-          <StepIcon>
-            <Ionicons name="walk-outline" size={20} color="#666" />
-          </StepIcon>
-          <StepText>
-            용산역 이동{"\n"}<SubText>3분 · 141m</SubText>
-          </StepText>
-        </Step>
-
-        <Step>
-          <StepIcon>
-            <MaterialIcons name="train" size={20} color="#2680eb" />
-          </StepIcon>
-          <StepText>
-            용산역 <Highlight>경의중앙선</Highlight> 승차{"\n"}<SubText>2역 이동 · 9분</SubText>
-          </StepText>
-        </Step>
-
-        <Step>
-          <StepIcon>
-            <Ionicons name="exit-outline" size={20} color="#666" />
-          </StepIcon>
-          <StepText>홍대입구역 하차</StepText>
-        </Step>
-
-        <Step>
-          <StepIcon>
-            <Ionicons name="walk-outline" size={20} color="#666" />
-          </StepIcon>
-          <StepText>
-            케이팝 스퀘어 홍대 이동{"\n"}<SubText>11분 · 671m</SubText>
-          </StepText>
-        </Step>
-
-        <Step>
-          <StepIcon>
-            <Ionicons name="location-sharp" size={20} color="#2680eb" />
-          </StepIcon>
-          <StepText><Highlight>케이팝 스퀘어 홍대 도착</Highlight></StepText>
-        </Step>
+        {segment.steps.map((s, i) => (
+            <Step key={i}>
+              <StepIcon>
+                {s.mode === 'WALK' && <Ionicons name="walk-outline" size={20} color="#666" />}
+                {s.mode === 'BUS' && <Ionicons name="bus-outline" size={20} color="#2680eb" />}
+                {s.mode === 'SUBWAY' && <Ionicons name="subway-outline" size={20} color="#2680eb" />}
+                {/* s.mode === 'ARRIVE' && <Ionicons name="location-sharp" size={20} color="#2680eb" /> */}
+              </StepIcon>
+              <StepText>
+                {s.instruction}{'\n'}
+                <SubText>
+                  {Math.round(s.distanceMeters)}m · {Math.round(s.durationSeconds / 60)}분
+                  {s.lineName}번, {s.numStops ? `${s.numStops}정거장` : ""}
+                  {s.headsign ? `headsign · ${s.headsign}` : ""}
+                </SubText>
+              </StepText>
+            </Step>
+          ))}
       </StepsContainer>
 
       <BottomButtons>
-        <ActiveButton onPress={() => goPrev() } >
-          <ActiveText>이전 플레이스</ActiveText>
-        </ActiveButton>
-        <ActiveButton onPress={() => goNext() }>
-          <ActiveText>다음 플레이스</ActiveText>
-        </ActiveButton>
+        { stepNum <= 1 ? (
+          <InactiveButton>
+            <InactiveText>이전 플레이스</InactiveText>
+          </InactiveButton>
+        ) : (
+          <ActiveButton onPress={() => goPrev() } >
+            <ActiveText>이전 플레이스</ActiveText>
+          </ActiveButton>
+        )
+        }
+        { stepNum >= segmentCount ? (
+          <ActiveButton onPress={() => router.replace("/")}>
+            <ActiveText>루트 종료</ActiveText>
+          </ActiveButton>
+        ) : (
+          <ActiveButton onPress={() => goNext() } >
+            <ActiveText>다음 플레이스</ActiveText>
+          </ActiveButton>
+        )
+        }
       </BottomButtons>
     </ScrollView>
     </Container>

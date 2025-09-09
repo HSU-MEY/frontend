@@ -1,3 +1,4 @@
+import { createRouteByAiGuideApi } from '@/api/routes.service';
 import Header from '@/components/common/Header';
 import { useSelectedRoute } from '@/contexts/SelectedRouteContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,6 +24,15 @@ export default function EditRouteScreen() {
     const handleDelete = (id: number) => {
         const updated = selectedPlaces.filter((place) => place.id !== id);
         setSelectedPlaces(updated);
+    };
+
+    const handleCreate = async () => {
+        const selectedPlaceId = selectedPlaces.map((place) => place.id);
+        const res = await createRouteByAiGuideApi(selectedPlaceId);
+
+        const createdRouteId = res.result.routeId;
+
+        router.replace(`/route/route-overview/${createdRouteId}`);
     };
 
     const renderItem = ({ item, index }: any) => (
@@ -154,7 +164,7 @@ export default function EditRouteScreen() {
 
             <View style={styles.bottomButtonWrapper}>
                 <TouchableOpacity
-                    onPress={() => router.replace('/route/route-overview')}
+                    onPress={handleCreate}
                 >
                     <LinearGradient
                         colors={['#69E8D9', '#0080FF']}

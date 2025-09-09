@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Image,
   ImageBackground,
@@ -11,48 +11,24 @@ import {
   View,
 } from 'react-native';
 
-const dummyData = [
-  {
-    id: '1',
-    title: 'K-POP 루트: idol',
-    location: '서울시 홍대',
-    description: '아이돌 본사 방문하고 성지순례하기',
-    image: require('../../assets/images/sample-stage.png'),
-  },
-  {
-    id: '2',
-    title: 'K-Beauty 루트: Skincare',
-    location: '서울시 강남',
-    description: '피부과 케어 받고 화장품 쇼핑하기',
-    image: require('../../assets/images/sample-beauty.png'),
-  },
-  {
-    id: '3',
-    title: 'K-Beauty 루트: Makeup',
-    location: '서울시 강남',
-    description: 'K-아이돌 메이크업 받기',
-    image: require('../../assets/images/sample-beauty2.png'),
-  },
-  {
-    id: '4',
-    title: 'K-Drama 루트: 촬영지',
-    location: '서울시 마포',
-    description: '드라마 명장면 따라가기',
-    image: require('../../assets/images/sample-stage2.png'),
-  },
-  {
-    id: '5',
-    title: 'K-Fashion 루트',
-    location: '서울 성수동',
-    description: '국내 로컬 디자이너 브랜드 체험',
-    image: require('../../assets/images/sample-beauty.png'),
-  },
-];
+import { getRecommendRouteApi, Routes } from '@/api/routes.service';
 
 export default function AIGuideRoutes() {
   const router = useRouter();
 
+  const [routes, setRoutes] = React.useState<Routes[]>([]);
+
+  useEffect(() => {
+    getRecommendRouteApi(undefined, undefined, 3, 0).then((response) => {
+      if(response.isSuccess) {
+        setRoutes(response.result.routes);
+      }
+    });
+  }, []);
+
   return (
+    <>
+    { routes.length != 0 &&
     <View style={styles.container}>
       {/* 섹션 제목 */}
       <View style={styles.headerRow}>
@@ -65,15 +41,15 @@ export default function AIGuideRoutes() {
 
       {/* 가로 스크롤 카드 */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 12 }}>
-        {dummyData.map((item) => (
+        {routes.map((item) => (
           <TouchableOpacity
-            key={item.id}
+            key={item.routeId}
             style={styles.cardContainer}
             onPress={() => router.push(`/route/route-overview/1`)}
           >
 
             <ImageBackground
-              source={item.image}
+              source={item.imageUrl ? { uri: item.imageUrl } : require('@/assets/images/placeholder-place.png')}
               style={styles.cardImage}
               imageStyle={styles.imageStyle}
             >
@@ -84,7 +60,7 @@ export default function AIGuideRoutes() {
               >
                 <View style={styles.topTextContainer}>
                   <Text style={styles.cardTitle}>{item.title}</Text>
-                  <Text style={styles.cardLocation}>{item.location}</Text>
+                  <Text style={styles.cardLocation}>{item.regionNameKo}</Text>
                 </View>
 
                 <View style={styles.bottomTextContainer}>
@@ -97,6 +73,8 @@ export default function AIGuideRoutes() {
         ))}
       </ScrollView>
     </View>
+    }
+    </>
   );
 }
 

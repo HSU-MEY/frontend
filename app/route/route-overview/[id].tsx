@@ -1,11 +1,15 @@
 // app/route/route
-import { getRouteApi, Routes } from '@/api/routes.service';
-import { fetchWeather } from '@/api/weather.service';
+import { getRouteApi, Routes, startRouteApi } from '@/api/routes.service';
 import Header from '@/components/common/Header';
+import { useUserRoutes } from '@/hooks/useUserRoutes';
+import { useWeather } from '@/hooks/useWeathers';
+import { useRouteRunStore } from '@/store/useRouteRunStore';
+import * as Location from "expo-location";
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect } from 'react';
 import { ImageBackground, StyleSheet } from 'react-native';
 import styled from 'styled-components/native';
+
 
 export default function RouteOverviewScreen() {
   const id = Number(useLocalSearchParams().id);
@@ -13,8 +17,11 @@ export default function RouteOverviewScreen() {
   const [distance, setDistance] = React.useState<string>("");
   const [estimatedTime, setEstimatedTime] = React.useState<string>("");
   const [estimatedCost, setEstimatedCost] = React.useState<string>("");
-  const [weatherDescription, setWeatherDescription] = React.useState<string>("");
-  const [temperature, setTemperature] = React.useState<string>("");
+  const upsertRoute = useRouteRunStore((s) => s.upsertRoute);
+  const setCurrent = useRouteRunStore((s) => s.setCurrent);
+  // const [weatherDescription, setWeatherDescription] = React.useState<string>("");
+  // const [temperature, setTemperature] = React.useState<string>("");
+
 
   useEffect(() => {
     async function fetchRoute() {
@@ -35,27 +42,69 @@ export default function RouteOverviewScreen() {
         setEstimatedCost(
           response_f.estimatedCost.toString() + "원"
         );
-        fetchCurrentWeather(response_f.routePlaces[0].place.latitude, response_f.routePlaces[0].place.longitude);
       }
       //setRoute(response.result);
     }
 
-    async function fetchCurrentWeather(lat: number, lon: number) {
-      try {
-        const weather = await fetchWeather(lat, lon);
-
-        setWeatherDescription(weather.weather[0].description);
-        setTemperature(weather.main.temp.toFixed(1) + "°C");
-        
-        console.log("Current weather:", weather);
-      } catch (error) {
-        console.error("Failed to fetch weather data:", error);
-      }
-      
-    }
-
     fetchRoute();
   }, [id]);
+
+  const lat = route?.routePlaces[0]?.place.latitude;
+  const lon = route?.routePlaces[0]?.place.longitude;
+
+  const {
+    data: weatherData,
+    loading: weatherLoading,
+    error: weatherError,
+    refresh: refreshWeather,
+  } = useWeather(lat, lon, { precision: 4 });
+
+  const weatherDescription =
+  weatherData?.weather?.[0]?.description ?? (weatherLoading ? "..." : weatherError ? "정보 없음" : "");
+  const temperature =
+  weatherData?.main?.temp != null ? `${weatherData.main.temp.toFixed(1)}°C` : "";
+
+  const startRoute = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if(status !== "granted") {
+      throw new Error("위치 권한이 거부되었습니다.");
+    }
+
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.High,
+    });
+
+    const lat = location.coords.latitude;
+    const lon = location.coords.longitude;
+
+    const res = await startRouteApi(id, lat, lon);
+    return res;
+  }
+
+  const handleStartRoute = async () => {
+    const route = useRouteRunStore.getState().routes[String(id)];
+    let segments;
+
+    if(route) {
+      segments = route.segments;
+      console.log("Using existing segments for route:", id);
+    } else {
+      const res = await startRoute();
+      segments = res.result.segments ?? [];
+
+      upsertRoute({ id: String(id), segments, startedAt: Date.now() });
+      setCurrent(String(id));
+
+      const { save } = useUserRoutes();
+      save(id, new Date(), "09:00").catch((error) => {
+        console.error("Failed to save route:", error);
+      });
+    }
+
+    
+    //페이지 이동
+    router.replace(`/route/route-step/${id}/1`);
+  }
 
   return (
     <Container>
@@ -114,7 +163,7 @@ export default function RouteOverviewScreen() {
         <ButtonOutline>
           <ButtonText>다음에 할래요</ButtonText>
         </ButtonOutline>
-        <ButtonPrimary onPress={() => router.push(`/route/route-step/${id}/1`)}>
+        <ButtonPrimary onPress={handleStartRoute}>
           <ButtonTextPrimary>여행 시작하기</ButtonTextPrimary>
         </ButtonPrimary>
       </ButtonRow>

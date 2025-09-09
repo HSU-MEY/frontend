@@ -84,6 +84,8 @@ export default function MyPage() {
         setLoading(true);
         setError(null);
 
+        await refetchAll();
+
         const token = await AsyncStorage.getItem('accessToken');
         if (!token) {
           if (mounted) setProfile(null);
@@ -187,6 +189,7 @@ export default function MyPage() {
       {profile ?
         (
           <>
+            { inProgressRoutes.length > 0 &&
             <Section>
               <SectionHeader
                 onPress={() => router.push('/routehistory/ongoing')}
@@ -216,6 +219,8 @@ export default function MyPage() {
                 }
               </Row>
             </Section>
+            }
+            { upcomingRoutes.length > 0 &&
             <Section>
               <SectionHeader
                 onPress={() => router.push('/routehistory/pending')}
@@ -242,6 +247,8 @@ export default function MyPage() {
                 ))}
               </Row>
             </Section>
+            }
+            { completedRoutes.length > 0 &&
             <Section>
               <SectionHeader
                 onPress={() => router.push('/routehistory/completed')}
@@ -267,6 +274,7 @@ export default function MyPage() {
                 ))}
               </Row>
             </Section>
+            }
             <Section>
               <SectionHeader
                 onPress={() => router.push('/place/place-favorite')}
@@ -313,10 +321,6 @@ export default function MyPage() {
         <SettingItem>
           <SettingText>언어 설정</SettingText>
         </SettingItem>
-        <SettingItem onPress={handleLogout}>
-              <SettingText>로그아웃</SettingText>
-          </SettingItem>
-
         {profile && (
           <>
             <SettingItem onPress={handleLogout}>
