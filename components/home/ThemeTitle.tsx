@@ -1,7 +1,10 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 export default function ThemeTitle() {
+    const { t } = useTranslation();
+
     return (
         <View style={styles.container}>
             <View style={styles.headerRow}>
@@ -9,7 +12,7 @@ export default function ThemeTitle() {
                     source={require('../../assets/images/icons/theme.png')}
                     style={styles.icon}
                 />
-                <Text style={styles.title}>테마별 탐색</Text>
+                <Text style={styles.title}>{t('theme.title')}</Text>
             </View>
         </View>
     );

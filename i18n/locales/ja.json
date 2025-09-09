@@ -1,0 +1,10 @@
+{
+    "home": {
+        "ongoingRouteTitle": "進行中のルートがあります！",
+        "language": "言語",
+        "languageButton": "言語を変更"
+    },
+    "theme": {
+        "title": "テーマ別に探す"
+    }
+}

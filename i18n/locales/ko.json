@@ -1,0 +1,10 @@
+{
+    "home": {
+        "ongoingRouteTitle": "현재 진행중인 루트가 있어요!",
+        "language": "언어",
+        "languageButton": "언어 바꾸기"
+    },
+    "theme": {
+        "title": "테마별 탐색"
+    }
+}

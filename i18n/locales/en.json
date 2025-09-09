@@ -1,0 +1,10 @@
+{
+    "home": {
+        "ongoingRouteTitle": "You have an ongoing route!",
+        "language": "Language",
+        "languageButton": "Change Language"
+    },
+    "theme": {
+        "title": "Explore by Theme"
+    }
+}

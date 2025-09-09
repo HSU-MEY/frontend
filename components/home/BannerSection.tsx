@@ -17,6 +17,7 @@ export default function BannerSection() {
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 20,
     marginBottom: 20,
     alignItems: 'center', // 가운데 정렬
   },

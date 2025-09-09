@@ -1,0 +1,10 @@
+{
+    "home": {
+        "ongoingRouteTitle": "您有进行中的路线！",
+        "language": "语言",
+        "languageButton": "更改语言"
+    },
+    "theme": {
+        "title": "按主题探索"
+    }
+}
