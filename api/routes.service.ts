@@ -70,6 +70,38 @@ export type CreateRouteRequest = {
   routeType: string;
 };
 
+// 루트 시작 타입
+
+export type StepMode = 'WALK' | 'BUS' | 'SUBWAY';
+
+export interface PolyPoint { lat: number; lng: number }
+export interface Step {
+  mode: StepMode;
+  instruction: string;
+  distanceMeters: number;
+  durationSeconds: number;
+  lineName?: string;
+  headsign?: string;
+  numStops?: number;
+  polyline?: PolyPoint[];
+}
+export interface Segment {
+  fromName: string;
+  fromLat: number; fromLng: number;
+  toName: string;   toLat: number; toLng: number;
+  distanceMeters: number;
+  durationSeconds: number;
+  fare: number;
+  summary: string;
+  steps: Step[];
+}
+export interface RouteRun {
+  id: string;                // routeId
+  segments: Segment[];
+  startedAt: number;         // Date.now()
+}
+
+
 // ===== 내부 유틸 =====
 const jsonHeaders = (token?: string): HeadersInit => {
   const h: Record<string, string> = { "Content-Type": "application/json" };
@@ -136,5 +168,18 @@ export async function createRouteApi(
     method: "POST",
     headers: jsonHeaders(await getAccess() || undefined),
     body: JSON.stringify(routeData),
+  });
+}
+
+// Route 시작
+export async function startRouteApi(
+  routeId: number,
+  lat: number,
+  lon: number
+): Promise<ApiEnvelope<{segments: Segment[]}>> {
+  return fetchJson<ApiEnvelope<{segments: Segment[]}>>(
+    `/routes/${routeId}/start?latitude=${lat}&longitude=${lon}`, {
+    method: "POST",
+    headers: jsonHeaders(await getAccess() || undefined),
   });
 }
