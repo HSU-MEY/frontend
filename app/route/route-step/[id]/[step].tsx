@@ -1,3 +1,4 @@
+import { searchPlaces } from '@/api/places.service';
 import Header from '@/components/common/Header';
 import KakaoMapWebView from '@/components/KakaoMapWebView';
 import { KAKAO_JS_API_KEY } from '@/src/env';
@@ -5,7 +6,7 @@ import { useRouteRunStore } from '@/store/useRouteRunStore';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import styled from 'styled-components/native';
 
@@ -31,22 +32,37 @@ export default function RouteStepScreen() {
   const goNext = () => router.replace(`/route/route-step/${id}/${stepNum + 1}`);
   const goPrev = () => router.replace(`/route/route-step/${id}/${Math.max(1, stepNum - 1)}`);
 
+
+  const handlePlaceButtonPress = async () => {
+    const places = await searchPlaces(segment.toName, 1);
+    const placeId = places[0]?.id;
+    if (placeId) {
+      router.push({
+        pathname: '/place/place-detail',
+        params: { id: String(placeId) },
+      })
+    } else {
+      alert("플레이스 정보를 찾을 수 없습니다.");
+    }
+  };
+  
   return (
     <Container>
     <Header title="루트" />
-    <ScrollView>
+    <View style={{ width: '100%', height: 300, backgroundColor: 'lightgrey' }}>
       <KakaoMapWebView 
           //@ts-ignore - ref
           ref={ref}
           jsKey={JS_KEY}
-          center={{ lat: 37.5665, lng: 126.9780 }}
+          center={{ lat: segment.fromLat, lng: segment.fromLng }}
           level={4}
-          onPress={(lat, lng) => console.log('Map pressed at:', lat, lng)}
+          //onPress={(lat, lng) => console.log('Map pressed at:', lat, lng)}
       ></KakaoMapWebView>
-
+    </View>
+    <ScrollView>
       <Section>
         <PlaceName>{segment.toName}</PlaceName>
-        <InfoButton onPress={() => router.push("/place/place-detail")}>
+        <InfoButton onPress={handlePlaceButtonPress}>
           <InfoText>이 플레이스에 대한 정보</InfoText>
           <Ionicons name="chevron-forward" size={16} color="white" />
         </InfoButton>
@@ -118,6 +134,7 @@ export default function RouteStepScreen() {
 }
 const Container = styled.View`
   flex: 1;
+  background-color: white;
 `;
 
 const MapImage = styled.Image`
