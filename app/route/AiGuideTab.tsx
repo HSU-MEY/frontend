@@ -228,7 +228,7 @@ export default function AiGuideTab() {
         const lat = Number(latitude);
         const lng = Number(longitude);
         if (Number.isNaN(lat) || Number.isNaN(lng)) {
-            Alert.alert(t('aiGuide.notice'), t('aiGuide.noCoords')); // ★
+            Alert.alert(t('aiGuide.notice'), t('aiGuide.noCoords'));
             return;
         }
         const [finalLat, finalLng] = normalizeCoord(lat, lng);
@@ -240,7 +240,7 @@ export default function AiGuideTab() {
         return (
             <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
                 <ActivityIndicator />
-                <Text style={{ marginTop: 8 }}>{t('aiGuide.loading')}{/* ★ */}</Text>
+                <Text style={{ marginTop: 8 }}>{t('aiGuide.loading')}</Text>
             </View>
         );
     }
@@ -345,7 +345,7 @@ export default function AiGuideTab() {
                     style={styles.button}
                     onPress={() => {
                         if (selectedPlaces.length === 0) {
-                            Alert.alert(t('aiGuide.notice'), t('aiGuide.selectAtLeastOne')); // ★
+                            Alert.alert(t('aiGuide.notice'), t('aiGuide.selectAtLeastOne'));
                             return;
                         }
                         setGlobalSelectedPlaces(selectedPlaces);
@@ -401,18 +401,19 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 0,
         paddingHorizontal: 16,
-        paddingVertical: 24,
+        paddingVertical: 20,
         marginBottom: 0,
         alignItems: 'center',
         borderBottomWidth: 1,
         borderBottomColor: '#d9d9d9'
     },
     placeImage: {
-        width: 120,
-        height: 70,
+        width: 80,
+        height: 80,
         borderRadius: 5,
         resizeMode: 'cover',
-        marginRight: 12,
+        marginRight: 20,
+        backgroundColor: 'black'
     },
     info: { flex: 1 },
     title: {
@@ -432,10 +433,15 @@ const styles = StyleSheet.create({
         color: '#555',
     },
     tag: {
-        fontSize: 12,
-        fontFamily: 'Pretendard-Medium',
+        fontSize: 10,
+        fontFamily: 'Pretendard-Bold',
         color: '#1C5BD8',
-        marginTop: 4,
+        marginTop: 10,
+        backgroundColor: '#ebf1ffff',
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: 4,
+        alignSelf: 'flex-start',
     },
     plusButton: {
         width: 36,

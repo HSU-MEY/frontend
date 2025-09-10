@@ -94,7 +94,7 @@
         "sun": "일"
     },
     "place": {
-        "title": "플레이스",
+        "title": "장소",
         "loading": "불러오는 중…",
         "loadFail": "장소 정보를 불러오지 못했어요.",
         "addressUnknown": "주소 정보 없음",
