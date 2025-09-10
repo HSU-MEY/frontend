@@ -2,9 +2,95 @@
     "home": {
         "ongoingRouteTitle": "進行中のルートがあります！",
         "language": "言語",
-        "languageButton": "言語を変更"
+        "languageButton": "言語を変更",
+        "recommendplace": "K-Route でみんなに人気の場所です。"
     },
     "theme": {
         "title": "テーマ別に探す"
+    },
+    "route": {
+        "title": "ルート",
+        "whichCity": "どの地域に行きますか？",
+        "whichDate": "どの日に行きますか？",
+        "createRoute": "ルートを作成",
+        "cities": [
+            "ソウル",
+            "インチョン",
+            "スウォン",
+            "プサン",
+            "キョンジュ",
+            "ウルサン",
+            "ヨス",
+            "テジョン",
+            "チェジュ"
+        ]
+    },
+    "calendar": {
+        "today": "今日",
+        "monthNames": [
+            "1月",
+            "2月",
+            "3月",
+            "4月",
+            "5月",
+            "6月",
+            "7月",
+            "8月",
+            "9月",
+            "10月",
+            "11月",
+            "12月"
+        ],
+        "dayNames": [
+            "日曜日",
+            "月曜日",
+            "火曜日",
+            "水曜日",
+            "木曜日",
+            "金曜日",
+            "土曜日"
+        ],
+        "dayNamesShort": [
+            "日",
+            "月",
+            "火",
+            "水",
+            "木",
+            "金",
+            "土"
+        ]
+    },
+    "routeStart": {
+        "tabs": [
+            "おすすめルート",
+            "AIガイドおすすめルート"
+        ]
+    },
+    "aiGuide": {
+        "fetchPopularFailed": "人気スポットを読み込めませんでした。",
+        "searchFailed": "検索に失敗しました。",
+        "searching": "検索中…",
+        "noResults": "検索結果がありません。",
+        "resultsCount": "検索結果（{{count}}件）",
+        "recommendedByKRoute": "K-Route のおすすめスポット",
+        "searchTag": "検索結果",
+        "hoursUnknown": "営業時間の情報はありません",
+        "placeLabelDefault": "名所",
+        "addressUnknown": "住所情報なし",
+        "searchPlaceholder": "行きたい場所を検索してください！",
+        "loading": "読み込み中…",
+        "retry": "再試行",
+        "notice": "お知らせ",
+        "noCoords": "この場所には座標情報がありません。",
+        "selectAtLeastOne": "少なくとも1つの場所を選択してください。"
+    },
+    "daysShort": {
+        "mon": "月",
+        "tue": "火",
+        "wed": "水",
+        "thu": "木",
+        "fri": "金",
+        "sat": "土",
+        "sun": "日"
     }
 }

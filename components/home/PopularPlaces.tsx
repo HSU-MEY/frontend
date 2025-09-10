@@ -1,8 +1,11 @@
 import { router } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function PopularPlaces() {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
@@ -10,7 +13,7 @@ export default function PopularPlaces() {
           source={require('../../assets/images/icons/like.png')}
           style={styles.icon}
         />
-        <Text style={styles.title}>K-Route에서 다들 만족하는 장소예요</Text>
+        <Text style={styles.title}>{t('home.recommendplace')}</Text>
       </View>
 
       {/* 카드 리스트 */}
