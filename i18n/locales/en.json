@@ -92,5 +92,16 @@
         "fri": "Fri",
         "sat": "Sat",
         "sun": "Sun"
+    },
+    "place": {
+        "title": "Place",
+        "loading": "Loading…",
+        "loadFail": "Failed to load place details.",
+        "addressUnknown": "Address unavailable",
+        "hoursUnknown": "Opening hours unavailable",
+        "costUnknown": "Cost info unavailable",
+        "closed": "Closed",
+        "relatedPosts": "Related Posts",
+        "nearby": "Nearby Spots"
     }
 }

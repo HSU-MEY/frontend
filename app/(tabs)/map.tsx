@@ -172,10 +172,12 @@ export default function MapScreen() {
         />
       </View>
 
-      <ThemeTabs
-        selected={selectedCategory}
-        onSelect={setSelectedCategory}
-      />
+      <View style={{marginTop: 20}}>
+        <ThemeTabs
+          selected={selectedCategory}
+          onSelect={setSelectedCategory}
+        />
+      </View>
 
       {/* 기존 스타일 유지, props만 추가 */}
       <ListContainer
