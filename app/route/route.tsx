@@ -1,6 +1,6 @@
 import Header from '@/components/common/Header';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
@@ -30,21 +30,31 @@ export default function RouteScreen() {
   const [selectedDate, setSelectedDate] = useState('');
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [calReady, setCalReady] = useState(false);
+  const locale = useMemo(() => i18n.language.split('-')[0], [i18n.language]);
 
   // 도시 리스트를 i18n에서 배열로 받기
   const cities = useMemo(() => t('route.cities', { returnObjects: true }) as string[], [i18n.language, t]);
 
-  // 캘린더 Locale을 현재 언어에 맞게 반영
-  useEffect(() => {
-    LocaleConfig.locales[i18n.language] = {
-      monthNames: t('calendar.monthNames', { returnObjects: true }) as string[],
-      monthNamesShort: t('calendar.monthNames', { returnObjects: true }) as string[],
-      dayNames: t('calendar.dayNames', { returnObjects: true }) as string[],
-      dayNamesShort: t('calendar.dayNamesShort', { returnObjects: true }) as string[],
-      today: t('calendar.today')
+  // i18n 변경될 때 LocaleConfig 채우기
+  useLayoutEffect(() => {
+    setCalReady(false);
+
+    const monthNames = t('calendar.monthNames', { returnObjects: true });
+    const dayNames = t('calendar.dayNames', { returnObjects: true });
+    const dayNamesShort = t('calendar.dayNamesShort', { returnObjects: true });
+
+    LocaleConfig.locales[locale] = {
+      monthNames: Array.isArray(monthNames) ? (monthNames as string[]) : [],
+      monthNamesShort: Array.isArray(monthNames) ? (monthNames as string[]) : [],
+      dayNames: Array.isArray(dayNames) ? (dayNames as string[]) : [],
+      dayNamesShort: Array.isArray(dayNamesShort) ? (dayNamesShort as string[]) : [],
+      today: t('calendar.today'),
     };
-    LocaleConfig.defaultLocale = i18n.language;
-  }, [i18n.language, t]);
+    LocaleConfig.defaultLocale = locale;
+
+    setCalReady(true);
+  }, [locale, t]);
 
   return (
     <View style={styles.container}>
@@ -74,29 +84,30 @@ export default function RouteScreen() {
 
         {/* 날짜 선택 */}
         <Text style={[styles.question, { marginTop: 28 }]}>{t('route.whichDate')}</Text>
-        <Calendar
-          onDayPress={(day) => setSelectedDate(day.dateString)}
-          markedDates={{
-            [selectedDate]: { selected: true, selectedColor: '#1A5CFF' },
-          }}
-          theme={{
-            selectedDayBackgroundColor: '#1A5CFF',
-            todayTextColor: '#1A5CFF',
-            textDayFontFamily: 'Pretendard-Medium',
-            textMonthFontFamily: 'Pretendard-Bold',
-            textDayHeaderFontFamily: 'Pretendard-Medium',
-          }}
-          renderHeader={(date) => {
-            // 헤더(YYYY/MM)도 언어별 포맷으로 보여주고 싶다면 Intl 사용
-            const year = date.getFullYear();
-            const month = date.getMonth() + 1;
-            return (
-              <Text style={styles.calendarHeader}>
-                {i18n.language === 'ko' ? `${year}년 ${month}월` : `${year}/${month.toString().padStart(2, '0')}`}
-              </Text>
-            );
-          }}
-        />
+
+        {calReady && (
+          <Calendar
+            key={`cal-${locale}`}   // 언어가 바뀌면 리마운트
+            onDayPress={(day) => setSelectedDate(day.dateString)}
+            markedDates={{ [selectedDate]: { selected: true, selectedColor: '#1A5CFF' } }}
+            theme={{
+              selectedDayBackgroundColor: '#1A5CFF',
+              todayTextColor: '#1A5CFF',
+              textDayFontFamily: 'Pretendard-Medium',
+              textMonthFontFamily: 'Pretendard-Bold',
+              textDayHeaderFontFamily: 'Pretendard-Medium',
+            }}
+            renderHeader={(date) => {
+              const y = date.getFullYear();
+              const m = date.getMonth() + 1;
+              return (
+                <Text style={styles.calendarHeader}>
+                  {locale === 'ko' ? `${y}년 ${m}월` : `${y}/${m.toString().padStart(2, '0')}`}
+                </Text>
+              );
+            }}
+          />
+        )}
       </ScrollView>
 
       {/* 항상 하단에 고정된 버튼 */}
