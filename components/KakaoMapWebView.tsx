@@ -26,6 +26,8 @@ export type KakaoMapHandle = {
   clearMarkers: () => void;
   /** (확장용) 모든 폴리라인 제거 */
   clearPolylines: () => void;
+  /** (확장용) 부드럽게 중심 이동 */
+  panTo: (lat: number, lng: number) => void;
 };
 
 const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebView(
@@ -130,13 +132,13 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
                 var color = '#FF0000'; // default color
                 switch(step.mode) {
                   case 'WALK': 
-                    color = '#a5a5a5ff'; 
+                    color = '#888888'; 
                     break;
                   case 'BUS': 
                     color = '#0000FF'; // default blue
                     if (step.lineName) {
-                      if (step.lineName.includes('마을') || step.lineName.includes('지선')) color = '#008000';
-                      else if (step.lineName.includes('시내') || step.lineName.includes('간선')) color = '#0000FF';
+                      if (step.lineName.includes('마을') || step.lineName.includes('지선')) color = '#008000';    
+                      else if (step.lineName.includes('시내') || step.lineName.includes('간선')) color = '#0000FF';        
                     }
                     break;
                   case 'SUBWAY': 
@@ -181,6 +183,10 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
           clearPolylines: function(){
             window._polylines.forEach(p => p.setMap(null));
             window._polylines = [];
+          },
+          panTo: function(lat, lng) {
+            var moveLatLon = new kakao.maps.LatLng(lat, lng);
+            _kmap.panTo(moveLatLon);
           }
         };
 
@@ -221,6 +227,9 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
     clearPolylines() {
       call(`window.__api && window.__api.clearPolylines()`);
     },
+    panTo(lat, lng) {
+      call(`window.__api && window.__api.panTo(${lat}, ${lng})`);
+    }
   }));
 
   const onMessage = (e: WebViewMessageEvent) => {

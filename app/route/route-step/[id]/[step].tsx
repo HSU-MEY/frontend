@@ -1,18 +1,17 @@
 import { searchPlaces } from '@/api/places.service';
 import Header from '@/components/common/Header';
-import KakaoMapWebView from '@/components/KakaoMapWebView';
+import KakaoMapWebView, { KakaoMapHandle } from '@/components/KakaoMapWebView';
 import { KAKAO_JS_API_KEY } from '@/src/env';
 import { useRouteRunStore } from '@/store/useRouteRunStore';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef } from 'react';
-import { ScrollView, View } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { ScrollView, TouchableOpacity, View } from 'react-native';
 import styled from 'styled-components/native';
 
 export default function RouteStepScreen() {
   const { id, step = "1" } = useLocalSearchParams<{ id: string; step: string }>();
-  const ref = useRef<WebView>(null);
+  const mapRef = useRef<KakaoMapHandle>(null);
   const JS_KEY = KAKAO_JS_API_KEY;
 
   const stepNum = useMemo(() => {
@@ -26,12 +25,16 @@ export default function RouteStepScreen() {
   
 
   if(!segment) {
-    router.replace(`/route/route-overview/${id}`);
+    router.replace(`/route/route-step/${id}`);
     return null;
   }
 
   const goNext = () => router.replace(`/route/route-step/${id}/${stepNum + 1}`);
   const goPrev = () => router.replace(`/route/route-step/${id}/${Math.max(1, stepNum - 1)}`);
+
+  const handlePanTo = (lat: number, lng: number) => {
+    mapRef.current?.panTo(lat, lng);
+  }
 
   const handlePlaceButtonPress = async () => {
     const places = await searchPlaces(segment.toName, 1);
@@ -51,8 +54,7 @@ export default function RouteStepScreen() {
     <Header title="루트" />
     <View style={{ width: '100%', height: 300, backgroundColor: 'lightgrey' }}>
       <KakaoMapWebView 
-          //@ts-ignore - ref
-          ref={ref}
+          ref={mapRef}
           jsKey={JS_KEY}
           center={{ lat: segment.fromLat, lng: segment.fromLng }}
           level={4}
@@ -88,7 +90,8 @@ export default function RouteStepScreen() {
 
       <StepsContainer>
         {segment.steps.map((s, i) => (
-            <Step key={i}>
+          <TouchableOpacity key={i} onPress={() => s.polyline && s.polyline.length > 0 && handlePanTo(s.polyline[0].lat, s.polyline[0].lng)}>
+            <Step>
               <StepIcon>
                 {s.mode === 'WALK' && <Ionicons name="walk-outline" size={20} color="#666" />}
                 {s.mode === 'BUS' && <Ionicons name="bus-outline" size={20} color="#2680eb" />}
@@ -104,6 +107,7 @@ export default function RouteStepScreen() {
                 </SubText>
               </StepText>
             </Step>
+            </TouchableOpacity>
           ))}
       </StepsContainer>
 
