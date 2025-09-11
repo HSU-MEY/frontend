@@ -103,15 +103,18 @@ export default function MapScreen() {
   useEffect(() => {
     if (currentLocation && mapRef.current && isMapReady) {
       const { latitude, longitude } = currentLocation;
-      mapRef.current.setCurrentLocationMarker(latitude, longitude, 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png');
+      mapRef.current.setCurrentLocationMarker(latitude, longitude, 'http://localhost:8081/assets/images/icons/current-location.png');
 
+      
       if (isInitialMapLoad.current) {
         mapRef.current.setCenter(latitude, longitude, 4);
         isInitialMapLoad.current = false;
+      } else {
+        mapRef.current.setCenter(latitude, longitude); // Update center without full reload
       }
     }
   }, [currentLocation, isMapReady]);
-
+  
 
   const mapBackendToUI = (b: PopularPlaceDTO, idx: number): UIPlace => {
     const title = b.nameKo || b.nameEn || `장소 #${b.id}`;
@@ -191,11 +194,12 @@ export default function MapScreen() {
         <KakaoMapWebView
           ref={mapRef}
           jsKey={JS_KEY}
-          center={ currentLocation ? { lat: currentLocation.latitude, lng: currentLocation.longitude } : undefined }
+          center={ undefined }
           level={4}
           onReady={() => setIsMapReady(true)}
         />
       </View>
+
 
       <ThemeTabs
         selected={selectedCategory}
