@@ -108,7 +108,6 @@ export default function AiGuideScreen() {
   useEffect(() => {
     const saveMessages = async () => {
       try {
-        // Don't save while loading or if it's the initial state
         if (messages.length === 0 || messages[messages.length - 1].isLoading) {
           return;
         }
@@ -119,10 +118,17 @@ export default function AiGuideScreen() {
       }
     };
 
-    if (isInitialized.current) { // Only save after initial load
+    if (isInitialized.current) {
         saveMessages();
     }
   }, [messages, isInitialized]);
+
+  // Auto-scroll effect
+  useEffect(() => {
+    if (flatListRef.current && messages.length > 0) {
+      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+    }
+  }, [messages]);
 
 
   const handleSend = useCallback(async () => {
@@ -208,7 +214,7 @@ export default function AiGuideScreen() {
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"} 
         style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 30} // Adjust this value based on your header height
+        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 30}
       >
         <FlatList
           ref={flatListRef}
@@ -216,8 +222,6 @@ export default function AiGuideScreen() {
           keyExtractor={(item) => item.id}
           renderItem={renderMessageItem}
           contentContainerStyle={{ padding: 16 }}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-          onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
         />
 
         <InputArea>
