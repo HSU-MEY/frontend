@@ -23,6 +23,7 @@ export default function RouteStepScreen() {
   const getSegment = useRouteRunStore((s) => s.getSegment);
   const segment = getSegment(String(id), stepNum - 1);
   const segmentCount = useRouteRunStore((s) => s.routes[id]?.segments.length ?? 0);
+  
 
   if(!segment) {
     router.replace(`/route/route-overview/${id}`);
@@ -31,7 +32,6 @@ export default function RouteStepScreen() {
 
   const goNext = () => router.replace(`/route/route-step/${id}/${stepNum + 1}`);
   const goPrev = () => router.replace(`/route/route-step/${id}/${Math.max(1, stepNum - 1)}`);
-
 
   const handlePlaceButtonPress = async () => {
     const places = await searchPlaces(segment.toName, 1);
@@ -56,6 +56,7 @@ export default function RouteStepScreen() {
           jsKey={JS_KEY}
           center={{ lat: segment.fromLat, lng: segment.fromLng }}
           level={4}
+          segments={[segment]}
           //onPress={(lat, lng) => console.log('Map pressed at:', lat, lng)}
       ></KakaoMapWebView>
     </View>
@@ -98,8 +99,8 @@ export default function RouteStepScreen() {
                 {s.instruction}{'\n'}
                 <SubText>
                   {Math.round(s.distanceMeters)}m · {Math.round(s.durationSeconds / 60)}분
-                  {s.lineName}번, {s.numStops ? `${s.numStops}정거장` : ""}
-                  {s.headsign ? `headsign · ${s.headsign}` : ""}
+                  {/*s.lineName}번, {s.numStops ? `${s.numStops}정거장` : ""*/}
+                  {/*s.headsign ? `headsign · ${s.headsign}` : ""*/}
                 </SubText>
               </StepText>
             </Step>

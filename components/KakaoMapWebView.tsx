@@ -1,5 +1,6 @@
 // components/KakaoMapWebView.tsx
-import React, { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
+import { Segment } from '@/api/routes.service';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { ViewStyle } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 
@@ -8,6 +9,7 @@ type Props = {
   jsKey: string;
   center?: { lat: number; lng: number };
   level?: number;
+  segments?: Segment[];
   onReady?: () => void;
   onPress?: (lat: number, lng: number) => void;
   onDragChange?: (active: boolean) => void;
@@ -22,13 +24,21 @@ export type KakaoMapHandle = {
   focusTo: (lat: number, lng: number, level?: number) => void;
   /** (확장용) 모든 마커 제거 */
   clearMarkers: () => void;
+  /** (확장용) 모든 폴리라인 제거 */
+  clearPolylines: () => void;
 };
 
 const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebView(
-  { style, jsKey, center = { lat: 37.5665, lng: 126.9780 }, level = 4, onReady, onPress, onDragChange }: Props,
+  { 
+    style, jsKey, 
+    center = { lat: 37.5665, lng: 126.9780 }, 
+    level = 4, 
+    segments,
+    onReady, onPress, onDragChange }: Props,
   ref
 ) {
   const webRef = useRef<WebView>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
 
   const html = useMemo(
     () =>
@@ -69,6 +79,8 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
 
         // 단일 마커 핸들
         window._singleMarker = null;
+        // 폴리라인 핸들
+        window._polylines = [];
 
         window.__api = {
           setCenter: function(lat, lng, level){
@@ -98,6 +110,77 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
           },
           clearMarkers: function(){
             if (window._singleMarker) { window._singleMarker.setMap(null); }
+          },
+          drawPolylines: function(segments) {
+            // 기존 폴리라인 제거
+            window._polylines.forEach(p => p.setMap(null));
+            window._polylines = [];
+
+            if (!segments || !Array.isArray(segments)) return;
+
+            segments.forEach(seg => {
+              if (!seg.steps || !Array.isArray(seg.steps)) return;
+              
+              seg.steps.forEach(step => {
+                if (!step.polyline || !Array.isArray(step.polyline)) return;
+
+                var linePath = step.polyline.map(p => new kakao.maps.LatLng(p.lat, p.lng));
+                if(linePath.length < 2) return;
+
+                var color = '#FF0000'; // default color
+                switch(step.mode) {
+                  case 'WALK': 
+                    color = '#a5a5a5ff'; 
+                    break;
+                  case 'BUS': 
+                    color = '#0000FF'; // default blue
+                    if (step.lineName) {
+                      if (step.lineName.includes('마을') || step.lineName.includes('지선')) color = '#008000';
+                      else if (step.lineName.includes('시내') || step.lineName.includes('간선')) color = '#0000FF';
+                    }
+                    break;
+                  case 'SUBWAY': 
+                    color = '#FFA500'; // default orange
+                    if (step.lineName) {
+                      if (step.lineName === '수도권1호선') color = '#00498B';
+                      else if (step.lineName === '수도권2호선') color = '#009246';
+                      else if (step.lineName === '수도권3호선') color = '#F36630';
+                      else if (step.lineName === '수도권4호선') color = '#00A2D1';
+                      else if (step.lineName === '수도권5호선') color = '#A664A3';
+                      else if (step.lineName === '수도권6호선') color = '#9E4510';
+                      else if (step.lineName === '수도권7호선') color = '#5D6519';
+                      else if (step.lineName === '수도권8호선') color = '#D6406A';
+                      else if (step.lineName === '수도권9호선') color = '#8E764B';
+                      else if (step.lineName === '경강선') color = '#003DA5';
+                      else if (step.lineName === '경춘선') color = '#0C8E72';
+                      else if (step.lineName === '수인분당선') color = '#E0A134';
+                      else if (step.lineName === '경의중앙선') color = '#2ABFD0';
+                      else if (step.lineName === '신분당선') color = '#BB1834';
+                      else if (step.lineName === '인천1호선') color = '#6E98BB';
+                      else if (step.lineName === '인천2호선') color = '#ED8B00';
+                      else if (step.lineName === '에버라인') color = '#6CBB5A';
+                      else if (step.lineName === '의정부경전철') color = '#B0B0B0';
+                      else if (step.lineName === '우이신설경전철') color = '#FF7F00';
+                    }
+                    break;
+                }
+
+                var polyline = new kakao.maps.Polyline({
+                  path: linePath,
+                  strokeWeight: 5,
+                  strokeColor: color,
+                  strokeOpacity: 1.0,
+                  strokeStyle: 'solid'
+                });
+
+                polyline.setMap(_kmap);
+                window._polylines.push(polyline);
+              });
+            });
+          },
+          clearPolylines: function(){
+            window._polylines.forEach(p => p.setMap(null));
+            window._polylines = [];
           }
         };
 
@@ -114,6 +197,13 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
   // RN -> Web
   const call = (code: string) => webRef.current?.injectJavaScript(code + ';true;');
 
+  useEffect(() => {
+    if (isMapReady && segments) {
+      const segmentsJson = JSON.stringify(segments);
+      call(`window.__api && window.__api.drawPolylines(${segmentsJson})`);
+    }
+  }, [isMapReady, segments]);
+
   // Ref 메서드 노출
   useImperativeHandle(ref, () => ({
     setCenter(lat, lng, lvl) {
@@ -128,12 +218,18 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
     clearMarkers() {
       call(`window.__api && window.__api.clearMarkers()`);
     },
+    clearPolylines() {
+      call(`window.__api && window.__api.clearPolylines()`);
+    },
   }));
 
   const onMessage = (e: WebViewMessageEvent) => {
     try {
       const msg = JSON.parse(e.nativeEvent.data);
-      if (msg.type === 'ready') onReady?.();
+      if (msg.type === 'ready') {
+        onReady?.();
+        setIsMapReady(true);
+      }
       if (msg.type === 'press') onPress?.(msg.lat, msg.lng);
       if (msg.type === 'drag' && typeof msg.active === 'boolean') onDragChange?.(msg.active);
     } catch {}
