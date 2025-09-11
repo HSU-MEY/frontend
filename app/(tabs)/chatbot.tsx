@@ -1,11 +1,11 @@
-import { postChatQuery, ChatContext, ChatQueryResult, ExistingRoute, PlaceInfo, RouteRecommendation } from '@/api/chat.service';
+import { ChatContext, ChatQueryResult, ExistingRoute, PlaceInfo, postChatQuery, RouteRecommendation } from '@/api/chat.service';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, AppState } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import styled from 'styled-components/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity } from 'react-native';
+import styled from 'styled-components/native';
 
 // ===== Constants =====
 const CHAT_HISTORY_KEY = '@chat_history';
@@ -205,22 +205,28 @@ export default function AiGuideScreen() {
 
   return (
     <Container>
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={renderMessageItem}
-        contentContainerStyle={{ padding: 16 }}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-        onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
-      />
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"} 
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 30} // Adjust this value based on your header height
+      >
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={renderMessageItem}
+          contentContainerStyle={{ padding: 16 }}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        />
 
-      <InputArea>
-        <Input placeholder="MEY에게 물어보세요" value={input} onChangeText={setInput} />
-        <SendButton onPress={handleSend}>
-          <Ionicons name="send" size={20} color="white" />
-        </SendButton>
-      </InputArea>
+        <InputArea>
+          <Input placeholder="MEY에게 물어보세요" value={input} onChangeText={setInput} />
+          <SendButton onPress={handleSend}>
+            <Ionicons name="send" size={20} color="white" />
+          </SendButton>
+        </InputArea>
+      </KeyboardAvoidingView>
     </Container>
   );
 }

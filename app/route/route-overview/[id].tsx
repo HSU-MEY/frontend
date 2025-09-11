@@ -7,7 +7,7 @@ import { useRouteRunStore } from '@/store/useRouteRunStore';
 import * as Location from "expo-location";
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, StyleSheet, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, ImageBackground, StyleSheet } from 'react-native';
 import styled from 'styled-components/native';
 
 
@@ -20,8 +20,7 @@ export default function RouteOverviewScreen() {
   const [estimatedCost, setEstimatedCost] = React.useState<string>("");
   const upsertRoute = useRouteRunStore((s) => s.upsertRoute);
   const setCurrent = useRouteRunStore((s) => s.setCurrent);
-  // const [weatherDescription, setWeatherDescription] = React.useState<string>("");
-  // const [temperature, setTemperature] = React.useState<string>("");
+  const { save: saveUserRoute } = useUserRoutes();
 
 
   useEffect(() => {
@@ -44,7 +43,6 @@ export default function RouteOverviewScreen() {
           response_f.estimatedCost.toString() + "원"
         );
       }
-      //setRoute(response.result);
     }
 
     fetchRoute();
@@ -98,8 +96,7 @@ export default function RouteOverviewScreen() {
         upsertRoute({ id: String(id), segments, startedAt: Date.now() });
         setCurrent(String(id));
 
-        const { save } = useUserRoutes();
-        save(id, new Date(), "09:00").catch((error) => {
+        saveUserRoute(id, new Date(), "09:00").catch((error) => {
           console.error("Failed to save route:", error);
         });
       }
