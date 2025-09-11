@@ -20,6 +20,8 @@ export type KakaoMapHandle = {
   setCenter: (lat: number, lng: number, level?: number) => void;
   /** 단일 마커를 해당 좌표로 표시 (없으면 생성) */
   addMarker: (lat: number, lng: number) => void;
+  /** 여러 마커를 추가합니다. */
+  addMarkers: (coords: { lat: number, lng: number }[]) => void;
   /** 중심 이동 + 단일 마커 표시 */
   focusTo: (lat: number, lng: number, level?: number) => void;
   /** (확장용) 모든 마커 제거 */
@@ -33,10 +35,10 @@ export type KakaoMapHandle = {
 };
 
 const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebView(
-  { 
-    style, jsKey, 
-    center = { lat: 37.5665, lng: 126.9780 }, 
-    level = 4, 
+  {
+    style, jsKey,
+    center = { lat: 37.5665, lng: 126.9780 },
+    level = 4,
     segments,
     onReady, onPress, onDragChange }: Props,
   ref
@@ -82,7 +84,7 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
         });
 
         // 마커/폴리라인 핸들
-        window._singleMarker = null;
+        window._markers = [];
         window._polylines = [];
         window._currentLocationMarker = null;
 
@@ -94,26 +96,34 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
           },
           addMarker: function(lat, lng){
             var pos = new kakao.maps.LatLng(lat, lng);
-            if (!window._singleMarker) {
-              window._singleMarker = new kakao.maps.Marker({ map: _kmap, position: pos });
-            } else {
-              window._singleMarker.setPosition(pos);
-              if (!window._singleMarker.getMap()) window._singleMarker.setMap(_kmap);
+            var marker = new kakao.maps.Marker({ map: _kmap, position: pos });
+            window._markers.push(marker);
+          },
+          addMarkers: function(coords) {
+            window.__api.clearMarkers();
+            if (!Array.isArray(coords)) return;
+            var bounds = new kakao.maps.LatLngBounds();
+            coords.forEach(function(c) {
+              var pos = new kakao.maps.LatLng(c.lat, c.lng);
+              var marker = new kakao.maps.Marker({ map: _kmap, position: pos });
+              window._markers.push(marker);
+              bounds.extend(pos);
+            });
+            if (window._markers.length > 0) {
+              _kmap.setBounds(bounds);
             }
           },
           focusTo: function(lat, lng, level){
             var pos = new kakao.maps.LatLng(lat, lng);
-            if (!window._singleMarker) {
-              window._singleMarker = new kakao.maps.Marker({ map: _kmap, position: pos });
-            } else {
-              window._singleMarker.setPosition(pos);
-              if (!window._singleMarker.getMap()) window._singleMarker.setMap(_kmap);
-            }
+            window.__api.clearMarkers();
+            var marker = new kakao.maps.Marker({ map: _kmap, position: pos });
+            window._markers.push(marker);
             _kmap.setCenter(pos);
             if (typeof level === 'number') _kmap.setLevel(level);
           },
           clearMarkers: function(){
-            if (window._singleMarker) { window._singleMarker.setMap(null); }
+            window._markers.forEach(function(m) { m.setMap(null); });
+            window._markers = [];
           },
           drawPolylines: function(segments) {
             // 기존 폴리라인 제거
@@ -124,7 +134,7 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
 
             segments.forEach(seg => {
               if (!seg.steps || !Array.isArray(seg.steps)) return;
-              
+
               seg.steps.forEach(step => {
                 if (!step.polyline || !Array.isArray(step.polyline)) return;
 
@@ -133,10 +143,10 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
 
                 var color = '#FF0000'; // default color
                 switch(step.mode) {
-                  case 'WALK': 
-                    color = '#888888'; 
+                  case 'WALK':
+                    color = '#888888';
                     break;
-                  case 'BUS': 
+                  case 'BUS':
                     color = '#0000FF'; // default blue
                     if (step.lineName) {
                       if (step.lineName.includes('마을')) color = '#FFFF00';
@@ -145,7 +155,7 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
                       else if (step.lineName.includes('광역')) color = '#f32f2f';
                     }
                     break;
-                  case 'SUBWAY': 
+                  case 'SUBWAY':
                     color = '#FFA500'; // default orange
                     if (step.lineName) {
                       if (step.lineName === '수도권1호선') color = '#00498B';
@@ -201,7 +211,7 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
               var imageSize = new kakao.maps.Size(32, 32);
               var imageOption = {offset: new kakao.maps.Point(16, 32)};
               var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption);
-              
+
               window._currentLocationMarker = new kakao.maps.Marker({
                 position: pos,
                 image: markerImage
@@ -238,6 +248,10 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
     },
     addMarker(lat, lng) {
       call(`window.__api && window.__api.addMarker(${lat}, ${lng})`);
+    },
+    addMarkers(coords) {
+      const coordsJson = JSON.stringify(coords);
+      call(`window.__api && window.__api.addMarkers(${coordsJson})`);
     },
     focusTo(lat, lng, lvl) {
       call(`window.__api && window.__api.focusTo(${lat}, ${lng}, ${typeof lvl === 'number' ? lvl : 'undefined'})`);

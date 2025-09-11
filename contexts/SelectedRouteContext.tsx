@@ -8,6 +8,11 @@ type Place = {
   tag: string;
   image: any;
   isRecommended: boolean;
+  raw: {
+    latitude: number | string;
+    longitude: number | string;
+    [key: string]: any;
+  };
 };
 
 type ContextType = {
