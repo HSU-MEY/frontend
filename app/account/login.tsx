@@ -51,7 +51,7 @@ export default function LoginScreen() {
         Alert.alert('로그인 실패', '이메일 또는 비밀번호가 올바르지 않습니다.');
         return;
       }
-      Alert.alert('로그인 성공', '환영합니다!');
+     Alert.alert('로그인 성공', '환영합니다!');
       router.replace('/(tabs)/myroute');
     } catch (e: any) {
       Alert.alert('로그인 실패', e?.message ?? '잠시 후 다시 시도해주세요.');
@@ -108,6 +108,7 @@ const Container = styled.View`
   flex: 1;
   justify-content: center;
   padding: 0 20px;
+  background-color: white;
 `;
 
 const Title = styled.Text`
