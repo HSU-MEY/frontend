@@ -1,92 +1,161 @@
+import { ChatContext, ChatQueryResult, ExistingRoute, PlaceInfo, postChatQuery, RouteRecommendation } from '@/api/chat.service';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import React, { useCallback, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
+
+// ===== Types =====
+
+type Message = {
+  id: string;
+  sender: 'user' | 'ai';
+  text: string;
+  isLoading?: boolean;
+  routeRecommendation?: RouteRecommendation;
+  existingRoutes?: ExistingRoute[];
+  places?: PlaceInfo[];
+  suggestions?: string[];
+};
+
+// ===== Helper: Chat Manager Logic (as a custom hook) =====
+
+const useChatManager = () => {
+  const contextRef = useRef<ChatContext | null>(null);
+
+  const generateSessionId = () => {
+    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  };
+
+  const sendMessage = async (query: string): Promise<ChatQueryResult> => {
+    if (!contextRef.current?.sessionId) {
+      contextRef.current = {
+        ...contextRef.current,
+        sessionId: generateSessionId(),
+        conversationStartTime: Date.now(),
+      };
+    }
+
+    const response = await postChatQuery({ query, context: contextRef.current });
+
+    // Update context from response
+    contextRef.current = response.result.context;
+
+    return response.result;
+  };
+
+  return { sendMessage };
+};
+
+// ===== Main Component =====
 
 export default function AiGuideScreen() {
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState([
-    { id: '1', sender: 'ai', text: '안녕하세요, 저는 당신의 AI 가이드 MEY입니다! 무엇을 도와드릴까요?', suggestion: ["K-POP 루트 추천해줘", "주변 맛집 추천해줘"] },
-    { id: '2', sender: 'user', text: 'K-POP 루트 추천해줘' },
-    { id: '3', sender: 'ai', text: '물론이죠, K-POP 루트를 추천해드릴게요', route: 1 },
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      sender: 'ai',
+      text: '안녕하세요, 저는 당신의 AI 가이드 MEY입니다! 무엇을 도와드릴까요?',
+      suggestions: ["K-POP 루트 추천해줘", "주변 맛집 추천해줘"],
+    },
   ]);
 
-  const handleSend = () => {
+  const { sendMessage } = useChatManager();
+  const flatListRef = useRef<FlatList>(null);
+
+  const handleSend = useCallback(async () => {
     if (input.trim() === '') return;
 
-    const userMessage = { id: Date.now().toString(), sender: 'user', text: input };
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    const query = input;
+    const userMessage: Message = { id: Date.now().toString(), sender: 'user', text: query };
+    const loadingMessage: Message = { id: (Date.now() + 1).toString(), sender: 'ai', text: '', isLoading: true };
 
+    setMessages((prev) => [...prev, userMessage, loadingMessage]);
     setInput('');
 
-    setTimeout(() => {
-      const aiResponse = { id: Date.now().toString(), sender: 'ai', text: 'Lorem ipsum dolor sit amet.' };
-      setMessages((prevMessages) => [...prevMessages, aiResponse]);
-    }, 1000);
+    try {
+      const result = await sendMessage(query);
+
+      const aiResponse: Message = {
+        id: (Date.now() + 2).toString(),
+        sender: 'ai',
+        text: result.message,
+        routeRecommendation: result.routeRecommendation,
+        existingRoutes: result.existingRoutes,
+        places: result.places,
+      };
+
+      setMessages((prev) => [...prev.slice(0, -1), aiResponse]); // Replace loading message
+    } catch (error) {
+      console.error("Chat API error:", error);
+      const errorMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        sender: 'ai',
+        text: '죄송합니다, 오류가 발생했어요. 다시 시도해주세요.',
+      };
+      setMessages((prev) => [...prev.slice(0, -1), errorMessage]);
+    }
+  }, [input, sendMessage]);
+
+  const renderMessageItem = ({ item }: { item: Message }) => {
+    if (item.sender === 'user') {
+      return (
+        <UserMessage>
+          <LinearGradient colors={['#8569ff', '#53bdff']} start={[0, 1]} end={[1, 0]} style={styleSheet.userBubble}>
+            <UserText>{item.text}</UserText>
+          </LinearGradient>
+        </UserMessage>
+      );
+    }
+
+    // AI Message
+    return (
+      <AiMessage>
+        <AvatarWrapper>
+          <Avatar source={require('@/assets/images/ai-bot.png')} />
+          <AvatarName>MEY</AvatarName>
+        </AvatarWrapper>
+        <MessageBubble>
+          {item.isLoading ? (
+            <ActivityIndicator color="#333" />
+          ) : (
+            <MessageText>{item.text}</MessageText>
+          )}
+        </MessageBubble>
+
+        {item.suggestions && (
+          <SuggestionBox>
+            {item.suggestions.map((suggestion, index) => (
+              <TagButton key={index} onPress={() => setInput(suggestion)}>
+                <TagText>{suggestion}</TagText>
+              </TagButton>
+            ))}
+          </SuggestionBox>
+        )}
+
+        {item.routeRecommendation && <RouteCard route={item.routeRecommendation} />}
+        {item.existingRoutes && <ExistingRoutesList routes={item.existingRoutes} />}
+        {item.places && <PlacesList places={item.places} />}
+
+      </AiMessage>
+    );
   };
 
   return (
     <Container>
       <FlatList
+        ref={flatListRef}
         data={messages}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) =>
-          item.sender === 'ai' ? (
-            <AiMessage>
-              <AvatarWrapper>
-                <Avatar source={require('@/assets/images/ai-bot.png')} />
-                <AvatarName>MEY</AvatarName>
-              </AvatarWrapper>
-              <MessageBubble>
-                <MessageText>{item.text}</MessageText>
-              </MessageBubble>
-              {item.suggestion && (
-                <SuggestionBox>
-                  {item.suggestion.map((suggestion, index) => (
-                    <TagButton key={index} onPress={() => setInput(suggestion)}>
-                      <TagText>{suggestion}</TagText>
-                    </TagButton>
-                  ))}
-                </SuggestionBox>
-              )}
-              {
-                item.route && (
-                  <CardWrapper onPress={() => router.push('/route/route-overview')}>
-                    <ImageGrid>
-                      <Preview source={{ uri: 'https://placehold.co/100x60' }} />
-                      <Preview source={{ uri: 'https://placehold.co/100x60' }} />
-                      <Preview source={{ uri: 'https://placehold.co/100x60' }} />
-                      <Preview source={{ uri: 'https://placehold.co/100x60' }} />
-                    </ImageGrid>
-                    <CardTitle>K-POP 루트: M/V 촬영 장소 투어</CardTitle>
-                    <SeeMore>자세히 보기 →</SeeMore>
-                </CardWrapper>
-                )
-              }
-            </AiMessage>
-          ) : (
-            <UserMessage>
-              <LinearGradient
-                colors={['#8569ff', '#53bdff']}
-                start={[0, 1]} end={[1, 0]}
-                style={styleSheet.userBubble}
-              >
-                <UserText>{item.text}</UserText>
-              </LinearGradient>
-            </UserMessage>
-          )
-        }
+        renderItem={renderMessageItem}
         contentContainerStyle={{ padding: 16 }}
+        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
 
       <InputArea>
-        <Input
-          placeholder="MEY에게 물어보세요"
-          value={input}
-          onChangeText={setInput}
-        />
+        <Input placeholder="MEY에게 물어보세요" value={input} onChangeText={setInput} />
         <SendButton onPress={handleSend}>
           <Ionicons name="send" size={20} color="white" />
         </SendButton>
@@ -94,6 +163,46 @@ export default function AiGuideScreen() {
     </Container>
   );
 }
+
+// ===== Card Components (Placeholders/Styled) =====
+
+const RouteCard = ({ route }: { route: RouteRecommendation }) => (
+  <CardWrapper onPress={() => router.push(`/route/route-overview/${route.routeId}`)}>
+    <CardTitle>{route.title}</CardTitle>
+    <CardDescription>{route.description}</CardDescription>
+    <CardMeta>{`비용: ${route.estimatedCost.toLocaleString()}원 · 소요시간: ${route.durationMinutes}분`}</CardMeta>
+    <SeeMore>자세히 보기 →</SeeMore>
+  </CardWrapper>
+);
+
+const ExistingRoutesList = ({ routes }: { routes: ExistingRoute[] }) => (
+  <CardListContainer>
+    {routes.map((route) => (
+      <CardWrapper key={route.routeId} onPress={() => router.push(`/route/route-overview/${route.routeId}`)}>
+        <CardTitle>{route.title}</CardTitle>
+        <CardDescription>{route.description}</CardDescription>
+        <CardMeta>{`비용: ${route.estimatedCost.toLocaleString()}원 · 소요시간: ${route.durationMinutes}분`}</CardMeta>
+        <SeeMore>자세히 보기 →</SeeMore>
+      </CardWrapper>
+    ))}
+  </CardListContainer>
+);
+
+const PlacesList = ({ places }: { places: PlaceInfo[] }) => (
+  <CardListContainer>
+    {places.map((place) => (
+      <CardWrapper key={place.placeId} onPress={() => router.push(`/place/place-detail/${place.placeId}`)}>
+        <CardTitle>{place.name}</CardTitle>
+        <CardDescription>{place.description}</CardDescription>
+        <CardMeta>{`주소: ${place.address} · 비용: ${place.costInfo}`}</CardMeta>
+        <SeeMore>자세히 보기 →</SeeMore>
+      </CardWrapper>
+    ))}
+  </CardListContainer>
+);
+
+
+// ===== Styles =====
 
 const styleSheet = StyleSheet.create({
   userBubble: {
@@ -138,6 +247,9 @@ const MessageBubble = styled.View`
   padding: 10px 20px;
   border-radius: 0 12px 12px 12px;
   max-width: 80%;
+  min-width: 50px;
+  justify-content: center;
+  align-items: center;
 `;
 
 const MessageText = styled.Text`
@@ -156,7 +268,7 @@ const UserText = styled.Text`
 const SuggestionBox = styled.View`
   flex-direction: row;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-top: 8px;
   flex-wrap: wrap;
 `;
 
@@ -171,41 +283,48 @@ const TagText = styled.Text`
   font-size: 14px;
 `;
 
+const CardListContainer = styled.View`
+  width: 85%;
+  gap: 12px;
+`;
 
-const CardWrapper = styled.TouchableOpacity`
-  margin-top: 16px;
+const CardWrapper = styled(TouchableOpacity)`
+  margin-top: 8px;
   background-color: #fff;
   border-radius: 12px;
-  padding: 12px;
+  padding: 16px;
   elevation: 2;
   shadow-color: #000;
   shadow-opacity: 0.1;
   shadow-radius: 5px;
-`;
-
-const ImageGrid = styled.View`
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  margin-bottom: 8px;
-`;
-
-const Preview = styled.Image`
-  width: 48%;
-  height: 80px;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  border-width: 1px;
+  border-color: #eee;
+  width: 100%;
 `;
 
 const CardTitle = styled.Text`
   font-weight: bold;
-  font-size: 15px;
-  margin-bottom: 4px;
+  font-size: 16px;
+  margin-bottom: 6px;
+`;
+
+const CardDescription = styled.Text`
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+`;
+
+const CardMeta = styled.Text`
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 8px;
 `;
 
 const SeeMore = styled.Text`
   color: #2680eb;
   font-size: 13px;
+  font-weight: bold;
+  text-align: right;
 `;
 
 const InputArea = styled.View`
@@ -213,11 +332,12 @@ const InputArea = styled.View`
   padding: 10px 16px;
   border-top-width: 1px;
   border-color: #eee;
+  background-color: #fff;
 `;
 
 const Input = styled.TextInput`
   flex: 1;
-  padding: 10px;
+  padding: 10px 15px;
   border-radius: 20px;
   background-color: #f2f2f2;
 `;
