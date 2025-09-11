@@ -1,13 +1,17 @@
-import { ChatContext, ChatQueryResult, ExistingRoute, PlaceInfo, postChatQuery, RouteRecommendation } from '@/api/chat.service';
+import { postChatQuery, ChatContext, ChatQueryResult, ExistingRoute, PlaceInfo, RouteRecommendation } from '@/api/chat.service';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useCallback, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, AppState } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import styled from 'styled-components/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// ===== Constants =====
+const CHAT_HISTORY_KEY = '@chat_history';
+const CHAT_CONTEXT_KEY = '@chat_context';
 
 // ===== Types =====
-
 type Message = {
   id: string;
   sender: 'user' | 'ai';
@@ -23,46 +27,103 @@ type Message = {
 
 const useChatManager = () => {
   const contextRef = useRef<ChatContext | null>(null);
+  const isInitialized = useRef(false);
 
-  const generateSessionId = () => {
-    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  const saveContext = async (context: ChatContext | null) => {
+    try {
+      await AsyncStorage.setItem(CHAT_CONTEXT_KEY, JSON.stringify(context));
+    } catch (e) {
+      console.error("Failed to save chat context.", e);
+    }
   };
 
   const sendMessage = async (query: string): Promise<ChatQueryResult> => {
     if (!contextRef.current?.sessionId) {
       contextRef.current = {
         ...contextRef.current,
-        sessionId: generateSessionId(),
+        sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
         conversationStartTime: Date.now(),
       };
     }
 
     const response = await postChatQuery({ query, context: contextRef.current });
-
-    // Update context from response
     contextRef.current = response.result.context;
+    await saveContext(contextRef.current);
 
     return response.result;
   };
 
-  return { sendMessage };
+  // Load context on init
+  useEffect(() => {
+    const loadContext = async () => {
+      try {
+        const savedContext = await AsyncStorage.getItem(CHAT_CONTEXT_KEY);
+        if (savedContext) {
+          contextRef.current = JSON.parse(savedContext);
+        }
+      } catch (e) {
+        console.error("Failed to load chat context.", e);
+      }
+      isInitialized.current = true;
+    };
+    loadContext();
+  }, []);
+
+  return { sendMessage, isInitialized };
 };
 
 // ===== Main Component =====
 
 export default function AiGuideScreen() {
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      sender: 'ai',
-      text: '안녕하세요, 저는 당신의 AI 가이드 MEY입니다! 무엇을 도와드릴까요?',
-      suggestions: ["K-POP 루트 추천해줘", "주변 맛집 추천해줘"],
-    },
-  ]);
-
-  const { sendMessage } = useChatManager();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const { sendMessage, isInitialized } = useChatManager();
   const flatListRef = useRef<FlatList>(null);
+
+  // Load messages from storage on mount
+  useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        const savedMessages = await AsyncStorage.getItem(CHAT_HISTORY_KEY);
+        if (savedMessages) {
+          setMessages(JSON.parse(savedMessages));
+        } else {
+          setMessages([
+            {
+              id: '1',
+              sender: 'ai',
+              text: '안녕하세요, 저는 당신의 AI 가이드 MEY입니다! 무엇을 도와드릴까요?',
+              suggestions: ["K-POP 루트 추천해줘", "주변 맛집 추천해줘"],
+            },
+          ]);
+        }
+      } catch (e) {
+        console.error("Failed to load messages.", e);
+      }
+    };
+    loadMessages();
+  }, []);
+
+  // Save messages to storage on change
+  useEffect(() => {
+    const saveMessages = async () => {
+      try {
+        // Don't save while loading or if it's the initial state
+        if (messages.length === 0 || messages[messages.length - 1].isLoading) {
+          return;
+        }
+        const messagesToSave = messages.filter(m => !m.isLoading);
+        await AsyncStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(messagesToSave));
+      } catch (e) {
+        console.error("Failed to save messages.", e);
+      }
+    };
+
+    if (isInitialized.current) { // Only save after initial load
+        saveMessages();
+    }
+  }, [messages, isInitialized]);
+
 
   const handleSend = useCallback(async () => {
     if (input.trim() === '') return;
