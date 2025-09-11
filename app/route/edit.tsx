@@ -6,7 +6,7 @@ import { KAKAO_JS_API_KEY } from '@/src/env';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Dimensions,
     Image,
@@ -24,9 +24,10 @@ export default function EditRouteScreen() {
     const router = useRouter();
     const mapRef = useRef<KakaoMapHandle>(null);
     const JS_KEY = KAKAO_JS_API_KEY;
+    const [isMapReady, setMapReady] = useState(false);
 
     useEffect(() => {
-        if (mapRef.current && selectedPlaces.length > 0) {
+        if (isMapReady && mapRef.current && selectedPlaces.length > 0) {
             const coords = selectedPlaces
                 .map(p => ({
                     lat: Number(p.raw.latitude),
@@ -38,8 +39,7 @@ export default function EditRouteScreen() {
                 mapRef.current.addMarkers(coords);
             }
         }
-    }, [selectedPlaces, mapRef.current]);
-
+    }, [selectedPlaces, isMapReady]);
 
     const handleDelete = (id: number) => {
         const updated = selectedPlaces.filter((place) => place.id !== id);
@@ -117,6 +117,7 @@ export default function EditRouteScreen() {
                 ref={mapRef}
                 jsKey={JS_KEY}
                 style={styles.map}
+                onReady={() => setMapReady(true)}
             />
         </View>
         <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>

@@ -51,6 +51,8 @@ export default function MapScreen() {
   const JS_KEY = KAKAO_JS_API_KEY;
 
   const [currentLocation, setCurrentLocation] = useState<Location.LocationObjectCoords | null>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
+
 
   const [byTheme, setByTheme] = useState<Record<ThemeCategory, ThemeState>>({
     'K-Pop': { items: [], loading: false, error: null, hasMore: true },
@@ -99,17 +101,16 @@ export default function MapScreen() {
 
   // ===== Map Update Effect =====
   useEffect(() => {
-    if (currentLocation && mapRef.current) {
+    if (currentLocation && mapRef.current && isMapReady) {
       const { latitude, longitude } = currentLocation;
-      const imageUrl = 'assets/images/icons/current-location.png';
-      mapRef.current.setCurrentLocationMarker(latitude, longitude, imageUrl);
+      mapRef.current.setCurrentLocationMarker(latitude, longitude, 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png');
 
       if (isInitialMapLoad.current) {
         mapRef.current.setCenter(latitude, longitude, 4);
         isInitialMapLoad.current = false;
       }
     }
-  }, [currentLocation]);
+  }, [currentLocation, isMapReady]);
 
 
   const mapBackendToUI = (b: PopularPlaceDTO, idx: number): UIPlace => {
@@ -192,6 +193,7 @@ export default function MapScreen() {
           jsKey={JS_KEY}
           center={ currentLocation ? { lat: currentLocation.latitude, lng: currentLocation.longitude } : undefined }
           level={4}
+          onReady={() => setIsMapReady(true)}
         />
       </View>
 

@@ -198,31 +198,31 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
             window._polylines.forEach(p => p.setMap(null));
             window._polylines = [];
           },
-          panTo: function(lat, lng) {
-            var moveLatLon = new kakao.maps.LatLng(lat, lng);
-            _kmap.panTo(moveLatLon);
-          },
-          setCurrentLocationMarker: function(lat, lng, imageUrl) {
-            var pos = new kakao.maps.LatLng(lat, lng);
-            if (window._currentLocationMarker) {
-              window._currentLocationMarker.setPosition(pos);
-            } else {
-              var imageSrc = imageUrl;
-              var imageSize = new kakao.maps.Size(32, 32);
-              var imageOption = {offset: new kakao.maps.Point(16, 32)};
-              var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption);
+      panTo: function(lat, lng) {
+        var moveLatLon = new kakao.maps.LatLng(lat, lng);
+        _kmap.panTo(moveLatLon);
+      },
+      setCurrentLocationMarker: function(lat, lng, imageUrl) {
+        var pos = new kakao.maps.LatLng(lat, lng);
+        if (window._currentLocationMarker) {
+          window._currentLocationMarker.setPosition(pos);
+        } else {
+          var imageSrc = imageUrl;
+          var imageSize = new kakao.maps.Size(32, 32);
+          var imageOption = {offset: new kakao.maps.Point(16, 32)};
+          var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption);
+          
+          window._currentLocationMarker = new kakao.maps.Marker({
+            position: pos,
+            image: markerImage
+          });
+          window._currentLocationMarker.setMap(_kmap);
+        }
+      }
+    };
 
-              window._currentLocationMarker = new kakao.maps.Marker({
-                position: pos,
-                image: markerImage
-              });
-              window._currentLocationMarker.setMap(_kmap);
-            }
-          }
-        };
-
-        // ready
-        setTimeout(function(){ post({ type: 'ready' }); }, 0);
+    // ready
+    setTimeout(function(){ post({ type: 'ready' }); }, 0);
       })();
     </script>
   </body>
