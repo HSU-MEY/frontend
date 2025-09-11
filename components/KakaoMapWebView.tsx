@@ -28,6 +28,8 @@ export type KakaoMapHandle = {
   clearPolylines: () => void;
   /** (확장용) 부드럽게 중심 이동 */
   panTo: (lat: number, lng: number) => void;
+  /** (확장용) 현재 위치 마커 표시 */
+  setCurrentLocationMarker: (lat: number, lng: number, imageUrl: string) => void;
 };
 
 const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebView(
@@ -79,10 +81,10 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
           post({ type: 'press', lat: latlng.getLat(), lng: latlng.getLng() });
         });
 
-        // 단일 마커 핸들
+        // 마커/폴리라인 핸들
         window._singleMarker = null;
-        // 폴리라인 핸들
         window._polylines = [];
+        window._currentLocationMarker = null;
 
         window.__api = {
           setCenter: function(lat, lng, level){
@@ -137,8 +139,10 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
                   case 'BUS': 
                     color = '#0000FF'; // default blue
                     if (step.lineName) {
-                      if (step.lineName.includes('마을') || step.lineName.includes('지선')) color = '#008000';    
-                      else if (step.lineName.includes('시내') || step.lineName.includes('간선')) color = '#0000FF';        
+                      if (step.lineName.includes('마을')) color = '#FFFF00';
+                      else if (step.lineName.includes('시내/간선')) color = '#0000FF';
+                      else if (step.lineName.includes('지선')) color = '#008000';
+                      else if (step.lineName.includes('광역')) color = '#f32f2f';
                     }
                     break;
                   case 'SUBWAY': 
@@ -171,7 +175,7 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
                   path: linePath,
                   strokeWeight: 5,
                   strokeColor: color,
-                  strokeOpacity: 1.0,
+                  strokeOpacity: 0.9,
                   strokeStyle: 'solid'
                 });
 
@@ -187,6 +191,23 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
           panTo: function(lat, lng) {
             var moveLatLon = new kakao.maps.LatLng(lat, lng);
             _kmap.panTo(moveLatLon);
+          },
+          setCurrentLocationMarker: function(lat, lng, imageUrl) {
+            var pos = new kakao.maps.LatLng(lat, lng);
+            if (window._currentLocationMarker) {
+              window._currentLocationMarker.setPosition(pos);
+            } else {
+              var imageSrc = imageUrl;
+              var imageSize = new kakao.maps.Size(32, 32);
+              var imageOption = {offset: new kakao.maps.Point(16, 32)};
+              var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption);
+              
+              window._currentLocationMarker = new kakao.maps.Marker({
+                position: pos,
+                image: markerImage
+              });
+              window._currentLocationMarker.setMap(_kmap);
+            }
           }
         };
 
@@ -229,6 +250,9 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
     },
     panTo(lat, lng) {
       call(`window.__api && window.__api.panTo(${lat}, ${lng})`);
+    },
+    setCurrentLocationMarker(lat, lng, imageUrl) {
+      call(`window.__api && window.__api.setCurrentLocationMarker(${lat}, ${lng}, '${imageUrl}')`);
     }
   }));
 
