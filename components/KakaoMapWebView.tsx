@@ -209,7 +209,7 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
               window._currentLocationMarker.setPosition(pos);
             } else {
               var imageSrc = imageUrl;
-              var imageSize = new kakao.maps.Size(32, 32);
+              var imageSize = new kakao.maps.Size(64, 64);
               var imageOption = {offset: new kakao.maps.Point(16, 32)};
               var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption);
           
@@ -226,7 +226,7 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
     setTimeout(function(){ 
       post({ type: 'ready' }); 
     }, 0);
-    
+
     })();
     </script>
   </body>

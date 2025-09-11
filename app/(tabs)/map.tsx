@@ -103,8 +103,7 @@ export default function MapScreen() {
   useEffect(() => {
     if (currentLocation && mapRef.current && isMapReady) {
       const { latitude, longitude } = currentLocation;
-      mapRef.current.setCurrentLocationMarker(latitude, longitude, 'http://localhost:8081/assets/images/icons/current-location.png');
-
+      mapRef.current.setCurrentLocationMarker(latitude, longitude, 'https://firebasestorage.googleapis.com/v0/b/apporium-d7aef.firebasestorage.app/o/temp%2Fcurrent-location.png?alt=media&token=e6b6469f-ee4a-4274-beb3-2b6fa0802aa7');
       
       if (isInitialMapLoad.current) {
         mapRef.current.setCenter(latitude, longitude, 4);
@@ -115,6 +114,7 @@ export default function MapScreen() {
     }
   }, [currentLocation, isMapReady]);
   
+
 
   const mapBackendToUI = (b: PopularPlaceDTO, idx: number): UIPlace => {
     const title = b.nameKo || b.nameEn || `장소 #${b.id}`;
