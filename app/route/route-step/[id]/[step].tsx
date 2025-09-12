@@ -2,18 +2,22 @@ import { searchPlaces } from '@/api/places.service';
 import { changeUserRouteStatus } from '@/api/users.routes.service';
 import Header from '@/components/common/Header';
 import KakaoMapWebView, { KakaoMapHandle } from '@/components/KakaoMapWebView';
+import { useUserRoutes } from '@/hooks/useUserRoutes';
 import { KAKAO_JS_API_KEY } from '@/src/env';
 import { useRouteRunStore } from '@/store/useRouteRunStore';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef } from 'react';
-import { ScrollView, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, TouchableOpacity, View } from 'react-native';
 import styled from 'styled-components/native';
 
 export default function RouteStepScreen() {
-  const { id, step = "1" } = useLocalSearchParams<{ id: string; step: string }>();
+  const { id: idString, step = "1" } = useLocalSearchParams<{ id: string; step: string }>();
+  const id = Number(idString);
   const mapRef = useRef<KakaoMapHandle>(null);
   const JS_KEY = KAKAO_JS_API_KEY;
+
+  const { data: onGoingData } = useUserRoutes('ON_GOING');
 
   const stepNum = useMemo(() => {
     const num = Number(step);
@@ -46,15 +50,32 @@ export default function RouteStepScreen() {
         params: { id: String(placeId) },
       })
     } else {
-      alert("플레이스 정보를 찾을 수 없습니다.");
+      Alert.alert("정보", "플레이스 정보를 찾을 수 없습니다.");
     }
   };
 
-  const handleEndRoute = () => {
-    changeUserRouteStatus(savedRouteId, 'COMPLETED').catch((error) => {
+  const handleEndRoute = async () => {
+    if (!onGoingData?.savedRoutes) {
+      Alert.alert("오류", "진행중인 경로 정보를 불러올 수 없습니다.");
+      return;
+    }
+
+    const currentRoute = onGoingData.savedRoutes.find(r => r.routeId === id);
+
+    if (!currentRoute) {
+      Alert.alert("오류", "현재 경로를 진행중인 경로 목록에서 찾을 수 없습니다.");
+      return;
+    }
+
+    try {
+      await changeUserRouteStatus(currentRoute.savedRouteId, 'COMPLETED');
+      Alert.alert("성공", "경로를 성공적으로 완료했습니다!", [
+        { text: "OK", onPress: () => router.replace("/(tabs)") }
+      ]);
+    } catch (error) {
       console.error("Failed to change route status:", error);
-    });
-    router.replace("/");
+      Alert.alert("오류", "경로 완료 처리에 실패했습니다.");
+    }
   }
   
   return (
@@ -107,7 +128,8 @@ export default function RouteStepScreen() {
                 {/* s.mode === 'ARRIVE' && <Ionicons name="location-sharp" size={20} color="#2680eb" /> */}
               </StepIcon>
               <StepText>
-                {s.instruction}{'\n'}
+                {s.instruction}{
+                '\n'}
                 <SubText>
                   {Math.round(s.distanceMeters)}m · {Math.round(s.durationSeconds / 60)}분
                   {/*s.lineName}번, {s.numStops ? `${s.numStops}정거장` : ""*/}
@@ -131,7 +153,7 @@ export default function RouteStepScreen() {
         )
         }
         { stepNum >= segmentCount ? (
-          <ActiveButton onPress={() => router.replace("/")}>
+          <ActiveButton onPress={handleEndRoute}>
             <ActiveText>루트 종료</ActiveText>
           </ActiveButton>
         ) : (

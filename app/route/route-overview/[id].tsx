@@ -129,7 +129,7 @@ export default function RouteOverviewScreen() {
 
       if(savedRouteId !== null && savedRouteId >= 0) {
         changeUserRouteStatus(savedRouteId, 'ON_GOING').catch((error) => {
-        console.error("Failed to change route status:", error);
+        //console.error("Failed to change route status:", error);
       });
       }
       
@@ -146,7 +146,7 @@ export default function RouteOverviewScreen() {
   const handleLaterButton = () => {
     if(routeStatus !== 'NOT_SAVED' && savedRouteId !== null) {
       saveUserRoute(savedRouteId, new Date(), "09:00").catch((error) => {
-        console.error("Failed to save route:", error);
+      //console.error("Failed to save route:", error);
       });
     }
     
