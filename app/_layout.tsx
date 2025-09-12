@@ -94,7 +94,7 @@ export default function RootLayout() {
                   <Stack.Screen name="account/privacy-policy" options={{ headerShown: false }} />
                   <Stack.Screen name="account/register" options={{ headerShown: false }} />
                   <Stack.Screen name="account/login" options={{ headerShown: false }} />
-                  <Stack.Screen name="account/forgot-password" options={{ headerShown: false }} />
+                  <Stack.Screen name="account/reset-password" options={{ headerShown: false }} />
                   <Stack.Screen name="+not-found" />
                 </Stack>
               </SelectedRouteProvider>

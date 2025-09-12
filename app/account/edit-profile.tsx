@@ -154,7 +154,7 @@ export default function EditProfileScreen() {
   return (
     <Container>
       <Title>프로필 수정</Title>
-
+      
       <ProfileImageContainer>
         <Pressable onPress={pickImage}>
           {profileImage ? (
