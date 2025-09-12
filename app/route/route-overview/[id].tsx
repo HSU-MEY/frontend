@@ -5,11 +5,13 @@ import Header from '@/components/common/Header';
 import { useUserRoutes } from '@/hooks/useUserRoutes';
 import { useWeather } from '@/hooks/useWeathers';
 import { useRouteRunStore } from '@/store/useRouteRunStore';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from "expo-location";
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, ImageBackground, StyleSheet } from 'react-native';
+import { ActivityIndicator, ImageBackground, StyleSheet, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
+
 
 export default function RouteOverviewScreen() {
   const id = Number(useLocalSearchParams().id);
@@ -184,8 +186,8 @@ export default function RouteOverviewScreen() {
                 { route?.routePlaces[0].place.name }
                 {"\n"} ... {"\n"}
                 { route?.routePlaces[route?.routePlaces.length - 1].place.name }</InfoSubtext>
-              <InfoImage source={require('../../../assets/images/city.png')} style={{right: 0, top: 30, width: 82}} />
-              <InfoHighlight style={{marginTop: 64}}><Highlight>{ route?.routePlaces.length }개</Highlight>의 장소를 둘러볼 예정이에요</InfoHighlight>
+              <InfoImage source={require('../../../assets/images/city.png')} style={{right: 0, top: 80, width: 124, height: 124}} />
+              <InfoHighlight style={{marginTop: 102}}><Highlight>{ route?.routePlaces.length }개</Highlight>의 장소를 둘러볼 예정이에요</InfoHighlight>
               <InfoImage source={require('../../../assets/images/transport.png')} style={{bottom: 40, width: 178}} />
               <InfoHighlight style={{marginTop: 86, textAlign: 'right'}}>예상 총 이동 시간은 <Highlight>{ estimatedTime }</Highlight>이에요</InfoHighlight>
             </InfoBox>
@@ -211,17 +213,26 @@ export default function RouteOverviewScreen() {
         <ButtonOutline onPress={handleLaterButton} disabled={isLoading}>
           <ButtonText>다음에 할래요</ButtonText>
         </ButtonOutline>
-        <ButtonPrimary onPress={handleStartRoute} disabled={isLoading || routeStatus === 'LOADING'} style={{ opacity: (isLoading || routeStatus === 'LOADING') ? 0.7 : 1 }}>
-          {(isLoading || routeStatus === 'LOADING') ? <ActivityIndicator color="white" /> : (
-            <ButtonTextPrimary>
-              {routeStatus === 'ON_GOING'
-                ? '여행 이어하기'
-                : routeStatus === 'COMPLETED'
-                ? '여행 다시하기'
-                : '여행 시작하기'}
-            </ButtonTextPrimary>
-          )}
-        </ButtonPrimary>
+        <TouchableOpacity
+            onPress={handleStartRoute} disabled={isLoading || routeStatus === 'LOADING'} style={{ opacity: ((isLoading || routeStatus === 'LOADING') ? 0.7 : 1), width: '60%'  }}
+        >
+            <LinearGradient
+                colors={['#69E8D9', '#0080FF']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styleSheet.startButton}
+            >
+              {(isLoading || routeStatus === 'LOADING') ? <ActivityIndicator color="white" /> : (
+                <ButtonTextPrimary>
+                  {routeStatus === 'ON_GOING'
+                    ? '여행 이어하기'
+                    : routeStatus === 'COMPLETED'
+                    ? '여행 다시하기'
+                    : '여행 시작하기'}
+                </ButtonTextPrimary>
+              )}
+            </LinearGradient>
+        </TouchableOpacity>
       </ButtonRow>
     </Container>
   );
@@ -236,6 +247,12 @@ const styleSheet = StyleSheet.create(
       borderRadius: 12,
       marginBottom: 16,
       textAlign: 'center',
+    },
+    startButton: {
+      borderRadius: 100,
+      paddingVertical: 14,
+      paddingHorizontal: 24,
+      alignItems: 'center',
     },
   }
 )
@@ -330,32 +347,24 @@ const ButtonRow = styled.View`
   flex-direction: row;
   justify-content: space-between;
   padding: 16px;
+  margin-top: 12px;
 `;
 
 const ButtonOutline = styled.TouchableOpacity`
   flex: 1;
+  background-color: #FAF8FF;
   margin-right: 8px;
   padding: 12px;
-  border: 1px solid #2680eb;
-  border-radius: 8px;
-  align-items: center;
-`;
-
-const ButtonPrimary = styled.TouchableOpacity`
-  flex: 1;
-  margin-left: 8px;
-  padding: 12px;
-  background-color: #2680eb;
-  border-radius: 8px;
+  border-radius: 100px;
   align-items: center;
 `;
 
 const ButtonText = styled.Text`
-  color: #2680eb;
-  font-weight: bold;
+  color: #0080FF;
+  font-family: 'Pretendard-SemiBold';
 `;
 
 const ButtonTextPrimary = styled.Text`
   color: white;
-  font-weight: bold;
+  font-family: 'Pretendard-Bold';
 `;
