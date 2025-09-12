@@ -31,6 +31,36 @@ type UiPlace = {
   raw: PopularPlaceDTO;       // 상세/좌표 등 원본
 };
 
+type Place = {
+  id: number;
+  name: string;
+  address: string;
+  time: string;
+  tag: string;
+  image: any;
+  isRecommended: boolean;
+  raw: {
+    latitude: number | string;
+    longitude: number | string;
+    [key: string]: any;
+  };
+};
+
+const toPlace = (p: UiPlace): Place => ({
+  id: p.id,
+  name: p.name,
+  address: p.address,
+  time: p.time,
+  tag: p.tag,
+  image: p.image,
+  isRecommended: p.isRecommended,
+  raw: {
+    ...p.raw,
+    latitude: p.raw?.latitude ?? '',   // 필수 보장
+    longitude: p.raw?.longitude ?? '', // 필수 보장
+  },
+});
+
 const PLACEHOLDER = require('@/assets/images/placeholder-place.png');
 
 // 요일 한글 맵
@@ -203,13 +233,13 @@ export default function AddRouteScreen() {
 
   const handleConfirm = () => {
     if (tempSelected.length === 0) {
-      Alert.alert('장소를 선택해주세요!');
+      Alert.alert('장소를 선택해주세요!'); 
       return;
     }
-    // 중복 없이 병합
-    const merged = [...selectedPlaces];
+    const merged: Place[] = [...selectedPlaces]; // 컨텍스트의 Place[]
     tempSelected.forEach((p) => {
-      if (!merged.some((mp) => mp.id === p.id)) merged.push(p);
+      const pl = toPlace(p); // 여기서 변환
+      if (!merged.some((mp) => mp.id === pl.id)) merged.push(pl);
     });
     setSelectedPlaces(merged);
     router.back();

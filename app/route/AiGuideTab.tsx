@@ -20,6 +20,21 @@ import KakaoMapWebView, { KakaoMapHandle } from '@/components/KakaoMapWebView';
 import { KAKAO_JS_API_KEY } from '@/src/env';
 import { useTranslation } from 'react-i18next';
 
+type Place = {
+    id: number;
+    name: string;
+    address: string;
+    time: string;
+    tag: string;
+    image: any;
+    isRecommended: boolean;
+    raw: {
+        latitude: number | string;
+        longitude: number | string;
+        [key: string]: any;
+    };
+};
+
 type UiPlace = {
     id: number;
     name: string;
@@ -28,7 +43,7 @@ type UiPlace = {
     tag: string;
     image: any;
     isRecommended: boolean;
-    raw: PopularPlaceDTO;
+    raw: PopularPlaceDTO; // 옵셔널 lat/lng
 };
 
 const PLACEHOLDER = require('@/assets/images/placeholder-place.png');
@@ -98,8 +113,24 @@ export default function AiGuideTab() {
     const { t, i18n } = useTranslation();
 
     const [search, setSearch] = useState('');
-    const [selectedPlaces, setLocalSelectedPlaces] = useState<UiPlace[]>([]);
+    const [selectedPlaces, setLocalSelectedPlaces] = useState<Place[]>([]);
     const { setSelectedPlaces: setGlobalSelectedPlaces } = useSelectedRoute();
+
+    const toPlace = (p: UiPlace): Place => ({
+        id: p.id,
+        name: p.name,
+        address: p.address,
+        time: p.time,
+        tag: p.tag,
+        image: p.image,
+        isRecommended: p.isRecommended,
+        raw: {
+            ...p.raw,
+            // 필수 보장: 없으면 빈 문자열로 채워 타입 충족
+            latitude: p.raw?.latitude ?? '',
+            longitude: p.raw?.longitude ?? '',
+        },
+    });
 
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -206,13 +237,14 @@ export default function AiGuideTab() {
     }, [showingSearch, uiSearched, uiPopular]);
 
     const handleAddPlace = (place: UiPlace) => {
-        if (!selectedPlaces.some((p) => p.id === place.id)) {
-            setLocalSelectedPlaces((prev) => [...prev, place]);
-        }
+        setLocalSelectedPlaces(prev => {
+            if (prev.some(p => p.id === place.id)) return prev;
+            return [...prev, toPlace(place)];
+        });
     };
 
     const handleRemovePlace = (id: number) => {
-        setLocalSelectedPlaces((prev) => prev.filter((p) => p.id !== id));
+        setLocalSelectedPlaces(prev => prev.filter(p => p.id !== id));
     };
 
     const inKR = (lat: number, lng: number) => lat >= 33 && lat <= 39 && lng >= 124 && lng <= 132;
@@ -348,11 +380,11 @@ export default function AiGuideTab() {
                             Alert.alert(t('aiGuide.notice'), t('aiGuide.selectAtLeastOne'));
                             return;
                         }
-                        setGlobalSelectedPlaces(selectedPlaces);
+                        setGlobalSelectedPlaces(selectedPlaces); // 이제 Place[]라 에러 없음
                         router.push('/route/edit');
                     }}
                 >
-                    <Text style={styles.buttonText}>{t('route.createRoute')}{/* ★ */}</Text>
+                    <Text style={styles.buttonText}>{t('route.createRoute')}</Text>
                 </TouchableOpacity>
             </View>
         </View>
