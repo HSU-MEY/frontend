@@ -150,10 +150,12 @@ const KakaoMapWebView = forwardRef<KakaoMapHandle, Props>(function KakaoMapWebVi
                   case 'BUS':
                     color = '#0000FF'; // default blue
                     if (step.lineName) {
-                      if (step.lineName.includes('마을')) color = '#FFFF00';
-                      else if (step.lineName.includes('시내/간선')) color = '#0000FF';
+                      if (step.lineName.includes('마을')) color = '#ffa600ff';
+                      else if (step.lineName.includes('시내')) color = '#0000FF';
+                      else if (step.lineName.includes('일반')) color = '#0000FF';
                       else if (step.lineName.includes('지선')) color = '#008000';
                       else if (step.lineName.includes('광역')) color = '#f32f2f';
+                      else if (step.lineName.includes('직행좌석')) color = '#f32f2f';
                     }
                     break;
                   case 'SUBWAY':

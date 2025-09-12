@@ -264,6 +264,7 @@ export default function MyPage() {
               <Row>
                 {completedRoutes.map((route: Route, index: number) => (
                   <RouteCard
+                    key={index}
                     onPress={() => router.push(`/route/route-overview/${route.routeId}`)}
                     thumbnail=""
                     title={route.title}

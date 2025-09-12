@@ -11,7 +11,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, ImageBackground, StyleSheet } from 'react-native';
 import styled from 'styled-components/native';
 
-
 export default function RouteOverviewScreen() {
   const id = Number(useLocalSearchParams().id);
   const [route, setRoute] = useState<Routes | null>(null);
@@ -172,8 +171,8 @@ export default function RouteOverviewScreen() {
         <Row>
           <InfoBox>
             <InfoTitle>이 여정은...</InfoTitle>
-            <InfoHighlight>총 <Highlight>{ distance }</Highlight>를 여행해요</InfoHighlight>
-            <InfoImage source={{ uri: 'https://placehold.co/300x300' }} />
+            <InfoImage source={ require('../../../assets/images/plane.png') } style={{right: 0, width: 192}} />
+            <InfoHighlightA style={{marginTop: 42}}>총 <HighlightA>{ distance }</HighlightA>를 여행해요</InfoHighlightA>
           </InfoBox>
         </Row>
 
@@ -181,19 +180,21 @@ export default function RouteOverviewScreen() {
           <Column style={{ flex: 1 }}>
             <InfoBox style={{ flex: 2 }}>
               <InfoTitle>우리가 둘러볼 곳은...</InfoTitle>
-              <InfoHighlight><Highlight>{ route?.routePlaces.length }개</Highlight>의 장소를 둘러볼 예정이에요</InfoHighlight>
-              <InfoSubtext>{ route?.routePlaces[0].place.name }에서 {"\n"} { route?.routePlaces[route?.routePlaces.length - 1].place.name }까지</InfoSubtext>
-              <InfoImage source={{ uri: 'https://placehold.co/300x300' }} />
-
-              <InfoHighlight>예상 총 이동 시간은 <Highlight>{ estimatedTime }</Highlight>이에요</InfoHighlight>
-              <InfoImage source={{ uri: 'https://placehold.co/300x300' }} />
+              <InfoSubtext>
+                { route?.routePlaces[0].place.name }
+                {"\n"} ... {"\n"}
+                { route?.routePlaces[route?.routePlaces.length - 1].place.name }</InfoSubtext>
+              <InfoImage source={require('../../../assets/images/city.png')} style={{right: 0, top: 30, width: 82}} />
+              <InfoHighlight style={{marginTop: 64}}><Highlight>{ route?.routePlaces.length }개</Highlight>의 장소를 둘러볼 예정이에요</InfoHighlight>
+              <InfoImage source={require('../../../assets/images/transport.png')} style={{bottom: 40, width: 178}} />
+              <InfoHighlight style={{marginTop: 86, textAlign: 'right'}}>예상 총 이동 시간은 <Highlight>{ estimatedTime }</Highlight>이에요</InfoHighlight>
             </InfoBox>
           </Column>
           <Column style={{ flex: 1 }}>
             <InfoBox style={{ flex: 1}}>
               <InfoTitle>예상 비용</InfoTitle>
-              <InfoHighlight>교통비로 약 <Highlight>{ estimatedCost }</Highlight>을 소모할 것 같아요</InfoHighlight>
-              <InfoImage source={{ uri: 'https://placehold.co/300x300' }} />
+              <InfoImage source={require('../../../assets/images/money.png')} style={{top:20}} />
+              <InfoHighlight style={{marginTop: 82, textAlign: 'right'}}>교통비로 {"\n"}약 <Highlight>{ estimatedCost }</Highlight>을{"\n"}소모할 것 같아요</InfoHighlight>
             </InfoBox>
 
             <InfoBox style={{ flex: 1 }}>
@@ -285,20 +286,33 @@ const InfoBox = styled.View`
 `;
 
 const InfoTitle = styled.Text`
-  font-weight: 700;
   font-size: 18px;
   margin-bottom: 6px;
-  color: #2680eb;
+  color: #1C5BD8;
+  font-family: 'Pretendard-Bold';
 `;
 
 const InfoHighlight = styled.Text`
   font-size: 15px;
+  
+  font-family: 'Pretendard-SemiBold';
+`;
+
+const InfoHighlightA = styled.Text`
+  font-size: 20px;
   margin-bottom: 6px;
+  font-family: 'Pretendard-SemiBold';
+`;
+
+const HighlightA = styled.Text`  
+  font-size: 24px;
+  font-family: 'Pretendard-Bold';
+  color: #0080FF;
 `;
 
 const Highlight = styled.Text`
-  color: #2680eb;
-  font-weight: bold;
+  color: #0080FF;
+  font-family: 'Pretendard-Bold';
 `;
 
 const InfoSubtext = styled.Text`
@@ -307,9 +321,9 @@ const InfoSubtext = styled.Text`
 `;
 
 const InfoImage = styled.Image`
-  width: 36px;
-  height: 36px;
-  margin-top: 8px;
+  position: absolute;
+  width: 128px;
+  height: 128px;
 `;
 
 const ButtonRow = styled.View`
