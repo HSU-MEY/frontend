@@ -12,7 +12,8 @@ import { SelectedRouteProvider } from '@/contexts/SelectedRouteContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 import { KAKAO_NATIVE_API_KEY } from '@/src/env';
-import { initializeKakaoSDK } from '@react-native-kakao/core';
+//import { initializeKakaoSDK } from '@react-native-kakao/core';
+import Constants from 'expo-constants';
 
 // i18n 추가
 import i18n, { initI18n } from '@/i18n';
@@ -37,8 +38,25 @@ export default function RootLayout() {
   const [i18nReady, setI18nReady] = useState(false);
 
   // Kakao SDK는 최초 1회만 초기화
+  // useEffect(() => {
+  //   initializeKakaoSDK(KAKAO_NATIVE_API_KEY);
+  // }, []);
   useEffect(() => {
-    initializeKakaoSDK(KAKAO_NATIVE_API_KEY);
+    const isExpoGo = Constants.appOwnership === 'expo';
+
+    if (isExpoGo) {
+      // Expo Go에서는 네이티브 모듈 사용 불가 → 지도(JS SDK)는 그대로 사용 가능
+      return;
+    }
+
+    (async () => {
+      try {
+        const { initializeKakaoSDK } = await import('@react-native-kakao/core'); // 동적 import
+        await initializeKakaoSDK(KAKAO_NATIVE_API_KEY);
+      } catch (e) {
+        console.warn('Kakao native init skipped:', e);
+      }
+    })();
   }, []);
 
   // i18n 비동기 초기화

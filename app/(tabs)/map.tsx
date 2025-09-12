@@ -309,11 +309,6 @@ export default function MapScreen() {
         />
       </View>
 
-      <ThemeTabs
-        selected={selectedCategory}
-        onSelect={setSelectedCategory}
-      />
-
       <ListContainer
         onScroll={onScroll}
         scrollEventThrottle={16}

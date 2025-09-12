@@ -4,3 +4,5 @@ declare module "@env" {
   export const KAKAO_NATIVE_API_KEY: string;
   export const OPEN_WEATHER_API_KEY: string;
 }
+
+declare module '@react-native-kakao/core';
