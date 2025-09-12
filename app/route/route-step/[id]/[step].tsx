@@ -1,17 +1,17 @@
+import { searchPlaces } from '@/api/places.service';
 import Header from '@/components/common/Header';
-import KakaoMapWebView from '@/components/KakaoMapWebView';
+import KakaoMapWebView, { KakaoMapHandle } from '@/components/KakaoMapWebView';
 import { KAKAO_JS_API_KEY } from '@/src/env';
 import { useRouteRunStore } from '@/store/useRouteRunStore';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef } from 'react';
-import { ScrollView } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { ScrollView, TouchableOpacity, View } from 'react-native';
 import styled from 'styled-components/native';
 
 export default function RouteStepScreen() {
   const { id, step = "1" } = useLocalSearchParams<{ id: string; step: string }>();
-  const ref = useRef<WebView>(null);
+  const mapRef = useRef<KakaoMapHandle>(null);
   const JS_KEY = KAKAO_JS_API_KEY;
 
   const stepNum = useMemo(() => {
@@ -22,31 +22,50 @@ export default function RouteStepScreen() {
   const getSegment = useRouteRunStore((s) => s.getSegment);
   const segment = getSegment(String(id), stepNum - 1);
   const segmentCount = useRouteRunStore((s) => s.routes[id]?.segments.length ?? 0);
+  
 
   if(!segment) {
-    router.replace(`/route/route-overview/${id}`);
+    router.replace(`/route/route-step/${id}`);
     return null;
   }
 
   const goNext = () => router.replace(`/route/route-step/${id}/${stepNum + 1}`);
   const goPrev = () => router.replace(`/route/route-step/${id}/${Math.max(1, stepNum - 1)}`);
 
+  const handlePanTo = (lat: number, lng: number) => {
+    mapRef.current?.panTo(lat, lng);
+  }
+
+  const handlePlaceButtonPress = async () => {
+    const places = await searchPlaces(segment.toName, 1);
+    const placeId = places[0]?.id;
+    if (placeId) {
+      router.push({
+        pathname: '/place/place-detail',
+        params: { id: String(placeId) },
+      })
+    } else {
+      alert("플레이스 정보를 찾을 수 없습니다.");
+    }
+  };
+  
   return (
     <Container>
     <Header title="루트" />
-    <ScrollView>
+    <View style={{ width: '100%', height: 300, backgroundColor: 'lightgrey' }}>
       <KakaoMapWebView 
-          //@ts-ignore - ref
-          ref={ref}
+          ref={mapRef}
           jsKey={JS_KEY}
-          center={{ lat: 37.5665, lng: 126.9780 }}
+          center={{ lat: segment.fromLat, lng: segment.fromLng }}
           level={4}
-          onPress={(lat, lng) => console.log('Map pressed at:', lat, lng)}
+          segments={[segment]}
+          //onPress={(lat, lng) => console.log('Map pressed at:', lat, lng)}
       ></KakaoMapWebView>
-
+    </View>
+    <ScrollView>
       <Section>
         <PlaceName>{segment.toName}</PlaceName>
-        <InfoButton onPress={() => router.push("/place/place-detail")}>
+        <InfoButton onPress={handlePlaceButtonPress}>
           <InfoText>이 플레이스에 대한 정보</InfoText>
           <Ionicons name="chevron-forward" size={16} color="white" />
         </InfoButton>
@@ -71,7 +90,8 @@ export default function RouteStepScreen() {
 
       <StepsContainer>
         {segment.steps.map((s, i) => (
-            <Step key={i}>
+          <TouchableOpacity key={i} onPress={() => s.polyline && s.polyline.length > 0 && handlePanTo(s.polyline[0].lat, s.polyline[0].lng)}>
+            <Step>
               <StepIcon>
                 {s.mode === 'WALK' && <Ionicons name="walk-outline" size={20} color="#666" />}
                 {s.mode === 'BUS' && <Ionicons name="bus-outline" size={20} color="#2680eb" />}
@@ -82,11 +102,12 @@ export default function RouteStepScreen() {
                 {s.instruction}{'\n'}
                 <SubText>
                   {Math.round(s.distanceMeters)}m · {Math.round(s.durationSeconds / 60)}분
-                  {s.lineName}번, {s.numStops ? `${s.numStops}정거장` : ""}
-                  {s.headsign ? `headsign · ${s.headsign}` : ""}
+                  {/*s.lineName}번, {s.numStops ? `${s.numStops}정거장` : ""*/}
+                  {/*s.headsign ? `headsign · ${s.headsign}` : ""*/}
                 </SubText>
               </StepText>
             </Step>
+            </TouchableOpacity>
           ))}
       </StepsContainer>
 
@@ -118,6 +139,7 @@ export default function RouteStepScreen() {
 }
 const Container = styled.View`
   flex: 1;
+  background-color: white;
 `;
 
 const MapImage = styled.Image`

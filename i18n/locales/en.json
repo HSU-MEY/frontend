@@ -1,0 +1,107 @@
+{
+    "home": {
+        "ongoingRouteTitle": "You have an ongoing route!",
+        "language": "Language",
+        "languageButton": "Change Language",
+        "recommendplace": "A popular spot on K-Route."
+    },
+    "theme": {
+        "title": "Explore by Theme"
+    },
+    "route": {
+        "title": "Route",
+        "whichCity": "Which city will you visit?",
+        "whichDate": "Which date will you go?",
+        "createRoute": "Create Route",
+        "cities": [
+            "Seoul",
+            "Incheon",
+            "Suwon",
+            "Busan",
+            "Gyeongju",
+            "Ulsan",
+            "Yeosu",
+            "Daejeon",
+            "Jeju"
+        ]
+    },
+    "calendar": {
+        "today": "Today",
+        "monthNames": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+        ],
+        "dayNames": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+        ],
+        "dayNamesShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+        ]
+    },
+    "routeStart": {
+        "tabs": [
+            "Recommended Routes",
+            "AI-guided Routes"
+        ]
+    },
+    "aiGuide": {
+        "fetchPopularFailed": "Failed to load popular places.",
+        "searchFailed": "Search failed.",
+        "searching": "Searching…",
+        "noResults": "No results found.",
+        "resultsCount": "Search results ({{count}})",
+        "recommendedByKRoute": "Places recommended by K-Route",
+        "searchTag": "Search Result",
+        "hoursUnknown": "Opening hours unavailable",
+        "placeLabelDefault": "Spot",
+        "addressUnknown": "Address unavailable",
+        "searchPlaceholder": "Search a place you want to visit!",
+        "loading": "Loading…",
+        "retry": "Retry",
+        "notice": "Notice",
+        "noCoords": "This place has no coordinate info.",
+        "selectAtLeastOne": "Please select at least one place."
+    },
+    "daysShort": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun"
+    },
+    "place": {
+        "title": "Place",
+        "loading": "Loading…",
+        "loadFail": "Failed to load place details.",
+        "addressUnknown": "Address unavailable",
+        "hoursUnknown": "Opening hours unavailable",
+        "costUnknown": "Cost info unavailable",
+        "closed": "Closed",
+        "relatedPosts": "Related Posts",
+        "nearby": "Nearby Spots"
+    }
+}

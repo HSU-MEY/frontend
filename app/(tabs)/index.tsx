@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
 
 // 컴포넌트 import
+import LanguagePicker from '@/components/common/LanguagePicker';
 import ThemeTitle from '@/components/home/ThemeTitle';
 import AIGuideRoutes from '../../components/home/AIGuideRoutes';
 import BannerSection from '../../components/home/BannerSection';
@@ -34,6 +35,7 @@ export default function HomeScreen() {
         {/* 흰색 둥근 네모 컨테이너 */}
         <View style={styles.whiteContainer}>
           <View style={{ padding: 20 }}>
+            <LanguagePicker />
             <OngoingRoute />
             <BannerSection />
             <AIGuideRoutes />

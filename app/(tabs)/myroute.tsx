@@ -326,9 +326,11 @@ export default function MyPage() {
             <SettingItem onPress={handleLogout}>
               <SettingText>로그아웃</SettingText>
             </SettingItem>
+            {/*
             <SettingItem>
               <SettingText>회원 탈퇴</SettingText>
             </SettingItem>
+            */}
           </>
         )}
       </Section>

@@ -1,0 +1,96 @@
+{
+    "home": {
+        "ongoingRouteTitle": "您有进行中的路线！",
+        "language": "语言",
+        "languageButton": "更改语言",
+        "recommendplace": "K-Route 上大家都喜欢的地方。"
+    },
+    "theme": {
+        "title": "按主题探索"
+    },
+    "route": {
+        "title": "路线",
+        "whichCity": "您要去哪个地区？",
+        "whichDate": "您要在哪一天去？",
+        "createRoute": "创建路线",
+        "cities": [
+            "首尔",
+            "仁川",
+            "水原",
+            "釜山",
+            "庆州",
+            "蔚山",
+            "丽水",
+            "大田",
+            "济州"
+        ]
+    },
+    "calendar": {
+        "today": "今天",
+        "monthNames": [
+            "1月",
+            "2月",
+            "3月",
+            "4月",
+            "5月",
+            "6月",
+            "7月",
+            "8月",
+            "9月",
+            "10月",
+            "11月",
+            "12月"
+        ],
+        "dayNames": [
+            "星期日",
+            "星期一",
+            "星期二",
+            "星期三",
+            "星期四",
+            "星期五",
+            "星期六"
+        ],
+        "dayNamesShort": [
+            "日",
+            "一",
+            "二",
+            "三",
+            "四",
+            "五",
+            "六"
+        ]
+    },
+    "routeStart": {
+        "tabs": [
+            "推荐路线",
+            "AI指南推荐路线"
+        ]
+    },
+    "aiGuide": {
+        "fetchPopularFailed": "未能加载热门地点。",
+        "searchFailed": "搜索失败。",
+        "searching": "搜索中…",
+        "noResults": "没有找到结果。",
+        "resultsCount": "搜索结果（{{count}}个）",
+        "recommendedByKRoute": "K-Route 推荐的地点",
+        "searchTag": "搜索结果",
+        "hoursUnknown": "营业时间暂无信息",
+        "placeLabelDefault": "名胜",
+        "addressUnknown": "地址信息暂无",
+        "searchPlaceholder": "搜索想去的地点！",
+        "loading": "加载中…",
+        "retry": "重试",
+        "notice": "提示",
+        "noCoords": "该地点没有坐标信息。",
+        "selectAtLeastOne": "请至少选择一个地点。"
+    },
+    "daysShort": {
+        "mon": "一",
+        "tue": "二",
+        "wed": "三",
+        "thu": "四",
+        "fri": "五",
+        "sat": "六",
+        "sun": "日"
+    }
+}

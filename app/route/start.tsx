@@ -1,17 +1,24 @@
 import Header from '@/components/common/Header';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AiGuideTab from './AiGuideTab';
 import RecommendTab from './RecommendTab';
 
-const tabs = ['추천 루트', 'AI가이드 추천 루트'];
+// const tabs = ['추천 루트', 'AI가이드 추천 루트'];
 
 export default function RouteStartScreen() {
+    const { t, i18n } = useTranslation();
     const [activeTab, setActiveTab] = useState(0);
+
+    const tabs = useMemo(
+        () => t('routeStart.tabs', { returnObjects: true }) as string[],
+        [i18n.language, t]
+    );
 
     return (
         <View style={styles.container}>
-            <Header title="루트" />
+            <Header title={t('route.title')} />
 
             {/* 탭 선택 바 */}
             <View style={styles.tabBar}>

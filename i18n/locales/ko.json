@@ -1,0 +1,107 @@
+{
+    "home": {
+        "ongoingRouteTitle": "현재 진행중인 루트가 있어요!",
+        "language": "언어",
+        "languageButton": "언어 바꾸기",
+        "recommendplace": "K-Route에서 다들 만족하는 장소예요"
+    },
+    "theme": {
+        "title": "테마별 탐색"
+    },
+    "route": {
+        "title": "루트",
+        "whichCity": "어느 지역으로 가시나요?",
+        "whichDate": "어느 날짜에 가시나요?",
+        "createRoute": "루트 만들기",
+        "cities": [
+            "서울",
+            "인천",
+            "수원",
+            "부산",
+            "경주",
+            "울산",
+            "여수",
+            "대전",
+            "제주"
+        ]
+    },
+    "calendar": {
+        "today": "오늘",
+        "monthNames": [
+            "1월",
+            "2월",
+            "3월",
+            "4월",
+            "5월",
+            "6월",
+            "7월",
+            "8월",
+            "9월",
+            "10월",
+            "11월",
+            "12월"
+        ],
+        "dayNames": [
+            "일요일",
+            "월요일",
+            "화요일",
+            "수요일",
+            "목요일",
+            "금요일",
+            "토요일"
+        ],
+        "dayNamesShort": [
+            "일",
+            "월",
+            "화",
+            "수",
+            "목",
+            "금",
+            "토"
+        ]
+    },
+    "routeStart": {
+        "tabs": [
+            "추천 루트",
+            "AI 가이드 추천 루트"
+        ]
+    },
+    "aiGuide": {
+        "fetchPopularFailed": "인기 장소를 불러오지 못했어요.",
+        "searchFailed": "검색에 실패했어요.",
+        "searching": "검색 중…",
+        "noResults": "검색 결과가 없습니다.",
+        "resultsCount": "검색 결과 ({{count}}개)",
+        "recommendedByKRoute": "K-Route가 추천해주는 장소",
+        "searchTag": "검색결과",
+        "hoursUnknown": "운영시간 정보 없음",
+        "placeLabelDefault": "명소",
+        "addressUnknown": "주소 정보 없음",
+        "searchPlaceholder": "가고싶은 장소를 검색해보세요!",
+        "loading": "불러오는 중…",
+        "retry": "다시 시도",
+        "notice": "안내",
+        "noCoords": "이 장소에는 좌표 정보가 없어요.",
+        "selectAtLeastOne": "장소를 한 개 이상 선택해주세요."
+    },
+    "daysShort": {
+        "mon": "월",
+        "tue": "화",
+        "wed": "수",
+        "thu": "목",
+        "fri": "금",
+        "sat": "토",
+        "sun": "일"
+    },
+    "place": {
+        "title": "장소",
+        "loading": "불러오는 중…",
+        "loadFail": "장소 정보를 불러오지 못했어요.",
+        "addressUnknown": "주소 정보 없음",
+        "hoursUnknown": "운영시간 정보 없음",
+        "costUnknown": "비용 정보 없음",
+        "closed": "휴무",
+        "relatedPosts": "관련 게시물",
+        "nearby": "근처 명소"
+    }
+}

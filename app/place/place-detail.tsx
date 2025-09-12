@@ -1,43 +1,110 @@
-// app/place/place-detail.tsx
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Linking } from 'react-native';
 import styled from 'styled-components/native';
 
 import { fetchPlaceDetail, PlaceDetailDTO } from '@/api/places.service';
 import Header from '@/components/common/Header';
+import { useTranslation } from 'react-i18next';
 
 const PLACEHOLDER = { uri: 'https://placehold.co/600x400' };
 
-const KR_DAYS: Record<string, string> = {
-  monday: '월', tuesday: '화', wednesday: '수', thursday: '목',
-  friday: '금', saturday: '토', sunday: '일',
-};
+// const KR_DAYS: Record<string, string> = {
+//   monday: '월', tuesday: '화', wednesday: '수', thursday: '목',
+//   friday: '금', saturday: '토', sunday: '일',
+// };
 
-function formatOpeningHours(hours: any): string {
-  if (!hours) return '운영시간 정보 없음';
-  if (typeof hours === 'string') return hours;
-  if (Array.isArray(hours)) return hours.filter(Boolean).join(', ');
+// function formatOpeningHours(hours: any): string {
+//   if (!hours) return '운영시간 정보 없음';
+//   if (typeof hours === 'string') return hours;
+//   if (Array.isArray(hours)) return hours.filter(Boolean).join(', ');
+//   if (typeof hours === 'object') {
+//     const parts = Object.entries(hours).map(([day, val]) => {
+//       const d = KR_DAYS[day.toLowerCase()] ?? day;
+//       if (typeof val === 'string') return `${d} ${val}`;
+//       if (val && typeof val === 'object') {
+//         const open = (val as any).open ?? (val as any).start ?? '';
+//         const close = (val as any).close ?? (val as any).end ?? '';
+//         if (open && close) return `${d} ${open}~${close}`;
+//         if (open || close) return `${d} ${open || close}`;
+//         return `${d} 영업`;
+//       }
+//       return `${d}`;
+//     }).filter(Boolean);
+//     return parts.length ? (parts.length <= 2 ? parts.join(' · ') : `${parts.slice(0,2).join(' · ')} 외`) : '운영시간 정보 없음';
+//   }
+//   return String(hours);
+// }
+
+// 현재 언어를 우선으로 고르기
+function pickByLang(
+  lang: string,
+  ko?: string | null,
+  en?: string | null
+): string {
+  if (lang.startsWith('ko')) return ko ?? en ?? '';
+  return en ?? ko ?? '';
+}
+
+// 요일/휴무까지 언어별로 포맷
+function formatOpeningHours(
+  hours: any,
+  daysShort: Record<string, string>,
+  t: (k: string, o?: any) => string
+): string {
+  if (!hours) return t('place.hoursUnknown');
+  if (typeof hours === 'string') {
+    // 'closed' 같은 표기를 번역
+    const s = hours.toLowerCase().includes('closed') ? t('place.closed') : hours;
+    return s;
+  }
+  if (Array.isArray(hours)) {
+    return hours
+      .filter(Boolean)
+      .map((s) => (String(s).toLowerCase().includes('closed') ? t('place.closed') : s))
+      .join(', ');
+  }
   if (typeof hours === 'object') {
-    const parts = Object.entries(hours).map(([day, val]) => {
-      const d = KR_DAYS[day.toLowerCase()] ?? day;
-      if (typeof val === 'string') return `${d} ${val}`;
-      if (val && typeof val === 'object') {
-        const open = (val as any).open ?? (val as any).start ?? '';
-        const close = (val as any).close ?? (val as any).end ?? '';
-        if (open && close) return `${d} ${open}~${close}`;
-        if (open || close) return `${d} ${open || close}`;
-        return `${d} 영업`;
-      }
-      return `${d}`;
-    }).filter(Boolean);
-    return parts.length ? (parts.length <= 2 ? parts.join(' · ') : `${parts.slice(0,2).join(' · ')} 외`) : '운영시간 정보 없음';
+    const mapLabel = (dayKey: string) => {
+      const k = dayKey.toLowerCase();
+      if (k.startsWith('mon')) return daysShort.mon;
+      if (k.startsWith('tue')) return daysShort.tue;
+      if (k.startsWith('wed')) return daysShort.wed;
+      if (k.startsWith('thu')) return daysShort.thu;
+      if (k.startsWith('fri')) return daysShort.fri;
+      if (k.startsWith('sat')) return daysShort.sat;
+      if (k.startsWith('sun')) return daysShort.sun;
+      // 'monday' 등 풀네임도 위 startsWith로 처리됨
+      return dayKey;
+    };
+
+    const parts = Object.entries(hours)
+      .map(([day, val]) => {
+        const d = mapLabel(day);
+        if (typeof val === 'string') {
+          const v = val.toLowerCase().includes('closed') ? t('place.closed') : val;
+          return `${d} ${v}`;
+        }
+        if (val && typeof val === 'object') {
+          const open = (val as any).open ?? (val as any).start ?? '';
+          const close = (val as any).close ?? (val as any).end ?? '';
+          if (open && close) return `${d} ${open}~${close}`;
+          if (open || close) return `${d} ${open || close}`;
+          return `${d}`;
+        }
+        return `${d}`;
+      })
+      .filter(Boolean);
+
+    if (parts.length === 0) return t('place.hoursUnknown');
+    return parts.length <= 2 ? parts.join(' · ') : `${parts.slice(0, 2).join(' · ')} …`;
   }
   return String(hours);
 }
 
 export default function PlaceDetailScreen() {
+  const { t, i18n } = useTranslation();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const placeId = Number(id);
 
@@ -54,44 +121,60 @@ export default function PlaceDetailScreen() {
         if (!mounted) return;
         setData(detail);
       } catch (e: any) {
-        setErr('장소 정보를 불러오지 못했어요.');
+        setErr(t('place.loadFail'));
       } finally {
         if (mounted) setLoading(false);
       }
     })();
-    return () => { mounted = false; };
-  }, [placeId]);
+    return () => {
+      mounted = false;
+    };
+  }, [placeId, t]);
 
-  const title = data?.nameKo || data?.nameEn || `장소 #${placeId}`;
-  const address = data?.address || '주소 정보 없음';
-  const hours = formatOpeningHours(data?.openingHours);
-  const cost = data?.costInfo || '비용 정보 없음';
+  // 언어별 요일 약칭 (i18n에서 가져옴)
+  const DAYS_SHORT = useMemo(
+    () => t('daysShort', { returnObjects: true }) as Record<string, string>,
+    [i18n.language, t]
+  );
+
+  // 다국어 필드 선택
+  const title =
+    pickByLang(i18n.language, data?.nameKo ?? null, data?.nameEn ?? null) || `#${placeId}`;
+  const address = data?.address || t('place.addressUnknown');
+  const hours = formatOpeningHours(data?.openingHours, DAYS_SHORT, t);
+  const cost = data?.costInfo || t('place.costUnknown');
   const tel = data?.contactInfo || '';
-  const desc = data?.descriptionKo || data?.descriptionEn || '';
+  const desc =
+    pickByLang(i18n.language, data?.descriptionKo ?? null, data?.descriptionEn ?? null);
+
   const imageSrc = data?.imageUrl ? { uri: data.imageUrl } : PLACEHOLDER;
 
   if (loading) {
     return (
       <Container>
-        <Header title="플레이스" />
+        <Header title={t('place.title')} />
         <TopImage source={PLACEHOLDER} />
-        <Section><Title>불러오는 중…</Title></Section>
+        <Section>
+          <Title>{t('place.loading')}</Title>
+        </Section>
       </Container>
     );
   }
   if (err) {
     return (
       <Container>
-        <Header title="플레이스" />
+        <Header title={t('place.title')} />
         <TopImage source={PLACEHOLDER} />
-        <Section><Title>{err}</Title></Section>
+        <Section>
+          <Title>{err}</Title>
+        </Section>
       </Container>
     );
   }
 
   return (
     <Container>
-      <Header title="플레이스" />
+      <Header title={t('place.title')} />
       <TopImage source={imageSrc} />
 
       <Section>
@@ -131,8 +214,7 @@ export default function PlaceDetailScreen() {
         {!!desc && <Description>{desc}</Description>}
       </Section>
 
-      {/* --- 아래 섹션들은 더미 유지 (백엔드 연결 전까지) --- */}
-      <Section>
+      {/* <Section>
         <Subtitle>주요 이벤트</Subtitle>
         <Card>
           <CardImage source={{ uri: 'https://placehold.co/300x300' }} />
@@ -142,36 +224,36 @@ export default function PlaceDetailScreen() {
           <CardImage source={{ uri: 'https://placehold.co/300x300' }} />
           <CardText>‘색채, 결이 되다’ 복운경 작가 쿠레이지 이벤트{"\n"}매일 11:00 - 20:00</CardText>
         </Card>
-      </Section>
+      </Section> */}
 
       <Section>
-        <Subtitle>관련 게시물</Subtitle>
+        <Subtitle>{t('place.relatedPosts')}</Subtitle>
         <Row>
           <RelatedCard>
             <RelatedImage source={{ uri: 'https://placehold.co/300x200' }} />
-            <RelatedText>설화수 플래그십 스토어에서의 특별한 하루</RelatedText>
+            <RelatedText>Sample Post A</RelatedText>
           </RelatedCard>
           <RelatedCard>
             <RelatedImage source={{ uri: 'https://placehold.co/300x200' }} />
-            <RelatedText>설화수 피부 진단 & 맞춤 클래스 후기</RelatedText>
+            <RelatedText>Sample Post B</RelatedText>
           </RelatedCard>
         </Row>
       </Section>
 
       <Section>
-        <Subtitle>근처 명소</Subtitle>
+        <Subtitle>{t('place.nearby')}</Subtitle>
         <Row>
           <NearbyCard>
             <NearbyImage source={{ uri: 'https://placehold.co/300x300' }} />
-            <NearbyText>핑크로즈 CAFE{"\n"}도보 1.2km</NearbyText>
+            <NearbyText>Sample Nearby 1{"\n"}1.2km</NearbyText>
           </NearbyCard>
           <NearbyCard>
             <NearbyImage source={{ uri: 'https://placehold.co/300x300' }} />
-            <NearbyText>진대감 벽제 본점{"\n"}도보 320m</NearbyText>
+            <NearbyText>Sample Nearby 2{"\n"}320m</NearbyText>
           </NearbyCard>
           <NearbyCard>
             <NearbyImage source={{ uri: 'https://placehold.co/300x300' }} />
-            <NearbyText>스위트브레드 베이커리{"\n"}도보 140m</NearbyText>
+            <NearbyText>Sample Nearby 3{"\n"}140m</NearbyText>
           </NearbyCard>
         </Row>
       </Section>
