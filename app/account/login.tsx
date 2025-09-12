@@ -1,9 +1,11 @@
 // app/account/login.tsx
+import Header from '@/components/common/Header';
+import GradientText from '@/components/GradientText';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Button, Text } from 'react-native';
+import { Alert, Text } from 'react-native';
 import styled from 'styled-components/native';
 // (선택) 프로필 읽어 환영 문구 등에 쓰고 싶다면:
 // import { getMyProfile } from '@/api/user';
@@ -63,6 +65,11 @@ export default function LoginScreen() {
   if (checking) {
     return (
       <Container>
+        <Header title="로그인" />
+        <HeaderImage
+          source={require('../../assets/images/header-l.png')} 
+          resizeMode="cover"
+        />
         <Title>로그인</Title>
         <Text style={{ textAlign: 'center', color: '#666' }}>로그인 상태 확인 중…</Text>
       </Container>
@@ -71,44 +78,63 @@ export default function LoginScreen() {
 
   return (
     <Container>
-      <Title>로그인</Title>
-
+      <Header title="로그인" />
+      <HeaderImage
+        source={require('../../assets/images/header-l.png')} 
+        resizeMode="cover"
+      />
+      <ContentContainer>
+      <GradientText
+        colors={['#0080FF', '#53BDFF']}
+        style={{ fontSize: 24, textAlign: 'center', marginBottom: 20, fontFamily: 'Pretendard-Bold' }}
+      >
+        환영합니다!
+      </GradientText>
+      <InputLabel>이메일</InputLabel>
       <Input
-        placeholder="이메일"
+        placeholder=""
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
         keyboardType="email-address"
       />
-
+      <InputLabel>비밀번호</InputLabel>
       <Input
-        placeholder="비밀번호"
+        placeholder=""
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
 
-      <Text onPress={() => router.push('/account/reset-password')} style={{ color: 'grey', marginBottom: 8 }}>
+      <Text onPress={() => router.push('/account/reset-password')} style={{ color: 'grey', marginBottom: 8, textAlign: 'center', fontFamily: 'Pretendard-Regular' }}>
         비밀번호를 잊으셨나요?
       </Text>
 
-      <Button title={submitting ? '로그인 중…' : '로그인'} onPress={handleLogin} disabled={submitting} />
+      <CustomButton title={submitting ? '로그인 중…' : '로그인'} onPress={handleLogin} disabled={submitting}>
+        <Text style={{ color: 'white', fontSize: 16, fontFamily: 'Pretendard-SemiBold' }}>
+          {submitting ? '로그인 중…' : '로그인'}
+        </Text>
+      </CustomButton>
 
-      <Text style={{ textAlign: 'center', marginTop: 16 }}>
+      <Text style={{ textAlign: 'center', marginTop: 16, fontFamily: 'Pretendard-Regular' }}>
         계정이 없으신가요?{' '}
-        <Text onPress={() => router.push('/account/register')} style={{ color: 'blue' }}>
+        <Text onPress={() => router.push('/account/register')} style={{ color: '#0080FF', fontFamily: 'Pretendard-SemiBold' }}>
           회원가입
         </Text>
       </Text>
+      </ContentContainer>
     </Container>
   );
 }
 
 const Container = styled.View`
   flex: 1;
-  justify-content: center;
-  padding: 0 20px;
   background-color: white;
+`;
+
+const ContentContainer = styled.View`
+  padding: 0 20px;
+
 `;
 
 const Title = styled.Text`
@@ -125,6 +151,30 @@ const Input = styled.TextInput`
   border-radius: 4px;
 `;
 
+const InputLabel = styled.Text`
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #0080FF;
+  font-family: 'Pretendard-SemiBold';
+`;
+
 const ForgotPassword = styled.TouchableOpacity`
   color: grey;
+`;
+
+const HeaderImage = styled.Image`
+  width: 100%;
+  height: 350px;
+  margin-bottom: 20px;
+`;
+
+const CustomButton = styled.TouchableOpacity`
+  background-color: #0080FF;
+  padding: 12px;
+  border-radius: 100px;
+  align-items: center;
+  margin: 20px auto 0 auto;
+  color: white;
+  width: 70%;
+
 `;
