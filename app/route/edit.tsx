@@ -1,10 +1,12 @@
 import { createRouteByAiGuideApi } from '@/api/routes.service';
+import KakaoMapWebView, { KakaoMapHandle } from '@/components/KakaoMapWebView';
 import Header from '@/components/common/Header';
 import { useSelectedRoute } from '@/contexts/SelectedRouteContext';
+import { KAKAO_JS_API_KEY } from '@/src/env';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Dimensions,
     Image,
@@ -20,6 +22,24 @@ const screenWidth = Dimensions.get('window').width;
 export default function EditRouteScreen() {
     const { selectedPlaces, setSelectedPlaces } = useSelectedRoute();
     const router = useRouter();
+    const mapRef = useRef<KakaoMapHandle>(null);
+    const JS_KEY = KAKAO_JS_API_KEY;
+    const [isMapReady, setMapReady] = useState(false);
+
+    useEffect(() => {
+        if (isMapReady && mapRef.current && selectedPlaces.length > 0) {
+            const coords = selectedPlaces
+                .map(p => ({
+                    lat: Number(p.raw.latitude),
+                    lng: Number(p.raw.longitude),
+                }))
+                .filter(c => !Number.isNaN(c.lat) && !Number.isNaN(c.lng));
+
+            if (coords.length > 0) {
+                mapRef.current.addMarkers(coords);
+            }
+        }
+    }, [selectedPlaces, isMapReady]);
 
     const handleDelete = (id: number) => {
         const updated = selectedPlaces.filter((place) => place.id !== id);
@@ -90,21 +110,24 @@ export default function EditRouteScreen() {
     };
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-            <Header title="루트 편집" />
-
-            <Image
-                source={require('@/assets/images/sample-route.png')}
-                style={styles.mapimage}
-                resizeMode="cover"
+        <View style={styles.container}>
+        <Header title="루트 편집" />
+        <View style={styles.mapContainer}>
+            <KakaoMapWebView
+                ref={mapRef}
+                jsKey={JS_KEY}
+                style={styles.map}
+                onReady={() => setMapReady(true)}
             />
+        </View>
+        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
 
             <View style={styles.routeInfo}>
-                <Text style={styles.routeTitle}>K-Beauty 추천 루트: Skincare</Text>
+                <Text style={styles.routeTitle}>커스텀 루트 생성</Text>
                 <Text style={styles.routeSub}>
-                    서울시 홍대{'\n'}예상 시간: 5시간 30분  |  예상 비용: 54,000원
+                    선택한 장소 {selectedPlaces.length}곳
                 </Text>
-                <Text style={styles.tip}>장소를 삭제할 수 있어요!</Text>
+                <Text style={styles.tip}>플레이스 순서 변경, 삭제, 추가가 가능해요</Text>
 
                 <TouchableOpacity
                     style={styles.addButton}
@@ -177,16 +200,19 @@ export default function EditRouteScreen() {
                 </TouchableOpacity>
             </View>
         </ScrollView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#fff' },
-    mapimage: {
+    mapContainer: {
         width: '100%',
         height: 220,
-        //aspectRatio: 1.5,
-        //height: 220
+    },
+    map: {
+        width: '100%',
+        height: '100%',
     },
     routeInfo: {
         paddingHorizontal: 16,

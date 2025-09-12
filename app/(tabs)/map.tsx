@@ -1,17 +1,23 @@
+import KakaoMapWebView, { KakaoMapHandle } from '@/components/KakaoMapWebView';
 import type { ThemeCategory } from '@/components/theme/ThemeRouteCards';
 import ThemeTabs from '@/components/theme/ThemeTabs';
-import { router } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components/native';
-
-import KakaoMapWebView from '@/components/KakaoMapWebView';
 import { places as dummyPlaces } from '@/data/dummyPlaces';
 import { KAKAO_JS_API_KEY } from '@/src/env';
-import { ActivityIndicator, ImageSourcePropType, NativeScrollEvent, NativeSyntheticEvent, View } from 'react-native';
-import { WebView } from 'react-native-webview';
 
 import { fetchPlaceDetail, fetchThemePlaces, PopularPlaceDTO } from '@/api/places.service';
 import { summarizeOpeningHours } from '@/utils/openingHours';
+
+import * as Location from 'expo-location';
+import { router } from 'expo-router';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  ImageSourcePropType,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  View,
+} from 'react-native';
+import styled from 'styled-components/native';
 
 type UIPlace = {
   id: number;
@@ -24,7 +30,6 @@ type UIPlace = {
   category: ThemeCategory;
 };
 
-// 테마 키워드 매핑: 탭 문자열 -> API keyword
 const THEME_TO_KEYWORD: Record<ThemeCategory, string> = {
   'K-Pop': 'K_pop',
   'K-Drama': 'K_drama',
@@ -35,7 +40,6 @@ const THEME_TO_KEYWORD: Record<ThemeCategory, string> = {
 
 const PAGE_SIZE = 10;
 
-// 카테고리별 상태를 캐시 (무한스크롤/재방문시 유지)
 type ThemeState = {
   items: UIPlace[];
   loading: boolean;
@@ -78,11 +82,15 @@ function formatOpeningHours(hours: any): string {
 
 export default function MapScreen() {
   const [selectedCategory, setSelectedCategory] = useState<ThemeCategory>('K-Pop');
-  const ref = useRef<WebView>(null);
+  const mapRef = useRef<KakaoMapHandle>(null);
+  const isInitialMapLoad = useRef(true);
   const JS_KEY = KAKAO_JS_API_KEY;
   const [detailCache, setDetailCache] = useState<Record<number, any>>({});
 
-  // 카테고리별 상태 캐시
+  const [currentLocation, setCurrentLocation] = useState<Location.LocationObjectCoords | null>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
+
+
   const [byTheme, setByTheme] = useState<Record<ThemeCategory, ThemeState>>({
     'K-Pop': { items: [], loading: false, error: null, hasMore: true },
     'K-Drama': { items: [], loading: false, error: null, hasMore: true },
@@ -91,16 +99,60 @@ export default function MapScreen() {
     'K-Food': { items: [], loading: false, error: null, hasMore: true },
   });
 
-  // 현재 카테고리의 상태
   const themeState = byTheme[selectedCategory];
 
-  // 더미에서 해당 카테고리 기본 템플릿들 추출 (부족한 필드 채우기에 사용)
   const dummyForCategory = useMemo(
     () => dummyPlaces.filter(p => p.category === selectedCategory),
     [selectedCategory]
   );
 
-  // 백엔드 DTO -> UIPlace로 변환 (부족한 필드 더미로 보충)
+  // ===== Location Tracking Effect =====
+  useEffect(() => {
+    let watcher: Location.LocationSubscription | undefined;
+
+    const startWatching = async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Permission to access location was denied');
+        return;
+      }
+
+      watcher = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 5000, // 5 seconds
+          distanceInterval: 10, // 10 meters
+        },
+        (location) => {
+          setCurrentLocation(location.coords);
+        }
+      );
+    };
+
+    startWatching();
+
+    return () => {
+      watcher?.remove();
+    };
+  }, []);
+
+  // ===== Map Update Effect =====
+  useEffect(() => {
+    if (currentLocation && mapRef.current && isMapReady) {
+      const { latitude, longitude } = currentLocation;
+      mapRef.current.setCurrentLocationMarker(latitude, longitude, 'https://firebasestorage.googleapis.com/v0/b/apporium-d7aef.firebasestorage.app/o/temp%2Fcurrent-location.png?alt=media&token=e6b6469f-ee4a-4274-beb3-2b6fa0802aa7');
+
+      if (isInitialMapLoad.current) {
+        mapRef.current.setCenter(latitude, longitude, 4);
+        isInitialMapLoad.current = false;
+      } else {
+        mapRef.current.setCenter(latitude, longitude); // Update center without full reload
+      }
+    }
+  }, [currentLocation, isMapReady]);
+
+
+
   const mapBackendToUI = (b: PopularPlaceDTO, idx: number): UIPlace => {
     const base = dummyForCategory[idx % Math.max(1, dummyForCategory.length)];
     const title = b.nameKo || b.nameEn || `장소 #${b.id}`;
@@ -182,34 +234,30 @@ export default function MapScreen() {
   // 최초/탭 변경 시 자동 로드
   useEffect(() => {
     if (themeState.items.length === 0 && !themeState.loading) {
-      loadMore(); // 첫 페이지
+      loadMore();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory]);
 
   const loadMore = async () => {
     const keyword = THEME_TO_KEYWORD[selectedCategory];
-    if (!keyword) return;
-    if (themeState.loading || !themeState.hasMore) return;
+    if (!keyword || themeState.loading || !themeState.hasMore) return;
 
     try {
       setThemeState(selectedCategory, { loading: true, error: null });
-
       const nextLimit = themeState.items.length + PAGE_SIZE;
       const backend = await fetchThemePlaces(keyword, nextLimit); // [{ id, nameKo, themes }...]
-
       const ui = backend.map((b, i) => mapBackendToUI(b, i));
       const dedup = deduplicateById([...ui]);
-
       const had = themeState.items.length;
       const got = dedup.length;
-      const hasMore = got > had;
-
-      setThemeState(selectedCategory, { items: dedup, hasMore });
+      //const hasMore = got > had;
 
       // 여기서 상세 보강 실행 (주소/운영시간 채우기)
       const ids = backend.map(b => b.id);
       fetchDetailsFor(ids).catch(() => { });
+
+      const hasMore = dedup.length > themeState.items.length;
+      setThemeState(selectedCategory, { items: dedup, hasMore });
     } catch (e: any) {
       setThemeState(selectedCategory, { error: '데이터를 불러오지 못했어요.' });
     } finally {
@@ -226,10 +274,8 @@ export default function MapScreen() {
     if (reachedEnd) loadMore();
   };
 
-  // 현재 화면에 그릴 리스트: 백엔드 items가 있으면 그것을 우선, 없으면 기존 더미
   const listForRender = useMemo<UIPlace[]>(() => {
     if (themeState.items.length > 0) return themeState.items;
-    // 백엔드 미로딩/실패면 기존 더미 유지
     return dummyForCategory.map<UIPlace>((d) => ({
       id: d.id,
       title: d.title ?? `장소 #${d.id}`,
@@ -248,13 +294,11 @@ export default function MapScreen() {
     <Container>
       <View style={{ width: '100%', height: 300, backgroundColor: 'lightgrey' }}>
         <KakaoMapWebView
-          //@ts-ignore - ref
-          ref={ref}
+          ref={mapRef}
           jsKey={JS_KEY}
-          center={{ lat: 37.5665, lng: 126.9780 }} // 서울시청 좌표
+          center={undefined}
           level={4}
-          onReady={() => console.log('Map is ready')}
-          onPress={(lat, lng) => console.log('Map pressed at:', lat, lng)}
+          onReady={() => setIsMapReady(true)}
         />
       </View>
 
@@ -265,7 +309,11 @@ export default function MapScreen() {
         />
       </View>
 
-      {/* 기존 스타일 유지, props만 추가 */}
+      <ThemeTabs
+        selected={selectedCategory}
+        onSelect={setSelectedCategory}
+      />
+
       <ListContainer
         onScroll={onScroll}
         scrollEventThrottle={16}
@@ -297,7 +345,6 @@ export default function MapScreen() {
               </PlaceItem>
             ))}
 
-          {/* 하단 로더 */}
           {themeState.loading && (
             <View style={{ padding: 14, alignItems: 'center' }}>
               <ActivityIndicator />
@@ -309,7 +356,6 @@ export default function MapScreen() {
   );
 }
 
-/** id 기준 중복 제거 (뒤에 온 항목으로 교체) */
 function deduplicateById(arr: UIPlace[]) {
   const map = new Map<number, UIPlace>();
   for (const it of arr) map.set(it.id, it);
@@ -323,12 +369,6 @@ const Container = styled.View`
 
 const ListContainer = styled.ScrollView`
   padding: 6px 0;
-`;
-
-const TabRow = styled.View`
-  flex-direction: row;
-  justify-content: space-around;
-  margin-vertical: 12px;
 `;
 
 const PlaceList = styled.View`
