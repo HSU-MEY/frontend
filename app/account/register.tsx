@@ -119,6 +119,13 @@ export default function RegisterScreen() {
           </Pressable>
         </ProfileImageContainer>
 
+        <InputLabel>닉네임</InputLabel>
+        <Input
+          placeholder="사용하실 닉네임"
+          value={nickname}
+          onChangeText={setNickname}
+        />
+
         <InputLabel>이메일</InputLabel>
         <Input
           placeholder="이메일 주소"
@@ -144,12 +151,6 @@ export default function RegisterScreen() {
           secureTextEntry
         />
 
-        <InputLabel>닉네임</InputLabel>
-        <Input
-          placeholder="사용하실 닉네임"
-          value={nickname}
-          onChangeText={setNickname}
-        />
 
         <AgreementContainer>
           <Switch
@@ -186,6 +187,7 @@ export default function RegisterScreen() {
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 30}
     >
       <Container contentContainerStyle={{ flexGrow: 1 }}>
         {renderContent()}
