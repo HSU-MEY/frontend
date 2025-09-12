@@ -1,4 +1,5 @@
 import { searchPlaces } from '@/api/places.service';
+import { changeUserRouteStatus } from '@/api/users.routes.service';
 import Header from '@/components/common/Header';
 import KakaoMapWebView, { KakaoMapHandle } from '@/components/KakaoMapWebView';
 import { KAKAO_JS_API_KEY } from '@/src/env';
@@ -48,6 +49,13 @@ export default function RouteStepScreen() {
       alert("플레이스 정보를 찾을 수 없습니다.");
     }
   };
+
+  const handleEndRoute = () => {
+    changeUserRouteStatus(savedRouteId, 'COMPLETED').catch((error) => {
+      console.error("Failed to change route status:", error);
+    });
+    router.replace("/");
+  }
   
   return (
     <Container>

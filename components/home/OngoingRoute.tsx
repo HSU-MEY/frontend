@@ -1,8 +1,9 @@
 import TicketCard from '@/components/TicketCard';
 import { useUserRoutes } from '@/hooks/useUserRoutes';
+import { router } from 'expo-router';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function OngoingRoute() {
     const { t } = useTranslation();
@@ -19,7 +20,7 @@ export default function OngoingRoute() {
     return (
         <>
             {!ongoingLoading && !ongoingError && ongoingData && firstData &&
-                <View style={styles.container}>
+                <TouchableOpacity style={styles.container} onPress={() => { router.push(`/route/route-overview/${firstData.routeId}`) }}>
                     {/* 이미지 + 텍스트 가로 배치 */}
                     <View style={styles.headerRow}>
                         <Image
@@ -38,7 +39,7 @@ export default function OngoingRoute() {
                         progress={88}   //TODO: Change to dynamic value
                         imageSource={require('@/assets/images/sample-stage.png')}
                     />
-                </View>
+                </TouchableOpacity>
             }
         </>
     );

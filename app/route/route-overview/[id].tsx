@@ -144,8 +144,8 @@ export default function RouteOverviewScreen() {
   }
 
   const handleLaterButton = () => {
-    if(routeStatus !== 'NOT_SAVED') {
-      saveUserRoute(id, new Date(), "09:00").catch((error) => {
+    if(routeStatus !== 'NOT_SAVED' && savedRouteId !== null) {
+      saveUserRoute(savedRouteId, new Date(), "09:00").catch((error) => {
         console.error("Failed to save route:", error);
       });
     }
