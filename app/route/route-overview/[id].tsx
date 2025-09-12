@@ -1,12 +1,13 @@
 // app/route/route
 import { getRouteApi, Routes, startRouteApi } from '@/api/routes.service';
+import { changeUserRouteStatus } from '@/api/users.routes.service';
 import Header from '@/components/common/Header';
 import { useUserRoutes } from '@/hooks/useUserRoutes';
 import { useWeather } from '@/hooks/useWeathers';
 import { useRouteRunStore } from '@/store/useRouteRunStore';
 import * as Location from "expo-location";
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, ImageBackground, StyleSheet } from 'react-native';
 import styled from 'styled-components/native';
 
@@ -18,9 +19,34 @@ export default function RouteOverviewScreen() {
   const [distance, setDistance] = React.useState<string>("");
   const [estimatedTime, setEstimatedTime] = React.useState<string>("");
   const [estimatedCost, setEstimatedCost] = React.useState<string>("");
+  const [savedRouteId, setSavedRouteId ] = useState<number | null>(null);
   const upsertRoute = useRouteRunStore((s) => s.upsertRoute);
   const setCurrent = useRouteRunStore((s) => s.setCurrent);
+  
+  // As per user instruction: call the hook for each status
   const { save: saveUserRoute } = useUserRoutes();
+  const { data: notStartedRoutes, loading: notStartedLoading } = useUserRoutes('NOT_STARTED');
+  const { data: onGoingRoutes, loading: onGoingLoading } = useUserRoutes('ON_GOING');
+  const { data: completedRoutes, loading: completedLoading } = useUserRoutes('COMPLETED');
+
+  const routeStatus = useMemo(() => {
+    const isLoading = onGoingLoading || completedLoading || notStartedLoading;
+    if (isLoading) return 'LOADING';
+
+    if (onGoingRoutes?.savedRoutes && onGoingRoutes.savedRoutes.some((r: any) => r.routeId === id)) {
+      setSavedRouteId(onGoingRoutes.savedRoutes.find((r: any) => r.routeId === id)?.savedRouteId ?? null);
+      return 'ON_GOING';
+    }
+    if (notStartedRoutes?.savedRoutes && notStartedRoutes.savedRoutes.some((r: any) => r.routeId === id)) {
+      setSavedRouteId(notStartedRoutes.savedRoutes.find((r: any) => r.routeId === id)?.savedRouteId ?? null);
+      return 'NOT_STARTED';
+    }
+    if (completedRoutes?.savedRoutes && completedRoutes.savedRoutes.some((r: any) => r.routeId === id)) {
+      setSavedRouteId(completedRoutes.savedRoutes.find((r: any) => r.routeId === id)?.savedRouteId ?? null);
+      return 'COMPLETED';
+    }
+    return 'NOT_SAVED';
+  }, [id, onGoingRoutes, completedRoutes, onGoingLoading, completedLoading]);
 
 
   useEffect(() => {
@@ -101,6 +127,11 @@ export default function RouteOverviewScreen() {
         });
       }
 
+      if(savedRouteId !== null && savedRouteId >= 0) {
+        changeUserRouteStatus(savedRouteId, 'ON_GOING').catch((error) => {
+        console.error("Failed to change route status:", error);
+      });
+      }
       
       //페이지 이동
       router.replace(`/route/route-step/${id}/1`);
@@ -110,6 +141,16 @@ export default function RouteOverviewScreen() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  const handleLaterButton = () => {
+    if(routeStatus !== 'NOT_SAVED') {
+      saveUserRoute(id, new Date(), "09:00").catch((error) => {
+        console.error("Failed to save route:", error);
+      });
+    }
+    
+    router.back();
   }
 
   return (
@@ -166,16 +207,25 @@ export default function RouteOverviewScreen() {
       </RouteInfoContainer>
 
       <ButtonRow>
-        <ButtonOutline disabled={isLoading}>
+        <ButtonOutline onPress={handleLaterButton} disabled={isLoading}>
           <ButtonText>다음에 할래요</ButtonText>
         </ButtonOutline>
-        <ButtonPrimary onPress={handleStartRoute} disabled={isLoading} style={{ opacity: isLoading ? 0.7 : 1 }}>
-          {isLoading ? <ActivityIndicator color="white" /> : <ButtonTextPrimary>여행 시작하기</ButtonTextPrimary>}
+        <ButtonPrimary onPress={handleStartRoute} disabled={isLoading || routeStatus === 'LOADING'} style={{ opacity: (isLoading || routeStatus === 'LOADING') ? 0.7 : 1 }}>
+          {(isLoading || routeStatus === 'LOADING') ? <ActivityIndicator color="white" /> : (
+            <ButtonTextPrimary>
+              {routeStatus === 'ON_GOING'
+                ? '여행 이어하기'
+                : routeStatus === 'COMPLETED'
+                ? '여행 다시하기'
+                : '여행 시작하기'}
+            </ButtonTextPrimary>
+          )}
         </ButtonPrimary>
       </ButtonRow>
     </Container>
   );
 }
+
 
 const styleSheet = StyleSheet.create(
   {

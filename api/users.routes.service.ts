@@ -61,7 +61,7 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
 export async function getUserRoutes(
   status?: string
 ): Promise<ApiEnvelope<SavedRoutes>> {
-  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  const query = status ? `?status=${encodeURIComponent(status)}` : '?status=ALL';
   return fetchJson<ApiEnvelope<SavedRoutes>>(
     ROUTES.users.routes + query,
     {
@@ -113,6 +113,19 @@ export async function saveUserRoutes(
       preferredStartDate: preferredStartDate.toISOString().split('T')[0], // "YYYY-MM-DD"
       preferredStartTime,
     }),
+    }
+  );
+}
+
+
+export async function changeUserRouteStatus(
+  id: number,
+  status: 'NOT_STARTED' | 'ON_GOING' | 'COMPLETED'
+): Promise<ApiEnvelope<null>> {
+  return fetchJson<ApiEnvelope<null>>(
+    ROUTES.users.routes + "/" + id + "/" + status, {
+    method: 'PUT',
+    headers: jsonHeaders((await getAccess()) ?? undefined),
     }
   );
 }
