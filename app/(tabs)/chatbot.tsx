@@ -6,7 +6,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import styled from 'styled-components/native';
 
 // ===== Constants =====
@@ -37,6 +37,10 @@ const useChatManager = () => {
     } catch (e) {
       console.error("Failed to save chat context.", e);
     }
+  };
+
+  const resetContext = () => {
+    contextRef.current = null;
   };
 
   const sendMessage = async (query: string): Promise<ChatQueryResult> => {
@@ -71,15 +75,22 @@ const useChatManager = () => {
     loadContext();
   }, []);
 
-  return { sendMessage, isInitialized };
+  return { sendMessage, isInitialized, resetContext };
+};
+
+const INITIAL_MESSAGE: Message = {
+  id: '1',
+  sender: 'ai',
+  text: '안녕하세요, 저는 당신의 AI 가이드 MEY입니다! 무엇을 도와드릴까요?',
+  suggestions: ["K-POP 루트 추천해줘", "주변 맛집 추천해줘"],
 };
 
 // ===== Main Component =====
 
 export default function AiGuideScreen() {
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const { sendMessage, isInitialized } = useChatManager();
+  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
+  const { sendMessage, isInitialized, resetContext } = useChatManager();
   const flatListRef = useRef<FlatList>(null);
   const isFocused = useIsFocused();
 
@@ -103,17 +114,11 @@ export default function AiGuideScreen() {
         if (savedMessages) {
           setMessages(JSON.parse(savedMessages));
         } else {
-          setMessages([
-            {
-              id: '1',
-              sender: 'ai',
-              text: '안녕하세요, 저는 당신의 AI 가이드 MEY입니다! 무엇을 도와드릴까요?',
-              suggestions: ["K-POP 루트 추천해줘", "주변 맛집 추천해줘"],
-            },
-          ]);
+          setMessages([INITIAL_MESSAGE]);
         }
       } catch (e) {
         console.error("Failed to load messages.", e);
+        setMessages([INITIAL_MESSAGE]);
       }
     };
     loadMessages();
@@ -146,6 +151,25 @@ export default function AiGuideScreen() {
     }
   }, [messages]);
 
+  const handleNewChat = () => {
+    Alert.alert(
+      "새 채팅 시작",
+      "현재 대화 내용을 모두 지우고 새로 시작하시겠습니까?",
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "확인",
+          style: "destructive",
+          onPress: async () => {
+            await AsyncStorage.removeItem(CHAT_HISTORY_KEY);
+            await AsyncStorage.removeItem(CHAT_CONTEXT_KEY);
+            resetContext();
+            setMessages([INITIAL_MESSAGE]);
+          },
+        },
+      ]
+    );
+  };
 
   const handleSend = useCallback(async () => {
     if (input.trim() === '') return;
@@ -246,6 +270,11 @@ export default function AiGuideScreen() {
 
   return (
     <Container>
+      <NewChatButton onPress={handleNewChat}>
+        <Ionicons name="add-circle-outline" size={24} color="#333" />
+        <NewChatButtonText>새 채팅</NewChatButtonText>
+      </NewChatButton>
+
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"} 
         style={{ flex: 1 }}
@@ -256,7 +285,7 @@ export default function AiGuideScreen() {
           data={messages}
           keyExtractor={(item) => item.id}
           renderItem={renderMessageItem}
-          contentContainerStyle={{ padding: 16 }}
+          contentContainerStyle={{ padding: 16, paddingTop: 50 }} // 버튼과 겹치지 않도록 패딩 추가
         />
 
         <InputArea>
@@ -322,6 +351,29 @@ const styleSheet = StyleSheet.create({
 const Container = styled.View`
   flex: 1;
   background-color: #fff;
+`;
+
+const NewChatButton = styled.TouchableOpacity`
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  z-index: 10;
+  flex-direction: row;
+  align-items: center;
+  background-color: #f0f0f0;
+  padding: 6px 12px;
+  border-radius: 20px;
+  elevation: 3;
+  shadow-color: #000;
+  shadow-opacity: 0.15;
+  shadow-radius: 3px;
+`;
+
+const NewChatButtonText = styled.Text`
+  font-size: 14px;
+  color: #333;
+  margin-left: 6px;
+  font-weight: 600;
 `;
 
 const AiMessage = styled.View`
