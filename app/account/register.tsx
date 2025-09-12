@@ -1,7 +1,7 @@
 // app/account/register.tsx
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, Button, Text } from 'react-native';
+import { Alert, Button, Switch, Text, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import styled from 'styled-components/native';
 
@@ -14,6 +14,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+  const [agreedToPrivacyPolicy, setAgreedToPrivacyPolicy] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   type Language = { label: string; value: string };
@@ -25,14 +26,18 @@ export default function RegisterScreen() {
   ];
 
   const handleRegister = useCallback(async () => {
-    if (submitting) return; // 중복 제출 가드
+    if (submitting) return;
+
+    if (!agreedToPrivacyPolicy) {
+      Alert.alert('개인정보처리방침에 동의해주세요.');
+      return;
+    }
 
     const nicknameTrim = nickname.trim();
     const emailNorm = email.trim().toLowerCase();
     const pwdTrim = password.trim();
     const confirmTrim = confirmPassword.trim();
 
-    // 프론트 유효성
     if (!emailNorm || !nicknameTrim || !pwdTrim || !selectedLanguage) {
       Alert.alert('모든 필드를 입력해주세요.');
       return;
@@ -56,18 +61,14 @@ export default function RegisterScreen() {
 
     try {
       setSubmitting(true);
-
       const resp = await signupApi({
         email: emailNorm,
         password: pwdTrim,
         nickname: nicknameTrim,
       });
-
       if (!resp?.isSuccess) {
         throw new Error(resp?.message || '회원가입 실패');
       }
-
-      // selectedLanguage는 현재 서버 전송 X (필요 시 별도 API에 저장)
       Alert.alert('회원가입 완료!', '이제 로그인해주세요.');
       router.replace('/account/login');
     } catch (error: any) {
@@ -76,7 +77,16 @@ export default function RegisterScreen() {
     } finally {
       setSubmitting(false);
     }
-  }, [submitting, nickname, email, password, confirmPassword, selectedLanguage, router]);
+  }, [
+    submitting,
+    nickname,
+    email,
+    password,
+    confirmPassword,
+    selectedLanguage,
+    agreedToPrivacyPolicy,
+    router,
+  ]);
 
   return (
     <Container>
@@ -122,13 +132,28 @@ export default function RegisterScreen() {
         onChange={(item: Language) => setSelectedLanguage(item.value)}
       />
 
+      <AgreementContainer>
+        <Switch
+          value={agreedToPrivacyPolicy}
+          onValueChange={setAgreedToPrivacyPolicy}
+        />
+        <AgreementText>
+          <Link href="/account/privacy-policy">
+            <Text style={{ color: 'blue', textDecorationLine: 'underline' }}>
+              개인정보처리방침
+            </Text>
+          </Link>
+          에 동의합니다.
+        </AgreementText>
+      </AgreementContainer>
+
       <Button
         title={submitting ? '가입 중…' : '회원가입'}
         onPress={handleRegister}
         disabled={submitting}
       />
 
-      <Text style={{ textAlign: 'center', marginBottom: 20 }}>
+      <Text style={{ textAlign: 'center', marginBottom: 20, marginTop: 10 }}>
         이미 계정이 있나요?{' '}
         <Text onPress={() => router.push('/account/login')} style={{ color: 'blue' }}>
           로그인
@@ -163,4 +188,15 @@ const StyledDropdown = styled(Dropdown)`
   margin-bottom: 12px;
   padding: 0 8px;
   border-radius: 4px;
+`;
+
+const AgreementContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+const AgreementText = styled.Text`
+  margin-left: 10px;
+  font-size: 14px;
 `;
