@@ -1,7 +1,6 @@
 // src/api/users.service.ts
-import { getAccess } from '@/utils/storage';
+import { apiDelete, apiGet, apiPost, apiPut } from './http';
 import { ROUTES } from './routes';
-const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 
 // ===== 공통 타입 =====
@@ -32,42 +31,15 @@ export type Route = {
   savedAt: string; // 저장된 날짜 (ISO 8601)
 }
 
-// ===== 내부 유틸 =====
-const jsonHeaders = (token?: string): HeadersInit => {
-  const h: Record<string, string> = { "Content-Type": "application/json" };
-  if (token) h.Authorization = `Bearer ${token}`;
-  return h;
-};
-
-async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, init);
-  let data: any = null;
-  try {
-    data = await res.json();
-  } catch {
-    // JSON이 아니면 그대로 던짐
-  }
-  if (!res.ok) {
-    const msg =
-      (data && (data.message || data.error || data.msg)) ||
-      `HTTP ${res.status} ${res.statusText}`;
-    throw new Error(msg);
-  }
-  return data as T;
-}
-  
 // ===== 엔드포인트 =====
 // 유저가 저장한 Routes 조회
 export async function getUserRoutes(
   status?: string
 ): Promise<ApiEnvelope<SavedRoutes>> {
-  const query = status ? `?status=${encodeURIComponent(status)}` : '';
-  return fetchJson<ApiEnvelope<SavedRoutes>>(
+  const query = status ? `?status=${encodeURIComponent(status)}` : '?status=ALL';
+  return apiGet<ApiEnvelope<SavedRoutes>>(
     ROUTES.users.routes + query,
-    {
-      method: 'GET',
-      headers: jsonHeaders((await getAccess()) ?? undefined),
-    }
+    'getUserRoutes'
   );
 }
 
@@ -76,26 +48,22 @@ export async function editUserRoutes(
   preferredStartDate: Date,
   preferredStartTime: string
 ): Promise<ApiEnvelope<null>> {
-  return fetchJson<ApiEnvelope<null>>(
-    ROUTES.users.routes + "/" + id, {
-    method: 'PUT',
-    headers: jsonHeaders((await getAccess()) ?? undefined),
-    body: JSON.stringify({
+  return apiPut<ApiEnvelope<null>>(
+    `${ROUTES.users.routes}/${id}`,
+    {
       preferredStartDate: preferredStartDate.toISOString().split('T')[0], // "YYYY-MM-DD"
       preferredStartTime,
-    }),
-    }
+    },
+    'editUserRoutes'
   );
 }
 
 export async function deleteUserRoutes(
   id: number
 ): Promise<ApiEnvelope<null>> {
-  return fetchJson<ApiEnvelope<null>>(
-    ROUTES.users.routes + "/" + id, {
-    method: 'DELETE',
-    headers: jsonHeaders((await getAccess()) ?? undefined),
-    }
+  return apiDelete<ApiEnvelope<null>>(
+    `${ROUTES.users.routes}/${id}`,
+    'deleteUserRoutes'
   );
 }
 
@@ -104,15 +72,25 @@ export async function saveUserRoutes(
   preferredStartDate: Date,
   preferredStartTime: string
 ): Promise<ApiEnvelope<{ savedRouteId: number }>> {
-  return fetchJson<ApiEnvelope<{ savedRouteId: number }>>(
-    ROUTES.users.routes, {
-    method: 'POST',
-    headers: jsonHeaders((await getAccess()) ?? undefined),
-    body: JSON.stringify({
+  return apiPost<ApiEnvelope<{ savedRouteId: number }>>(
+    ROUTES.users.routes,
+    {
       routeId,
       preferredStartDate: preferredStartDate.toISOString().split('T')[0], // "YYYY-MM-DD"
       preferredStartTime,
-    }),
-    }
+    },
+    'saveUserRoutes'
+  );
+}
+
+
+export async function changeUserRouteStatus(
+  id: number,
+  status: 'NOT_STARTED' | 'ON_GOING' | 'COMPLETED'
+): Promise<ApiEnvelope<null>> {
+  return apiPut<ApiEnvelope<null>>(
+    `${ROUTES.users.routes}/${id}/${status}`,
+    undefined,
+    'changeUserRouteStatus'
   );
 }

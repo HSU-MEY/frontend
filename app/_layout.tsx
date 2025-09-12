@@ -91,6 +91,10 @@ export default function RootLayout() {
                   <Stack.Screen name="place/place-detail/[id]" options={{ headerShown: false }} />
                   <Stack.Screen name="place/place-favorite" options={{ headerShown: false }} />
                   <Stack.Screen name="account/edit-profile" options={{ headerShown: false }} />
+                  <Stack.Screen name="account/privacy-policy" options={{ headerShown: false }} />
+                  <Stack.Screen name="account/register" options={{ headerShown: false }} />
+                  <Stack.Screen name="account/login" options={{ headerShown: false }} />
+                  <Stack.Screen name="account/reset-password" options={{ headerShown: false }} />
                   <Stack.Screen name="+not-found" />
                 </Stack>
               </SelectedRouteProvider>

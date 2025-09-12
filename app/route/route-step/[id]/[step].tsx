@@ -1,18 +1,24 @@
 import { searchPlaces } from '@/api/places.service';
+import { changeUserRouteStatus } from '@/api/users.routes.service';
 import Header from '@/components/common/Header';
 import KakaoMapWebView, { KakaoMapHandle } from '@/components/KakaoMapWebView';
+import { useUserRoutes } from '@/hooks/useUserRoutes';
 import { KAKAO_JS_API_KEY } from '@/src/env';
 import { useRouteRunStore } from '@/store/useRouteRunStore';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef } from 'react';
-import { ScrollView, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import styled from 'styled-components/native';
 
 export default function RouteStepScreen() {
-  const { id, step = "1" } = useLocalSearchParams<{ id: string; step: string }>();
+  const { id: idString, step = "1" } = useLocalSearchParams<{ id: string; step: string }>();
+  const id = Number(idString);
   const mapRef = useRef<KakaoMapHandle>(null);
   const JS_KEY = KAKAO_JS_API_KEY;
+
+  const { data: onGoingData } = useUserRoutes('ON_GOING');
 
   const stepNum = useMemo(() => {
     const num = Number(step);
@@ -45,9 +51,33 @@ export default function RouteStepScreen() {
         params: { id: String(placeId) },
       })
     } else {
-      alert("플레이스 정보를 찾을 수 없습니다.");
+      Alert.alert("정보", "플레이스 정보를 찾을 수 없습니다.");
     }
   };
+
+  const handleEndRoute = async () => {
+    if (!onGoingData?.savedRoutes) {
+      Alert.alert("오류", "진행중인 경로 정보를 불러올 수 없습니다.");
+      return;
+    }
+
+    const currentRoute = onGoingData.savedRoutes.find(r => r.routeId === id);
+
+    if (!currentRoute) {
+      Alert.alert("오류", "현재 경로를 진행중인 경로 목록에서 찾을 수 없습니다.");
+      return;
+    }
+
+    try {
+      await changeUserRouteStatus(currentRoute.savedRouteId, 'COMPLETED');
+      Alert.alert("성공", "경로를 성공적으로 완료했습니다!", [
+        { text: "OK", onPress: () => router.replace("/(tabs)") }
+      ]);
+    } catch (error) {
+      console.error("Failed to change route status:", error);
+      Alert.alert("오류", "경로 완료 처리에 실패했습니다.");
+    }
+  }
   
   return (
     <Container>
@@ -64,10 +94,18 @@ export default function RouteStepScreen() {
     </View>
     <ScrollView>
       <Section>
+        <Text style={{ textAlign: 'center', color: '#666', marginBottom: 8 }}>안내중 ({stepNum} / {segmentCount})</Text>
         <PlaceName>{segment.toName}</PlaceName>
         <InfoButton onPress={handlePlaceButtonPress}>
-          <InfoText>이 플레이스에 대한 정보</InfoText>
-          <Ionicons name="chevron-forward" size={16} color="white" />
+          <LinearGradient
+            colors={['#69E8D9', '#0080FF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styleSheet.startButton}
+          >
+            <InfoText>플레이스 상세보기</InfoText>
+            <Ionicons name="chevron-forward" size={16} color="white" />
+          </LinearGradient>
         </InfoButton>
 
         <StatsRow>
@@ -99,7 +137,8 @@ export default function RouteStepScreen() {
                 {/* s.mode === 'ARRIVE' && <Ionicons name="location-sharp" size={20} color="#2680eb" /> */}
               </StepIcon>
               <StepText>
-                {s.instruction}{'\n'}
+                {s.instruction}{
+                '\n'}
                 <SubText>
                   {Math.round(s.distanceMeters)}m · {Math.round(s.durationSeconds / 60)}분
                   {/*s.lineName}번, {s.numStops ? `${s.numStops}정거장` : ""*/}
@@ -123,9 +162,9 @@ export default function RouteStepScreen() {
         )
         }
         { stepNum >= segmentCount ? (
-          <ActiveButton onPress={() => router.replace("/")}>
-            <ActiveText>루트 종료</ActiveText>
-          </ActiveButton>
+          <EndButton onPress={handleEndRoute}>
+            <EndText>루트 종료</EndText>
+          </EndButton>
         ) : (
           <ActiveButton onPress={() => goNext() } >
             <ActiveText>다음 플레이스</ActiveText>
@@ -137,6 +176,21 @@ export default function RouteStepScreen() {
     </Container>
   );
 }
+
+const styleSheet = StyleSheet.create(
+  {
+    startButton: {
+      borderRadius: 100,
+      paddingVertical: 14,
+      paddingHorizontal: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '100%',
+      flexDirection: 'row',
+    },
+  }
+)
+
 const Container = styled.View`
   flex: 1;
   background-color: white;
@@ -153,20 +207,16 @@ const Section = styled.View`
 
 const PlaceName = styled.Text`
   font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 12px;
+  font-family: 'Pretendard-Bold';
   text-align: center;
-  color: #333;
+  color: #0080FF;
 `;
 
 //background: linear-gradient(90deg, #53d5ff, #4481ff);
 const InfoButton = styled.TouchableOpacity`
   flex-direction: row;
-  background-color: #4481ff;
   padding: 12px;
   border-radius: 999px;
-  align-items: center;
-  justify-content: center;
   margin-bottom: 16px;
 `;
 
@@ -255,9 +305,25 @@ const InactiveButton = styled.View`
 
 const InactiveText = styled.Text`
   color: #888;
+  font-family: 'Pretendard-SemiBold';
 `;
 
 const ActiveButton = styled.TouchableOpacity`
+  flex: 1;
+  padding: 12px;
+  background-color: #FFFFFF;
+  border: 1px solid #2680eb;
+  border-radius: 8px;
+  align-items: center;
+  margin-left: 8px;
+`;
+
+const ActiveText = styled.Text`
+  color: #2680eb;
+  font-family: 'Pretendard-SemiBold';
+`;
+
+const EndButton = styled.TouchableOpacity`
   flex: 1;
   padding: 12px;
   background-color: #2680eb;
@@ -266,7 +332,7 @@ const ActiveButton = styled.TouchableOpacity`
   margin-left: 8px;
 `;
 
-const ActiveText = styled.Text`
-  color: white;
-  font-weight: bold;
+const EndText = styled.Text`
+  color: #fff;
+  font-family: 'Pretendard-SemiBold';
 `;
