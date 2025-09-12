@@ -1,5 +1,4 @@
 // app/(tabs)/myroute.tsx
-import { FavoritePlace } from '@/components/mypage/favorite-place';
 import RouteCard from '@/components/mypage/route-card';
 import { places } from '@/data/dummyPlaces';
 import { Place } from '@/types/Place';
@@ -275,6 +274,7 @@ export default function MyPage() {
               </Row>
             </Section>
             }
+            {/* 좋아하는 장소 섹션 
             <Section>
               <SectionHeader
                 onPress={() => router.push('/place/place-favorite')}
@@ -302,6 +302,7 @@ export default function MyPage() {
                 ))}
               </Grid>
             </Section>
+            */}
           </>
         ) : (
           <Section>

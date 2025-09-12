@@ -1,10 +1,12 @@
 import { ChatContext, ChatQueryResult, ExistingRoute, PlaceInfo, postChatQuery, RouteRecommendation } from '@/api/chat.service';
+import { useAuthSession } from '@/hooks/useAuthSession';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useIsFocused } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import styled from 'styled-components/native';
 
 // ===== Constants =====
@@ -79,9 +81,22 @@ export default function AiGuideScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const { sendMessage, isInitialized } = useChatManager();
   const flatListRef = useRef<FlatList>(null);
+  const isFocused = useIsFocused();
+
+  const { accessToken, ensureValidAccessToken } = useAuthSession();
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  // 로그인 상태 확인
+  useEffect(() => {
+    if (isFocused) {
+      setIsAuthLoading(true);
+      ensureValidAccessToken().finally(() => setIsAuthLoading(false));
+    }
+  }, [isFocused, ensureValidAccessToken]);
 
   // Load messages from storage on mount
   useEffect(() => {
+    if (!accessToken) return; // 비로그인 시 채팅내역 안불러옴
     const loadMessages = async () => {
       try {
         const savedMessages = await AsyncStorage.getItem(CHAT_HISTORY_KEY);
@@ -102,10 +117,11 @@ export default function AiGuideScreen() {
       }
     };
     loadMessages();
-  }, []);
+  }, [accessToken]); // 로그인 상태 확정 후 불러오기
 
   // Save messages to storage on change
   useEffect(() => {
+    if (!accessToken) return;
     const saveMessages = async () => {
       try {
         if (messages.length === 0 || messages[messages.length - 1].isLoading) {
@@ -121,7 +137,7 @@ export default function AiGuideScreen() {
     if (isInitialized.current) {
         saveMessages();
     }
-  }, [messages, isInitialized]);
+  }, [messages, isInitialized, accessToken]);
 
   // Auto-scroll effect
   useEffect(() => {
@@ -208,6 +224,25 @@ export default function AiGuideScreen() {
       </AiMessage>
     );
   };
+
+  if (isAuthLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (!accessToken) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', padding: 20 }}>
+        <Text style={{ fontSize: 16, color: '#333', marginBottom: 20, fontFamily: 'Pretendard-Regular' }}>서비스를 이용하려면 로그인하세요.</Text>
+        <TouchableOpacity style={{ backgroundColor: '#279FFF', paddingVertical: 12, paddingHorizontal: 30, borderRadius: 25 }} onPress={() => router.push('/account/login')}>
+          <Text style={{ color: 'white', fontSize: 16, fontFamily: 'Pretendard-SemiBold' }}>로그인</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <Container>
