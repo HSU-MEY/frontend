@@ -10,17 +10,15 @@ interface ThemeRouteCardsProps {
   limit?: number;
 }
 
-type ApiTheme = 'KPOP' | 'KDRAMA' | 'KFASHION' | 'KFOOD';
+type ApiTheme = 'KPOP' | 'KDRAMA' | 'KBEAUTY' | 'KFASHION' | 'KFOOD';
 
 const UI_TO_API_THEME_MAP: Partial<Record<ThemeCategory, ApiTheme>> = {
   'K-Pop': 'KPOP',
   'K-Drama': 'KDRAMA',
-  'K-Beauty': 'KFASHION', // TODO: Need to check with backend
+  'K-Beauty': 'KBEAUTY',
   'K-Fashion': 'KFASHION',
   'K-Food': 'KFOOD',
 }
-
-
 
 export default function ThemeRouteCards({ category, limit = Infinity }: ThemeRouteCardsProps) {
   const [routes, setRoutes] = React.useState<Routes[]>([]);
@@ -29,7 +27,7 @@ export default function ThemeRouteCards({ category, limit = Infinity }: ThemeRou
 
   const apiTheme = useMemo(() => UI_TO_API_THEME_MAP[category], [category]);
 
-  
+
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -37,13 +35,32 @@ export default function ThemeRouteCards({ category, limit = Infinity }: ThemeRou
       setError(null);
       try {
         const themesParam = apiTheme ? [apiTheme] : undefined;
-        const res = await getRecommendRouteApi(themesParam, undefined, Number.isFinite(limit) ? limit : 3, 0);
+        const res = await getRecommendRouteApi(
+          themesParam,
+          undefined,
+          Number.isFinite(limit) ? limit : 3,
+          0
+        );
         if (!res.isSuccess) throw new Error(res.message);
-        
+
         const list = res.result.routes ?? [];
-        if (mounted) setRoutes(Number.isFinite(limit) ? list.slice(0, limit) : list);
+
+        // 중복 routeId 제거 + routeId 없는 항목도 키 만들 수 있게 준비
+        const seen = new Set<string | number>();
+        const uniq: Routes[] = [];
+        for (const r of list) {
+          const k = r.routeId ?? `${r.title}|${r.imageUrl}`; // fallback 키
+          if (seen.has(k)) continue;
+          seen.add(k);
+          uniq.push(r);
+        }
+
+        if (mounted) {
+          const sliced = Number.isFinite(limit) ? uniq.slice(0, limit) : uniq;
+          setRoutes(sliced);
+        }
       } catch (e: any) {
-        if (mounted) setError(e?.message ?? "로드 실패");
+        if (mounted) setError(e?.message ?? '로드 실패');
       } finally {
         if (mounted) setLoading(false);
       }
@@ -51,17 +68,18 @@ export default function ThemeRouteCards({ category, limit = Infinity }: ThemeRou
     return () => { mounted = false; };
   }, [apiTheme, limit]);
 
+
   if (loading) return <ActivityIndicator style={{ marginVertical: 16 }} />;
-  if (error)   return <Text style={{ color: 'red' }}>에러: {error}</Text>;
+  if (error) return <Text style={{ color: 'red' }}>에러: {error}</Text>;
   if (!routes.length) return <Text style={{ opacity: 0.6 }}>해당 테마의 추천 루트가 없습니다.</Text>;
 
   return (
     <View>
       {routes.map((route, index) => (
         <ThemeRouteCard
-          key={route.routeId}
+          key={`${category}-${route.routeId ?? index}`}  // ← 카테고리 prefix + 없으면 index
           id={route.routeId}
-          image={{uri: route.imageUrl}}
+          image={route.imageUrl ? { uri: route.imageUrl } : undefined}
           title={route.title}
           location={route.regionNameKo || ''}
           description={route.description}
