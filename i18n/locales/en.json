@@ -160,5 +160,12 @@
     "settings": {
         "title": "Settings",
         "language": "Language"
+    },
+    "tabs": {
+        "home": "Home",
+        "map": "Map",
+        "route": "Route",
+        "chatbot": "AI Chat",
+        "myroute": "My Route"
     }
 }

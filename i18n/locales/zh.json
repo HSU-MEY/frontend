@@ -160,5 +160,12 @@
     "settings": {
         "title": "设置",
         "language": "语言设置"
+    },
+    "tabs": {
+        "home": "首页",
+        "map": "地图",
+        "route": "路线",
+        "chatbot": "AI 聊天",
+        "myroute": "我的路线"
     }
 }

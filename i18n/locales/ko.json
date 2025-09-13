@@ -160,5 +160,12 @@
     "settings": {
         "title": "설정",
         "language": "언어 설정"
+    },
+    "tabs": {
+        "home": "홈",
+        "map": "지도",
+        "route": "루트",
+        "chatbot": "AI 챗봇",
+        "myroute": "마이루트"
     }
 }

@@ -160,5 +160,12 @@
     "settings": {
         "title": "設定",
         "language": "言語設定"
+    },
+    "tabs": {
+        "home": "ホーム",
+        "map": "マップ",
+        "route": "ルート",
+        "chatbot": "AIチャット",
+        "myroute": "マイルート"
     }
 }
