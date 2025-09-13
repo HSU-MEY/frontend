@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Dimensions,
     Image,
@@ -25,6 +26,7 @@ export default function EditRouteScreen() {
     const mapRef = useRef<KakaoMapHandle>(null);
     const JS_KEY = KAKAO_JS_API_KEY;
     const [isMapReady, setMapReady] = useState(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (isMapReady && mapRef.current && selectedPlaces.length > 0) {
@@ -111,7 +113,7 @@ export default function EditRouteScreen() {
 
     return (
         <View style={styles.container}>
-            <Header title="루트 편집" />
+            <Header title={t('routeEdit.title')} />
             <View style={styles.mapContainer}>
                 <KakaoMapWebView
                     ref={mapRef}
@@ -123,22 +125,22 @@ export default function EditRouteScreen() {
             <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
 
                 <View style={styles.routeInfo}>
-                    <Text style={styles.routeTitle}>커스텀 루트 생성</Text>
+                    <Text style={styles.routeTitle}>{t('routeEdit.createCustom')}</Text>
                     <Text style={styles.routeSub}>
-                        선택한 장소 {selectedPlaces.length}곳
+                        {t('routeEdit.selectedCount', { count: selectedPlaces.length })}
                     </Text>
-                    <Text style={styles.tip}>플레이스 순서 변경, 삭제, 추가가 가능해요</Text>
+                    <Text style={styles.tip}>{t('routeEdit.tip')}</Text>
 
                     <TouchableOpacity
                         style={styles.addButton}
                         onPress={() => router.push('/route/add')}
                     >
-                        <Text style={styles.addButtonText}>장소 추가하기</Text>
+                        <Text style={styles.addButtonText}>{t('routeEdit.addPlace')}</Text>
                     </TouchableOpacity>
                 </View>
 
                 {selectedPlaces.length === 0 ? (
-                    <Text style={styles.empty}>선택된 장소가 없습니다.</Text>
+                    <Text style={styles.empty}>{t('routeEdit.empty')}</Text>
                 ) : (
                     <View style={styles.listContainer}>
                         {selectedPlaces.map((item, index) => (
@@ -200,7 +202,7 @@ export default function EditRouteScreen() {
                             end={{ x: 1, y: 0 }}
                             style={styles.startButton}
                         >
-                            <Text style={styles.startButtonText}>루트 시작하기</Text>
+                            <Text style={styles.startButtonText}>{t('routeEdit.start')}</Text>
                         </LinearGradient>
                     </TouchableOpacity>
                 </View>

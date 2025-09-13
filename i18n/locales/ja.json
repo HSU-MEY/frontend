@@ -167,5 +167,14 @@
         "route": "ルート",
         "chatbot": "AIチャット",
         "myroute": "マイルート"
+    },
+    "routeEdit": {
+        "title": "ルート編集",
+        "createCustom": "カスタムルートを作成",
+        "selectedCount": "選択した場所：{{count}}件",
+        "tip": "スポットの並べ替え・削除・追加ができます。",
+        "addPlace": "場所を追加",
+        "empty": "選択された場所がありません。",
+        "start": "ルートを開始"
     }
 }

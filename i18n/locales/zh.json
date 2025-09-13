@@ -167,5 +167,14 @@
         "route": "路线",
         "chatbot": "AI 聊天",
         "myroute": "我的路线"
+    },
+    "routeEdit": {
+        "title": "编辑路线",
+        "createCustom": "创建自定义路线",
+        "selectedCount": "已选择 {{count}} 个地点",
+        "tip": "你可以调整顺序、删除或添加地点。",
+        "addPlace": "添加地点",
+        "empty": "尚未选择任何地点。",
+        "start": "开始路线"
     }
 }

@@ -167,5 +167,14 @@
         "route": "루트",
         "chatbot": "AI 챗봇",
         "myroute": "마이루트"
+    },
+    "routeEdit": {
+        "title": "루트 편집",
+        "createCustom": "커스텀 루트 생성",
+        "selectedCount": "선택한 장소 {{count}}곳",
+        "tip": "플레이스 순서 변경, 삭제, 추가가 가능해요",
+        "addPlace": "장소 추가하기",
+        "empty": "선택된 장소가 없습니다.",
+        "start": "루트 시작하기"
     }
 }

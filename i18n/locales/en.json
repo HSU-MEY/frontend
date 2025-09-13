@@ -167,5 +167,14 @@
         "route": "Route",
         "chatbot": "AI Chat",
         "myroute": "My Route"
+    },
+    "routeEdit": {
+        "title": "Edit Route",
+        "createCustom": "Create a custom route",
+        "selectedCount": "{{count}} place(s) selected",
+        "tip": "You can reorder, delete, and add places.",
+        "addPlace": "Add a place",
+        "empty": "No places selected.",
+        "start": "Start route"
     }
 }
