@@ -176,5 +176,21 @@
         "addPlace": "添加地点",
         "empty": "尚未选择任何地点。",
         "start": "开始路线"
+    },
+    "routeOverview": {
+        "title": "行程概览",
+        "thisJourney": "本次行程…",
+        "totalDistance": "我们将总共行驶 {{distance}}",
+        "placesToVisit": "将要游览的地点…",
+        "placesCount": "计划参观 {{count}} 个地点",
+        "totalTime": "预计总行程时间为 {{time}}",
+        "estimatedCostTitle": "预计费用",
+        "estimatedCost": "交通费约为 {{cost}}",
+        "weatherTitle": "天气",
+        "weatherSentence": "今日天气为 {{desc}}，{{temp}}。",
+        "doLater": "稍后再说",
+        "start": "开始行程",
+        "resume": "继续行程",
+        "restart": "重新开始"
     }
 }

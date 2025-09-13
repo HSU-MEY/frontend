@@ -176,5 +176,21 @@
         "addPlace": "Add a place",
         "empty": "No places selected.",
         "start": "Start route"
+    },
+    "routeOverview": {
+        "title": "Trip Overview",
+        "thisJourney": "This journey...",
+        "totalDistance": "We will travel {{distance}} in total",
+        "placesToVisit": "Places to explore...",
+        "placesCount": "We plan to visit {{count}} places",
+        "totalTime": "Estimated total travel time is {{time}}",
+        "estimatedCostTitle": "Estimated Cost",
+        "estimatedCost": "About {{cost}} for transportation",
+        "weatherTitle": "Weather",
+        "weatherSentence": "Today's weather is {{desc}}, {{temp}}.",
+        "doLater": "Do it later",
+        "start": "Start trip",
+        "resume": "Resume trip",
+        "restart": "Restart trip"
     }
 }

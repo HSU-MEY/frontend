@@ -176,5 +176,21 @@
         "addPlace": "場所を追加",
         "empty": "選択された場所がありません。",
         "start": "ルートを開始"
+    },
+    "routeOverview": {
+        "title": "旅の概要",
+        "thisJourney": "この旅は…",
+        "totalDistance": "合計で{{distance}}移動します",
+        "placesToVisit": "訪れる場所は…",
+        "placesCount": "{{count}}か所を回る予定です",
+        "totalTime": "想定総移動時間は{{time}}です",
+        "estimatedCostTitle": "予想費用",
+        "estimatedCost": "交通費は約{{cost}}になりそうです",
+        "weatherTitle": "天気",
+        "weatherSentence": "今日の天気は{{desc}}、{{temp}}です。",
+        "doLater": "あとで行う",
+        "start": "旅を始める",
+        "resume": "旅を再開",
+        "restart": "旅をやり直す"
     }
 }

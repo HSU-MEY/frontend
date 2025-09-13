@@ -28,9 +28,9 @@ export default function RouteStepScreen() {
   const getSegment = useRouteRunStore((s) => s.getSegment);
   const segment = getSegment(String(id), stepNum - 1);
   const segmentCount = useRouteRunStore((s) => s.routes[id]?.segments.length ?? 0);
-  
 
-  if(!segment) {
+
+  if (!segment) {
     router.replace(`/route/route-step/${id}`);
     return null;
   }
@@ -43,15 +43,21 @@ export default function RouteStepScreen() {
   }
 
   const handlePlaceButtonPress = async () => {
-    const places = await searchPlaces(segment.toName, 1);
-    const placeId = places[0]?.id;
-    if (placeId) {
+    try {
+      const places = await searchPlaces(segment.toName, 1);
+      const placeId = places?.[0]?.id;
+
+      if (!placeId) {
+        Alert.alert("정보", "플레이스 정보를 찾을 수 없습니다.");
+        return;
+      }
+
       router.push({
-        pathname: '/place/place-detail',
+        pathname: '/place/place-detail/[id]',
         params: { id: String(placeId) },
-      })
-    } else {
-      Alert.alert("정보", "플레이스 정보를 찾을 수 없습니다.");
+      });
+    } catch (e) {
+      Alert.alert("오류", "플레이스 정보를 불러오지 못했습니다.");
     }
   };
 
@@ -78,101 +84,101 @@ export default function RouteStepScreen() {
       Alert.alert("오류", "경로 완료 처리에 실패했습니다.");
     }
   }
-  
+
   return (
     <Container>
-    <Header title="루트" />
-    <View style={{ width: '100%', height: 300, backgroundColor: 'lightgrey' }}>
-      <KakaoMapWebView 
+      <Header title="루트" />
+      <View style={{ width: '100%', height: 300, backgroundColor: 'lightgrey' }}>
+        <KakaoMapWebView
           ref={mapRef}
           jsKey={JS_KEY}
           center={{ lat: segment.fromLat, lng: segment.fromLng }}
           level={4}
           segments={[segment]}
-          //onPress={(lat, lng) => console.log('Map pressed at:', lat, lng)}
-      ></KakaoMapWebView>
-    </View>
-    <ScrollView>
-      <Section>
-        <Text style={{ textAlign: 'center', color: '#666', marginBottom: 8 }}>안내중 ({stepNum} / {segmentCount})</Text>
-        <PlaceName>{segment.toName}</PlaceName>
-        <InfoButton onPress={handlePlaceButtonPress}>
-          <LinearGradient
-            colors={['#69E8D9', '#0080FF']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styleSheet.startButton}
-          >
-            <InfoText>플레이스 상세보기</InfoText>
-            <Ionicons name="chevron-forward" size={16} color="white" />
-          </LinearGradient>
-        </InfoButton>
+        //onPress={(lat, lng) => console.log('Map pressed at:', lat, lng)}
+        ></KakaoMapWebView>
+      </View>
+      <ScrollView>
+        <Section>
+          <Text style={{ textAlign: 'center', color: '#666', marginBottom: 8 }}>안내중 ({stepNum} / {segmentCount})</Text>
+          <PlaceName>{segment.toName}</PlaceName>
+          <InfoButton onPress={handlePlaceButtonPress}>
+            <LinearGradient
+              colors={['#69E8D9', '#0080FF']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styleSheet.startButton}
+            >
+              <InfoText>플레이스 상세보기</InfoText>
+              <Ionicons name="chevron-forward" size={16} color="white" />
+            </LinearGradient>
+          </InfoButton>
 
-        <StatsRow>
-          <Stat>
-            <StatLabel>총 거리</StatLabel>
-            <StatValue>{(segment.distanceMeters / 1000).toFixed(1)}km</StatValue>
-          </Stat>
-          <Stat>
-            <StatLabel>예상 시간</StatLabel>
-            <StatValue>{(Math.round(segment.durationSeconds / 60))}분</StatValue>
-          </Stat>
-          <Stat>
-            <StatLabel>예상 비용</StatLabel>
-            <StatValue>{segment.fare.toLocaleString()}원</StatValue>
-          </Stat>
-        </StatsRow>
-      </Section>
+          <StatsRow>
+            <Stat>
+              <StatLabel>총 거리</StatLabel>
+              <StatValue>{(segment.distanceMeters / 1000).toFixed(1)}km</StatValue>
+            </Stat>
+            <Stat>
+              <StatLabel>예상 시간</StatLabel>
+              <StatValue>{(Math.round(segment.durationSeconds / 60))}분</StatValue>
+            </Stat>
+            <Stat>
+              <StatLabel>예상 비용</StatLabel>
+              <StatValue>{segment.fare.toLocaleString()}원</StatValue>
+            </Stat>
+          </StatsRow>
+        </Section>
 
-      <RouteLine />
+        <RouteLine />
 
-      <StepsContainer>
-        {segment.steps.map((s, i) => (
-          <TouchableOpacity key={i} onPress={() => s.polyline && s.polyline.length > 0 && handlePanTo(s.polyline[0].lat, s.polyline[0].lng)}>
-            <Step>
-              <StepIcon>
-                {s.mode === 'WALK' && <Ionicons name="walk-outline" size={20} color="#666" />}
-                {s.mode === 'BUS' && <Ionicons name="bus-outline" size={20} color="#2680eb" />}
-                {s.mode === 'SUBWAY' && <Ionicons name="subway-outline" size={20} color="#2680eb" />}
-                {/* s.mode === 'ARRIVE' && <Ionicons name="location-sharp" size={20} color="#2680eb" /> */}
-              </StepIcon>
-              <StepText>
-                {s.instruction}{
-                '\n'}
-                <SubText>
-                  {Math.round(s.distanceMeters)}m · {Math.round(s.durationSeconds / 60)}분
-                  {/*s.lineName}번, {s.numStops ? `${s.numStops}정거장` : ""*/}
-                  {/*s.headsign ? `headsign · ${s.headsign}` : ""*/}
-                </SubText>
-              </StepText>
-            </Step>
+        <StepsContainer>
+          {segment.steps.map((s, i) => (
+            <TouchableOpacity key={i} onPress={() => s.polyline && s.polyline.length > 0 && handlePanTo(s.polyline[0].lat, s.polyline[0].lng)}>
+              <Step>
+                <StepIcon>
+                  {s.mode === 'WALK' && <Ionicons name="walk-outline" size={20} color="#666" />}
+                  {s.mode === 'BUS' && <Ionicons name="bus-outline" size={20} color="#2680eb" />}
+                  {s.mode === 'SUBWAY' && <Ionicons name="subway-outline" size={20} color="#2680eb" />}
+                  {/* s.mode === 'ARRIVE' && <Ionicons name="location-sharp" size={20} color="#2680eb" /> */}
+                </StepIcon>
+                <StepText>
+                  {s.instruction}{
+                    '\n'}
+                  <SubText>
+                    {Math.round(s.distanceMeters)}m · {Math.round(s.durationSeconds / 60)}분
+                    {/*s.lineName}번, {s.numStops ? `${s.numStops}정거장` : ""*/}
+                    {/*s.headsign ? `headsign · ${s.headsign}` : ""*/}
+                  </SubText>
+                </StepText>
+              </Step>
             </TouchableOpacity>
           ))}
-      </StepsContainer>
+        </StepsContainer>
 
-      <BottomButtons>
-        { stepNum <= 1 ? (
-          <InactiveButton>
-            <InactiveText>이전 플레이스</InactiveText>
-          </InactiveButton>
-        ) : (
-          <ActiveButton onPress={() => goPrev() } >
-            <ActiveText>이전 플레이스</ActiveText>
-          </ActiveButton>
-        )
-        }
-        { stepNum >= segmentCount ? (
-          <EndButton onPress={handleEndRoute}>
-            <EndText>루트 종료</EndText>
-          </EndButton>
-        ) : (
-          <ActiveButton onPress={() => goNext() } >
-            <ActiveText>다음 플레이스</ActiveText>
-          </ActiveButton>
-        )
-        }
-      </BottomButtons>
-    </ScrollView>
+        <BottomButtons>
+          {stepNum <= 1 ? (
+            <InactiveButton>
+              <InactiveText>이전 플레이스</InactiveText>
+            </InactiveButton>
+          ) : (
+            <ActiveButton onPress={() => goPrev()} >
+              <ActiveText>이전 플레이스</ActiveText>
+            </ActiveButton>
+          )
+          }
+          {stepNum >= segmentCount ? (
+            <EndButton onPress={handleEndRoute}>
+              <EndText>루트 종료</EndText>
+            </EndButton>
+          ) : (
+            <ActiveButton onPress={() => goNext()} >
+              <ActiveText>다음 플레이스</ActiveText>
+            </ActiveButton>
+          )
+          }
+        </BottomButtons>
+      </ScrollView>
     </Container>
   );
 }

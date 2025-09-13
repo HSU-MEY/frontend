@@ -176,5 +176,21 @@
         "addPlace": "장소 추가하기",
         "empty": "선택된 장소가 없습니다.",
         "start": "루트 시작하기"
+    },
+    "routeOverview": {
+        "title": "여행 개요",
+        "thisJourney": "이 여정은...",
+        "totalDistance": "총 {{distance}}를 여행해요",
+        "placesToVisit": "우리가 둘러볼 곳은...",
+        "placesCount": "{{count}}개의 장소를 둘러볼 예정이에요",
+        "totalTime": "예상 총 이동 시간은 {{time}}이에요",
+        "estimatedCostTitle": "예상 비용",
+        "estimatedCost": "교통비로 약 {{cost}}을 소모할 것 같아요",
+        "weatherTitle": "날씨",
+        "weatherSentence": "오늘의 날씨는 {{desc}}, {{temp}}입니다.",
+        "doLater": "다음에 할래요",
+        "start": "여행 시작하기",
+        "resume": "여행 이어하기",
+        "restart": "여행 다시하기"
     }
 }
