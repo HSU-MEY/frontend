@@ -1,4 +1,4 @@
-import { fetchPlaceDetail, PlaceDetailDTO } from '@/api/places.service';
+import { fetchPlaceDetail, fetchRelatedPlaces, PlaceDetailDTO, RelatedPlaceDTO } from '@/api/places.service';
 import Header from '@/components/common/Header';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
@@ -12,10 +12,34 @@ import { KAKAO_JS_API_KEY } from '@/src/env';
 
 const PLACEHOLDER = { uri: 'https://placehold.co/600x400' };
 
-// 다국어 필드 선택
-function pickByLang(lang: string, ko?: string | null, en?: string | null) {
-  if (lang?.startsWith('ko')) return ko ?? en ?? '';
-  return en ?? ko ?? '';
+// i18n.language -> ko/en/ja/zh 정규화
+function normalizeUiLang(lang?: string): 'ko' | 'en' | 'ja' | 'zh' {
+  const l = (lang || 'ko').toLowerCase();
+  if (l.startsWith('ko')) return 'ko';
+  if (l.startsWith('en')) return 'en';
+  if (l.startsWith('ja')) return 'ja';
+  if (l.startsWith('zh')) return 'zh';
+  return 'ko';
+}
+
+function formatDistance(m: number) {
+  if (!Number.isFinite(m)) return '';
+  if (m < 1000) return `${Math.round(m)} m`;
+  return `${(m / 1000).toFixed(1)} km`;
+}
+
+// 언어별 우선순위 선택 (현재 언어 → ko → en → ja → zh)
+function pickByLang4(
+  uiLang: 'ko' | 'en' | 'ja' | 'zh',
+  ko?: string | null,
+  en?: string | null,
+  ja?: string | null,
+  zh?: string | null
+): string {
+  const by = { ko, en, ja, zh } as const;
+  const candidates = [by[uiLang], ko, en, ja, zh];
+  for (const c of candidates) if (c && c.trim().length) return c;
+  return '';
 }
 
 function formatOpeningHours(
@@ -71,11 +95,9 @@ function formatOpeningHours(
 export default function PlaceDetailScreen() {
   const { t, i18n } = useTranslation();
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
-  const lang = i18n.language?.toLowerCase() ?? 'ko';
-  const isKo = lang.startsWith('ko');
+  const placeId = useMemo(() => Number(Array.isArray(id) ? id?.[0] : id), [id]);
 
-  // id가 배열로 올 가능성 방어
-  const placeId = useMemo(() => Number(Array.isArray(id) ? id[0] : id), [id]);
+  const uiLang = normalizeUiLang(i18n.language);
 
   const [data, setData] = useState<PlaceDetailDTO | null>(null);
   const [loading, setLoading] = useState(true);
@@ -83,20 +105,25 @@ export default function PlaceDetailScreen() {
 
   // 카카오 맵 뷰
   const mapRef = useRef<KakaoMapHandle>(null);
-  // 좌표 유효성 체크
-  const lat = Number(data?.latitude);
-  const lng = Number(data?.longitude);
-  const hasCoord = Number.isFinite(lat) && Number.isFinite(lng);
 
+  // Nearby
+  const [related, setRelated] = useState<RelatedPlaceDTO[]>([]);
+  const [relatedLoading, setRelatedLoading] = useState(true);
+
+  // 상세 로딩 (불러오는 중 고정 방지: placeId 가드 + setLoading true/false)
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
         setErr(null);
+        setLoading(true);
+
+        if (!Number.isFinite(placeId)) throw new Error('Invalid placeId');
+
         const detail = await fetchPlaceDetail(placeId);
         if (!mounted) return;
         setData(detail);
-      } catch (e) {
+      } catch {
         if (mounted) setErr(t('place.loadFail'));
       } finally {
         if (mounted) setLoading(false);
@@ -105,17 +132,58 @@ export default function PlaceDetailScreen() {
     return () => { mounted = false; };
   }, [placeId, t]);
 
+  // Nearby 로딩 (선택 언어 적용)
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setRelatedLoading(true);
+        if (!Number.isFinite(placeId)) {
+          setRelated([]);
+          return;
+        }
+        const list = await fetchRelatedPlaces(placeId, uiLang);
+        if (!mounted) return;
+        const top3 = (list ?? [])
+          .filter(Boolean)
+          .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
+          .slice(0, 3);
+        setRelated(top3);
+      } catch {
+        if (mounted) setRelated([]);
+      } finally {
+        if (mounted) setRelatedLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [placeId, uiLang]);
+
+  // 좌표 유효성
+  const lat = Number(data?.latitude);
+  const lng = Number(data?.longitude);
+  const hasCoord = Number.isFinite(lat) && Number.isFinite(lng);
+
+  // 언어별 라벨
   const DAYS_SHORT = useMemo(
     () => t('daysShort', { returnObjects: true }) as Record<string, string>,
     [i18n.language, t]
   );
 
-  const title = pickByLang(i18n.language, data?.nameKo ?? null, data?.nameEn ?? null) || `#${placeId}`;
-  const address = data?.address || t('place.addressUnknown');
+  // 다국어 필드 선택
+  const title =
+    pickByLang4(uiLang, data?.nameKo ?? null, data?.nameEn ?? null, data?.nameJp ?? null, data?.nameCh ?? null) ||
+    `#${placeId}`;
+
+  const address =
+    pickByLang4(uiLang, data?.addressKo ?? null, data?.addressEn ?? null, data?.addressJp ?? null, data?.addressCh ?? null) ||
+    data?.address || t('place.addressUnknown');
+
+  const desc =
+    pickByLang4(uiLang, data?.descriptionKo ?? null, data?.descriptionEn ?? null, data?.descriptionJp ?? null, data?.descriptionCh ?? null);
+
   const hours = formatOpeningHours(data?.openingHours, DAYS_SHORT, t);
   const cost = data?.costInfo || t('place.costUnknown');
   const tel = data?.contactInfo || '';
-  const desc = pickByLang(i18n.language, data?.descriptionKo ?? null, data?.descriptionEn ?? null);
   const imageSrc = data?.imageUrl ? { uri: data.imageUrl } : PLACEHOLDER;
 
   if (loading) {
@@ -137,6 +205,8 @@ export default function PlaceDetailScreen() {
     );
   }
 
+  const showNearbySection = relatedLoading || related.length > 0;
+
   return (
     <Container>
       <Header title={t('place.title')} />
@@ -150,7 +220,6 @@ export default function PlaceDetailScreen() {
             <IconBadge>
               <Ionicons name="information-circle-outline" size={18} color="#1C5BD8" />
             </IconBadge>
-            <SmallLabel>{t('place.infoTitle') ?? '정보'}</SmallLabel>
             <InfoText>{hours}</InfoText>
           </InfoItem>
 
@@ -195,71 +264,61 @@ export default function PlaceDetailScreen() {
         <Section>
           <Subtitle>{t('place.locationTitle')}</Subtitle>
 
-          {/* 주소가 비어 있을 수 있으니 있으면 한 줄 노출 */}
-          {!!data?.address && <InfoText style={{ marginBottom: 8 }}>{data.address}</InfoText>}
-
           <MapBox>
             <KakaoMapWebView
               ref={mapRef}
               jsKey={KAKAO_JS_API_KEY}
-              center={{ lat, lng }}   // 초기 센터
+              center={{ lat, lng }}
               level={3}
               onReady={() => {
-                // 준비되면 해당 위치에 마커 + 센터 고정
                 mapRef.current?.focusTo(lat, lng, 3);
               }}
             />
           </MapBox>
+
+          {!!address && <LocationText style={{ marginBottom: 8 }}>{address}</LocationText>}
         </Section>
       )}
 
-      {/* <Section>
-        <Subtitle>주요 이벤트</Subtitle>
-        <Card>
-          <CardImage source={{ uri: 'https://placehold.co/300x300' }} />
-          <CardText>
-            설화수 피부 진단 & 맞춤 앰플 클래스{"\n"}매일 11:00 - 20:00
-          </CardText>
-        </Card>
-        <Card>
-          <CardImage source={{ uri: 'https://placehold.co/300x300' }} />
-          <CardText>
-            ‘색채, 결이 되다’ 복운경 작가 쿠레이지 이벤트{"\n"}매일 11:00 - 20:00
-          </CardText>
-        </Card>
-      </Section> */}
+      {/* Nearby */}
+      {showNearbySection && (
+        <Section>
+          <Subtitle>{t('place.nearby')}</Subtitle>
 
-      <Section>
-        <Subtitle>{t('place.relatedPosts')}</Subtitle>
-        <Row>
-          <RelatedCard>
-            <RelatedImage source={{ uri: 'https://placehold.co/300x200' }} />
-            <RelatedText>설화수 플래그십 스토어에서의 특별한 하루</RelatedText>
-          </RelatedCard>
-          <RelatedCard>
-            <RelatedImage source={{ uri: 'https://placehold.co/300x200' }} />
-            <RelatedText>설화수 피부 진단 & 맞춤 클래스 후기</RelatedText>
-          </RelatedCard>
-        </Row>
-      </Section>
+          {relatedLoading && (
+            <Row>
+              {[0, 1, 2].map((i) => (
+                <NearbyCard key={`skeleton-${i}`}>
+                  <NearbyImage source={PLACEHOLDER} />
+                  <NearbyType>—</NearbyType>
+                  <NearbyAddr>—</NearbyAddr>
+                  <NearbyDist>—</NearbyDist>
+                </NearbyCard>
+              ))}
+            </Row>
+          )}
 
-      <Section>
-        <Subtitle>{t('place.nearby')}</Subtitle>
-        <Row>
-          <NearbyCard>
-            <NearbyImage source={{ uri: 'https://placehold.co/300x300' }} />
-            <NearbyText>핑크로즈 CAFE{"\n"}도보 1.2km</NearbyText>
-          </NearbyCard>
-          <NearbyCard>
-            <NearbyImage source={{ uri: 'https://placehold.co/300x300' }} />
-            <NearbyText>진대감 벽제 본점{"\n"}도보 320m</NearbyText>
-          </NearbyCard>
-          <NearbyCard>
-            <NearbyImage source={{ uri: 'https://placehold.co/300x300' }} />
-            <NearbyText>스위트브레드 베이커리{"\n"}도보 140m</NearbyText>
-          </NearbyCard>
-        </Row>
-      </Section>
+          {!relatedLoading && related.length > 0 && (
+            <Row>
+              {related.map((r, idx) => {
+                const img = r.firstImage ? { uri: r.firstImage } : PLACEHOLDER;
+                return (
+                  <NearbyCard key={`${r.title}-${idx}`}>
+                    <NearbyImage source={img} />
+                    {/* 이미지 아래: (제목) → 타입 → 주소 → 거리(밑줄) */}
+                    <NearbyAddr>{r.title}</NearbyAddr>
+                    <NearbyType>{r.contentTypeName}</NearbyType>
+                    <NearbyAddr numberOfLines={2}>{r.address || ''}</NearbyAddr>
+                    <NearbyDist>
+                      {t('place.distancePrefix', '이 장소에서')} {formatDistance(r.distance)}
+                    </NearbyDist>
+                  </NearbyCard>
+                );
+              })}
+            </Row>
+          )}
+        </Section>
+      )}
     </Container>
   );
 }
@@ -306,6 +365,13 @@ const InfoText = styled.Text`
   color: #333;
   marginTop: 5px;
   fontFamily: 'Pretendard-Regular';
+`;
+
+const LocationText = styled.Text`
+  flex: 1;
+  color: #333;
+  marginTop: 5px;
+  fontFamily: 'Pretendard-Medium';
 `;
 
 const Description = styled.Text`
@@ -362,17 +428,6 @@ const RelatedText = styled.Text`
   padding: 8px;
 `;
 
-const NearbyCard = styled.View`
-  width: 32%;
-`;
-
-const NearbyImage = styled.Image`
-  width: 100%;
-  height: 100px;
-  border-radius: 8px;
-  margin-bottom: 4px;
-`;
-
 const NearbyText = styled.Text`
   font-size: 12px;
   color: #333;
@@ -398,4 +453,36 @@ const SmallLabel = styled.Text`
   color: #333333;
   margin-bottom: 8px;
   fontFamily: 'Pretendard-SemiBold';
+`;
+
+const NearbyCard = styled.View`
+  width: 30%;
+`;
+
+const NearbyImage = styled.Image`
+  width: 100%;
+  height: 100px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+`;
+
+const NearbyType = styled.Text`
+  font-size: 12px;
+  color: #1C5BD8;
+  fontFamily: 'Pretendard-SemiBold';
+  margin-bottom: 2px;
+`;
+
+const NearbyAddr = styled.Text`
+  font-size: 12px;
+  color: #333333;
+  margin-bottom: 2px;
+  fontFamily: 'Pretendard-Regular';
+`;
+
+const NearbyDist = styled.Text`
+  font-size: 12px;
+  color: #666666;
+  text-decoration-line: underline;  /* RN은 textDecorationLine 사용 */
+  fontFamily: 'Pretendard-Regular';
 `;
