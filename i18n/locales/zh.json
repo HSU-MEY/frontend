@@ -135,7 +135,8 @@
         "loading": "正在加载…",
         "retry": "重试",
         "ok": "确定",
-        "loadFail": "加载失败"
+        "loadFail": "加载失败",
+        "close": "关闭"
     },
     "auth": {
         "reauthTitle": "需要重新验证",

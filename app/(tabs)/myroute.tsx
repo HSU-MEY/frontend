@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import styled from 'styled-components/native';
 
 import { Route } from '@/api/users.routes.service';
+import LanguageSheet from '@/components/common/LanguageSheet';
 
 import { favoritePlaceList } from '@/data/favoritePlace';
 //import { completedRoutes, inProgressRoutes, upcomingRoutes } from '@/data/routesInProgress';
@@ -29,6 +30,7 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
+  const [langOpen, setLangOpen] = useState(false);
 
   const {
     data: upcomingData,
@@ -323,9 +325,10 @@ export default function MyPage() {
           <SectionTitle>{t('settings.title')}</SectionTitle>
         </SectionHeader>
 
-        <SettingItem>
+        <SettingItem onPress={() => setLangOpen(true)}>
           <SettingText>{t('settings.language')}</SettingText>
         </SettingItem>
+
         {profile && (
           <>
             <SettingItem onPress={handleLogout}>
@@ -339,6 +342,8 @@ export default function MyPage() {
           </>
         )}
       </Section>
+
+      <LanguageSheet visible={langOpen} onClose={() => setLangOpen(false)} />
     </Container>
   );
 }

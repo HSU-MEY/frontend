@@ -135,7 +135,8 @@
         "loading": "불러오는 중…",
         "retry": "다시 시도",
         "ok": "확인",
-        "loadFail": "불러오기 실패"
+        "loadFail": "불러오기 실패",
+        "close": "닫기"
     },
     "auth": {
         "reauthTitle": "세션 재인증 필요",

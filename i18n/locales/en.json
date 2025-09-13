@@ -135,7 +135,8 @@
         "loading": "Loading…",
         "retry": "Retry",
         "ok": "OK",
-        "loadFail": "Failed to load"
+        "loadFail": "Failed to load",
+        "close": "close"
     },
     "auth": {
         "reauthTitle": "Re-authentication required",
