@@ -43,9 +43,19 @@ export type SearchPlaceDTO = {
   id: number;
   nameKo?: string;
   nameEn?: string;
+  nameJp?: string;
+  nameCh?: string;
   longitude: number;
   latitude: number;
   regionId?: number;
+
+  // 다국어 주소, 이미지, 운영시간 (옵셔널)
+  addressKo?: string | null;
+  addressEn?: string | null;
+  addressJp?: string | null;
+  addressCh?: string | null;
+  imageUrl?: string | null;
+  openingHours?: any;
 };
 
 export type PlaceDetailDTO = {
