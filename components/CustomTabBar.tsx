@@ -67,7 +67,7 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
                         style={styles.tabItem}
                         onPress={() => {
                             if (item.key === 'route') {
-                                router.push('/route/route'); // 탭이 아닌 라우트는 router.push로 이동
+                                router.push('/route/start'); // 탭이 아닌 라우트는 router.push로 이동
                             } else {
                                 navigation.navigate(item.key);
                             }

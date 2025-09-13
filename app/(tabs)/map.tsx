@@ -320,7 +320,7 @@ export default function MapScreen() {
               <PlaceItem key={`${selectedCategory}-${place.id}`}
                 onPress={() =>
                   router.push({
-                    pathname: '/place/place-detail',
+                    pathname: '/place/place-detail/[id]',
                     params: { id: String(place.id) },
                   })
                 }>

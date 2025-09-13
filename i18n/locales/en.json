@@ -102,6 +102,8 @@
         "costUnknown": "Cost info unavailable",
         "closed": "Closed",
         "relatedPosts": "Related Posts",
-        "nearby": "Nearby Spots"
+        "nearby": "Nearby Spots",
+        "locationTitle": "Location",
+        "infoTitle": "information"
     }
 }

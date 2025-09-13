@@ -2,10 +2,13 @@ import { fetchPlaceDetail, PlaceDetailDTO } from '@/api/places.service';
 import Header from '@/components/common/Header';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Linking } from 'react-native';
 import styled from 'styled-components/native';
+
+import KakaoMapWebView, { KakaoMapHandle } from '@/components/KakaoMapWebView';
+import { KAKAO_JS_API_KEY } from '@/src/env';
 
 const PLACEHOLDER = { uri: 'https://placehold.co/600x400' };
 
@@ -68,6 +71,8 @@ function formatOpeningHours(
 export default function PlaceDetailScreen() {
   const { t, i18n } = useTranslation();
   const { id } = useLocalSearchParams<{ id?: string | string[] }>();
+  const lang = i18n.language?.toLowerCase() ?? 'ko';
+  const isKo = lang.startsWith('ko');
 
   // id가 배열로 올 가능성 방어
   const placeId = useMemo(() => Number(Array.isArray(id) ? id[0] : id), [id]);
@@ -75,6 +80,13 @@ export default function PlaceDetailScreen() {
   const [data, setData] = useState<PlaceDetailDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+
+  // 카카오 맵 뷰
+  const mapRef = useRef<KakaoMapHandle>(null);
+  // 좌표 유효성 체크
+  const lat = Number(data?.latitude);
+  const lng = Number(data?.longitude);
+  const hasCoord = Number.isFinite(lat) && Number.isFinite(lng);
 
   useEffect(() => {
     let mounted = true;
@@ -135,30 +147,41 @@ export default function PlaceDetailScreen() {
 
         <InfoBox>
           <InfoItem>
-            <Ionicons name="information-circle-outline" size={16} color="gray" />
+            <IconBadge>
+              <Ionicons name="information-circle-outline" size={18} color="#1C5BD8" />
+            </IconBadge>
+            <SmallLabel>{t('place.infoTitle') ?? '정보'}</SmallLabel>
             <InfoText>{hours}</InfoText>
           </InfoItem>
 
           <InfoItem>
-            <Ionicons name="location-outline" size={16} color="gray" />
+            <IconBadge>
+              <Ionicons name="location-outline" size={18} color="#1C5BD8" />
+            </IconBadge>
             <InfoText>{address}</InfoText>
           </InfoItem>
 
           <InfoItem>
-            <Ionicons name="pricetags-outline" size={16} color="gray" />
+            <IconBadge>
+              <Ionicons name="pricetags-outline" size={18} color="#1C5BD8" />
+            </IconBadge>
             <InfoText>{cost}</InfoText>
           </InfoItem>
 
           {!!tel && (
             <InfoItem>
-              <Ionicons name="call-outline" size={16} color="gray" />
+              <IconBadge>
+                <Ionicons name="call-outline" size={18} color="#1C5BD8" />
+              </IconBadge>
               <InfoText onPress={() => Linking.openURL(`tel:${tel}`)}>{tel}</InfoText>
             </InfoItem>
           )}
 
           {!!data?.websiteUrl && (
             <InfoItem>
-              <Ionicons name="link-outline" size={16} color="gray" />
+              <IconBadge>
+                <Ionicons name="link-outline" size={18} color="#1C5BD8" />
+              </IconBadge>
               <InfoText onPress={() => Linking.openURL(data.websiteUrl!)}>{data.websiteUrl}</InfoText>
             </InfoItem>
           )}
@@ -166,6 +189,29 @@ export default function PlaceDetailScreen() {
 
         {!!desc && <Description>{desc}</Description>}
       </Section>
+
+      {/* 지도 */}
+      {hasCoord && (
+        <Section>
+          <Subtitle>{t('place.locationTitle')}</Subtitle>
+
+          {/* 주소가 비어 있을 수 있으니 있으면 한 줄 노출 */}
+          {!!data?.address && <InfoText style={{ marginBottom: 8 }}>{data.address}</InfoText>}
+
+          <MapBox>
+            <KakaoMapWebView
+              ref={mapRef}
+              jsKey={KAKAO_JS_API_KEY}
+              center={{ lat, lng }}   // 초기 센터
+              level={3}
+              onReady={() => {
+                // 준비되면 해당 위치에 마커 + 센터 고정
+                mapRef.current?.focusTo(lat, lng, 3);
+              }}
+            />
+          </MapBox>
+        </Section>
+      )}
 
       {/* <Section>
         <Subtitle>주요 이벤트</Subtitle>
@@ -184,7 +230,7 @@ export default function PlaceDetailScreen() {
       </Section> */}
 
       <Section>
-        <Subtitle>관련 게시물</Subtitle>
+        <Subtitle>{t('place.relatedPosts')}</Subtitle>
         <Row>
           <RelatedCard>
             <RelatedImage source={{ uri: 'https://placehold.co/300x200' }} />
@@ -198,7 +244,7 @@ export default function PlaceDetailScreen() {
       </Section>
 
       <Section>
-        <Subtitle>근처 명소</Subtitle>
+        <Subtitle>{t('place.nearby')}</Subtitle>
         <Row>
           <NearbyCard>
             <NearbyImage source={{ uri: 'https://placehold.co/300x300' }} />
@@ -225,7 +271,7 @@ const Container = styled.ScrollView`
 
 const TopImage = styled.Image`
   width: 100%;
-  height: 240px;
+  height: 220px;
 `;
 
 const Section = styled.View`
@@ -234,8 +280,8 @@ const Section = styled.View`
 
 const Title = styled.Text`
   font-size: 22px;
-  font-weight: bold;
   margin-bottom: 16px;
+  fontFamily: 'Pretendard-SemiBold';
 `;
 
 const Subtitle = styled.Text`
@@ -258,11 +304,14 @@ const InfoText = styled.Text`
   margin-left: 8px;
   flex: 1;
   color: #333;
+  marginTop: 5px;
+  fontFamily: 'Pretendard-Regular';
 `;
 
 const Description = styled.Text`
   line-height: 20px;
   color: #555;
+  fontFamily: 'Pretendard-Regular';
 `;
 
 const Card = styled.View`
@@ -328,4 +377,25 @@ const NearbyText = styled.Text`
   font-size: 12px;
   color: #333;
   padding: 4px;
+`;
+
+const MapBox = styled.View`
+  height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+`;
+
+const IconBadge = styled.View`
+  border-radius: 8px;        /* 둥근 네모 */
+  background-color: #DFEAFF; /* 배경색 */
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+`;
+
+const SmallLabel = styled.Text`
+  font-size: 12px;
+  color: #333333;
+  margin-bottom: 8px;
+  fontFamily: 'Pretendard-SemiBold';
 `;

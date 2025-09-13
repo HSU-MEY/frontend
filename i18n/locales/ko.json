@@ -102,6 +102,8 @@
         "costUnknown": "비용 정보 없음",
         "closed": "휴무",
         "relatedPosts": "관련 게시물",
-        "nearby": "근처 명소"
+        "nearby": "근처 명소",
+        "locationTitle": "위치 정보",
+        "infoTitle": "정보"
     }
 }
