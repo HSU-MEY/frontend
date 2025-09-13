@@ -1,13 +1,15 @@
 // app/route/route
 import { getRouteApi, Routes, startRouteApi } from '@/api/routes.service';
+import { changeUserRouteStatus } from '@/api/users.routes.service';
 import Header from '@/components/common/Header';
 import { useUserRoutes } from '@/hooks/useUserRoutes';
 import { useWeather } from '@/hooks/useWeathers';
 import { useRouteRunStore } from '@/store/useRouteRunStore';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from "expo-location";
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ImageBackground, StyleSheet } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, ImageBackground, StyleSheet, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 
 
@@ -18,9 +20,34 @@ export default function RouteOverviewScreen() {
   const [distance, setDistance] = React.useState<string>("");
   const [estimatedTime, setEstimatedTime] = React.useState<string>("");
   const [estimatedCost, setEstimatedCost] = React.useState<string>("");
+  const [savedRouteId, setSavedRouteId ] = useState<number | null>(null);
   const upsertRoute = useRouteRunStore((s) => s.upsertRoute);
   const setCurrent = useRouteRunStore((s) => s.setCurrent);
+  
+  // As per user instruction: call the hook for each status
   const { save: saveUserRoute } = useUserRoutes();
+  const { data: notStartedRoutes, loading: notStartedLoading } = useUserRoutes('NOT_STARTED');
+  const { data: onGoingRoutes, loading: onGoingLoading } = useUserRoutes('ON_GOING');
+  const { data: completedRoutes, loading: completedLoading } = useUserRoutes('COMPLETED');
+
+  const routeStatus = useMemo(() => {
+    const isLoading = onGoingLoading || completedLoading || notStartedLoading;
+    if (isLoading) return 'LOADING';
+
+    if (onGoingRoutes?.savedRoutes && onGoingRoutes.savedRoutes.some((r: any) => r.routeId === id)) {
+      setSavedRouteId(onGoingRoutes.savedRoutes.find((r: any) => r.routeId === id)?.savedRouteId ?? null);
+      return 'ON_GOING';
+    }
+    if (notStartedRoutes?.savedRoutes && notStartedRoutes.savedRoutes.some((r: any) => r.routeId === id)) {
+      setSavedRouteId(notStartedRoutes.savedRoutes.find((r: any) => r.routeId === id)?.savedRouteId ?? null);
+      return 'NOT_STARTED';
+    }
+    if (completedRoutes?.savedRoutes && completedRoutes.savedRoutes.some((r: any) => r.routeId === id)) {
+      setSavedRouteId(completedRoutes.savedRoutes.find((r: any) => r.routeId === id)?.savedRouteId ?? null);
+      return 'COMPLETED';
+    }
+    return 'NOT_SAVED';
+  }, [id, onGoingRoutes, completedRoutes, onGoingLoading, completedLoading]);
 
 
   useEffect(() => {
@@ -101,6 +128,11 @@ export default function RouteOverviewScreen() {
         });
       }
 
+      if(savedRouteId !== null && savedRouteId >= 0) {
+        changeUserRouteStatus(savedRouteId, 'ON_GOING').catch((error) => {
+        //console.error("Failed to change route status:", error);
+      });
+      }
       
       //페이지 이동
       router.replace(`/route/route-step/${id}/1`);
@@ -110,6 +142,16 @@ export default function RouteOverviewScreen() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  const handleLaterButton = () => {
+    if(routeStatus !== 'NOT_SAVED' && savedRouteId !== null) {
+      saveUserRoute(savedRouteId, new Date(), "09:00").catch((error) => {
+      //console.error("Failed to save route:", error);
+      });
+    }
+    
+    router.back();
   }
 
   return (
@@ -131,8 +173,8 @@ export default function RouteOverviewScreen() {
         <Row>
           <InfoBox>
             <InfoTitle>이 여정은...</InfoTitle>
-            <InfoHighlight>총 <Highlight>{ distance }</Highlight>를 여행해요</InfoHighlight>
-            <InfoImage source={{ uri: 'https://placehold.co/300x300' }} />
+            <InfoImage source={ require('../../../assets/images/plane.png') } style={{right: 0, width: 192}} />
+            <InfoHighlightA style={{marginTop: 42}}>총 <HighlightA>{ distance }</HighlightA>를 여행해요</InfoHighlightA>
           </InfoBox>
         </Row>
 
@@ -140,19 +182,21 @@ export default function RouteOverviewScreen() {
           <Column style={{ flex: 1 }}>
             <InfoBox style={{ flex: 2 }}>
               <InfoTitle>우리가 둘러볼 곳은...</InfoTitle>
-              <InfoHighlight><Highlight>{ route?.routePlaces.length }개</Highlight>의 장소를 둘러볼 예정이에요</InfoHighlight>
-              <InfoSubtext>{ route?.routePlaces[0].place.name }에서 {"\n"} { route?.routePlaces[route?.routePlaces.length - 1].place.name }까지</InfoSubtext>
-              <InfoImage source={{ uri: 'https://placehold.co/300x300' }} />
-
-              <InfoHighlight>예상 총 이동 시간은 <Highlight>{ estimatedTime }</Highlight>이에요</InfoHighlight>
-              <InfoImage source={{ uri: 'https://placehold.co/300x300' }} />
+              <InfoSubtext>
+                { route?.routePlaces[0].place.name }
+                {"\n"} ... {"\n"}
+                { route?.routePlaces[route?.routePlaces.length - 1].place.name }</InfoSubtext>
+              <InfoImage source={require('../../../assets/images/city.png')} style={{right: 0, top: 80, width: 124, height: 124}} />
+              <InfoHighlight style={{marginTop: 102}}><Highlight>{ route?.routePlaces.length }개</Highlight>의 장소를 둘러볼 예정이에요</InfoHighlight>
+              <InfoImage source={require('../../../assets/images/transport.png')} style={{bottom: 40, width: 178}} />
+              <InfoHighlight style={{marginTop: 86, textAlign: 'right'}}>예상 총 이동 시간은 <Highlight>{ estimatedTime }</Highlight>이에요</InfoHighlight>
             </InfoBox>
           </Column>
           <Column style={{ flex: 1 }}>
             <InfoBox style={{ flex: 1}}>
               <InfoTitle>예상 비용</InfoTitle>
-              <InfoHighlight>교통비로 약 <Highlight>{ estimatedCost }</Highlight>을 소모할 것 같아요</InfoHighlight>
-              <InfoImage source={{ uri: 'https://placehold.co/300x300' }} />
+              <InfoImage source={require('../../../assets/images/money.png')} style={{top:20}} />
+              <InfoHighlight style={{marginTop: 82, textAlign: 'right'}}>교통비로 {"\n"}약 <Highlight>{ estimatedCost }</Highlight>을{"\n"}소모할 것 같아요</InfoHighlight>
             </InfoBox>
 
             <InfoBox style={{ flex: 1 }}>
@@ -166,16 +210,34 @@ export default function RouteOverviewScreen() {
       </RouteInfoContainer>
 
       <ButtonRow>
-        <ButtonOutline disabled={isLoading}>
+        <ButtonOutline onPress={handleLaterButton} disabled={isLoading}>
           <ButtonText>다음에 할래요</ButtonText>
         </ButtonOutline>
-        <ButtonPrimary onPress={handleStartRoute} disabled={isLoading} style={{ opacity: isLoading ? 0.7 : 1 }}>
-          {isLoading ? <ActivityIndicator color="white" /> : <ButtonTextPrimary>여행 시작하기</ButtonTextPrimary>}
-        </ButtonPrimary>
+        <TouchableOpacity
+            onPress={handleStartRoute} disabled={isLoading || routeStatus === 'LOADING'} style={{ opacity: ((isLoading || routeStatus === 'LOADING') ? 0.7 : 1), width: '60%'  }}
+        >
+            <LinearGradient
+                colors={['#69E8D9', '#0080FF']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styleSheet.startButton}
+            >
+              {(isLoading || routeStatus === 'LOADING') ? <ActivityIndicator color="white" /> : (
+                <ButtonTextPrimary>
+                  {routeStatus === 'ON_GOING'
+                    ? '여행 이어하기'
+                    : routeStatus === 'COMPLETED'
+                    ? '여행 다시하기'
+                    : '여행 시작하기'}
+                </ButtonTextPrimary>
+              )}
+            </LinearGradient>
+        </TouchableOpacity>
       </ButtonRow>
     </Container>
   );
 }
+
 
 const styleSheet = StyleSheet.create(
   {
@@ -185,6 +247,12 @@ const styleSheet = StyleSheet.create(
       borderRadius: 12,
       marginBottom: 16,
       textAlign: 'center',
+    },
+    startButton: {
+      borderRadius: 100,
+      paddingVertical: 14,
+      paddingHorizontal: 24,
+      alignItems: 'center',
     },
   }
 )
@@ -235,20 +303,33 @@ const InfoBox = styled.View`
 `;
 
 const InfoTitle = styled.Text`
-  font-weight: 700;
   font-size: 18px;
   margin-bottom: 6px;
-  color: #2680eb;
+  color: #1C5BD8;
+  font-family: 'Pretendard-Bold';
 `;
 
 const InfoHighlight = styled.Text`
   font-size: 15px;
+  
+  font-family: 'Pretendard-SemiBold';
+`;
+
+const InfoHighlightA = styled.Text`
+  font-size: 20px;
   margin-bottom: 6px;
+  font-family: 'Pretendard-SemiBold';
+`;
+
+const HighlightA = styled.Text`  
+  font-size: 24px;
+  font-family: 'Pretendard-Bold';
+  color: #0080FF;
 `;
 
 const Highlight = styled.Text`
-  color: #2680eb;
-  font-weight: bold;
+  color: #0080FF;
+  font-family: 'Pretendard-Bold';
 `;
 
 const InfoSubtext = styled.Text`
@@ -257,41 +338,33 @@ const InfoSubtext = styled.Text`
 `;
 
 const InfoImage = styled.Image`
-  width: 36px;
-  height: 36px;
-  margin-top: 8px;
+  position: absolute;
+  width: 128px;
+  height: 128px;
 `;
 
 const ButtonRow = styled.View`
   flex-direction: row;
   justify-content: space-between;
   padding: 16px;
+  margin-top: 12px;
 `;
 
 const ButtonOutline = styled.TouchableOpacity`
   flex: 1;
+  background-color: #FAF8FF;
   margin-right: 8px;
   padding: 12px;
-  border: 1px solid #2680eb;
-  border-radius: 8px;
-  align-items: center;
-`;
-
-const ButtonPrimary = styled.TouchableOpacity`
-  flex: 1;
-  margin-left: 8px;
-  padding: 12px;
-  background-color: #2680eb;
-  border-radius: 8px;
+  border-radius: 100px;
   align-items: center;
 `;
 
 const ButtonText = styled.Text`
-  color: #2680eb;
-  font-weight: bold;
+  color: #0080FF;
+  font-family: 'Pretendard-SemiBold';
 `;
 
 const ButtonTextPrimary = styled.Text`
   color: white;
-  font-weight: bold;
+  font-family: 'Pretendard-Bold';
 `;

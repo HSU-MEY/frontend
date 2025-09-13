@@ -2,12 +2,14 @@ import { useIsFocused } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Pressable } from 'react-native';
+import { Alert, Pressable, Text } from 'react-native';
 import styled from 'styled-components/native';
 
 import { apiPut, type ApiEnvelope } from '@/api/http';
 import { ROUTES } from '@/api/routes';
 import { getMyProfile, type UserProfile } from '@/api/user';
+import Header from '@/components/common/Header';
+import GradientText from '@/components/GradientText';
 import { useAuthSession } from '@/hooks/useAuthSession';
 
 export default function EditProfileScreen() {
@@ -153,8 +155,18 @@ export default function EditProfileScreen() {
 
   return (
     <Container>
-      <Title>프로필 수정</Title>
-
+      <Header title="프로필 수정" />
+      <HeaderImage
+        source={require('../../assets/images/header.png')}
+        resizeMode="cover"
+      />
+      <ContentContainer>
+      <GradientText
+        colors={['#0080FF', '#53BDFF']}
+        style={{ fontSize: 24, textAlign: 'center', marginBottom: 20, fontFamily: 'Pretendard-Bold' }}
+      >
+        프로필 수정
+      </GradientText>
       <ProfileImageContainer>
         <Pressable onPress={pickImage}>
           {profileImage ? (
@@ -166,7 +178,8 @@ export default function EditProfileScreen() {
           )}
         </Pressable>
       </ProfileImageContainer>
-
+      
+      <InputLabel>이메일</InputLabel>
       <Input
         placeholder="이메일"
         value={email}
@@ -175,13 +188,14 @@ export default function EditProfileScreen() {
         keyboardType="email-address"
       />
 
+      <InputLabel>새 비밀번호 (선택)</InputLabel>
       <Input
         placeholder="새 비밀번호 (선택)"
         value={newPassword}
         onChangeText={setNewPassword}
         secureTextEntry
       />
-
+      <InputLabel>새 비밀번호 확인</InputLabel>
       <Input
         placeholder="새 비밀번호 확인"
         value={confirmPassword}
@@ -189,7 +203,12 @@ export default function EditProfileScreen() {
         secureTextEntry
       />
 
-      <Button title={saving ? '저장 중…' : '저장'} onPress={handleSave} disabled={saving} />
+      <CustomButton onPress={handleSave} disabled={saving}>
+        <Text style={{ color: 'white', fontSize: 16, fontFamily: 'Pretendard-SemiBold' }}>
+          {saving ? '저장 중…' : '저장'}
+        </Text>
+      </CustomButton>
+      </ContentContainer>
     </Container>
   );
 }
@@ -197,14 +216,25 @@ export default function EditProfileScreen() {
 /* ===== styled ===== */
 const Container = styled.ScrollView`
   flex: 1;
-  padding: 24px 20px 40px;
   background-color: white;
+`;
+
+const ContentContainer = styled.View`
+  padding: 20px;
+  flex: 1;
 `;
 const Title = styled.Text`
   font-size: 24px;
   margin-bottom: 20px;
   text-align: center;
   font-weight: 700;
+`;
+
+const InputLabel = styled.Text`
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #0080ff;
+  font-family: 'Pretendard-SemiBold';
 `;
 const Input = styled.TextInput`
   height: 44px;
@@ -214,6 +244,13 @@ const Input = styled.TextInput`
   border-radius: 8px;
   font-size: 15px;
 `;
+
+const HeaderImage = styled.Image`
+  width: 100%;
+  height: 120px;
+  margin-bottom: 20px;
+`;
+
 const ProfileImageContainer = styled.View`
   align-items: center;
   margin-bottom: 20px;
@@ -243,4 +280,15 @@ const Center = styled.View`
 const CenterText = styled.Text`
   font-size: 16px;
   color: #333;
+`;
+
+const CustomButton = styled.TouchableOpacity`
+  background-color: #0080FF;
+  padding: 12px;
+  border-radius: 100px;
+  align-items: center;
+  margin: 20px auto 0 auto;
+  color: white;
+  width: 70%;
+
 `;
