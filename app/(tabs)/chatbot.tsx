@@ -79,20 +79,26 @@ const useChatManager = () => {
   return { sendMessage, isInitialized, resetContext };
 };
 
-const { t, i18n } = useTranslation();
 
-const INITIAL_MESSAGE: Message = {
+
+const INITIAL_MESSAGE = (i18n: any): Message => ({
   id: '1',
   sender: 'ai',
-  text: t('chat.welcome'),
-  suggestions: [t('chat.suggestions.kpopRoute'), t('chat.suggestions.nearbyFood')],
-};
+  text: i18n.t('chat.welcome'),
+  suggestions: [
+    i18n.t('chat.suggestions.kpopRoute'),
+    i18n.t('chat.suggestions.nearbyFood'),
+  ],
+});
 
 // ===== Main Component =====
 
 export default function AiGuideScreen() {
+  const { t, i18n } = useTranslation();
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
+  const [messages, setMessages] = useState<Message[]>(
+    () => [INITIAL_MESSAGE(i18n)]
+  );
   const { sendMessage, isInitialized, resetContext } = useChatManager();
   const flatListRef = useRef<FlatList>(null);
   const isFocused = useIsFocused();
@@ -108,23 +114,35 @@ export default function AiGuideScreen() {
     }
   }, [isFocused, ensureValidAccessToken]);
 
+  useEffect(() => {
+    setMessages(prev => {
+      if (
+        prev.length === 1 &&
+        prev[0].id === '1' &&
+        prev[0].sender === 'ai'
+      ) {
+        const next = INITIAL_MESSAGE(i18n);
+        return [{ ...prev[0], text: next.text, suggestions: next.suggestions }];
+      }
+      return prev;
+    });
+  }, [i18n.language]);
+
   // Load messages from storage on mount
   useEffect(() => {
-    if (!accessToken) return; // 비로그인 시 채팅내역 안불러옴
-    const loadMessages = async () => {
+    if (!accessToken) return;
+    (async () => {
       try {
-        const savedMessages = await AsyncStorage.getItem(CHAT_HISTORY_KEY);
-        if (savedMessages) {
-          setMessages(JSON.parse(savedMessages));
+        const saved = await AsyncStorage.getItem(CHAT_HISTORY_KEY);
+        if (saved) {
+          setMessages(JSON.parse(saved));
         } else {
-          setMessages([INITIAL_MESSAGE]);
+          setMessages([INITIAL_MESSAGE(i18n)]);
         }
-      } catch (e) {
-        console.error("Failed to load messages.", e);
-        setMessages([INITIAL_MESSAGE]);
+      } catch {
+        setMessages([INITIAL_MESSAGE(i18n)]);
       }
-    };
-    loadMessages();
+    })();
   }, [accessToken]); // 로그인 상태 확정 후 불러오기
 
   // Save messages to storage on change
@@ -159,20 +177,21 @@ export default function AiGuideScreen() {
       t('chat.resetTitle'),
       t('chat.resetBody'),
       [
-        { text: t('common.cancel'), style: "cancel" },
+        { text: t('common.cancel'), style: 'cancel' },
         {
           text: t('common.confirm'),
-          style: "destructive",
+          style: 'destructive',
           onPress: async () => {
             await AsyncStorage.removeItem(CHAT_HISTORY_KEY);
             await AsyncStorage.removeItem(CHAT_CONTEXT_KEY);
             resetContext();
-            setMessages([INITIAL_MESSAGE]);
+            setMessages([INITIAL_MESSAGE(i18n)]);
           },
         },
       ]
     );
   };
+
 
   const handleSend = useCallback(async () => {
     if (input.trim() === '') return;
@@ -304,40 +323,49 @@ export default function AiGuideScreen() {
 
 // ===== Card Components (Placeholders/Styled) =====
 
-const RouteCard = ({ route }: { route: RouteRecommendation }) => (
-  <CardWrapper onPress={() => router.push(`/route/route-overview/${route.routeId}`)}>
-    <CardTitle>{route.title}</CardTitle>
-    <CardDescription>{route.description}</CardDescription>
-    <CardMeta>{t('chat.meta.costAmount', { amount: route.estimatedCost.toLocaleString() })} · {t('chat.meta.durationMin', { mins: route.durationMinutes })}</CardMeta>
-    <SeeMore>{t('chat.seeMore')}</SeeMore>
-  </CardWrapper>
-);
+const RouteCard = ({ route }: { route: RouteRecommendation }) => {
+  const { t } = useTranslation();
+  return (
+    <CardWrapper onPress={() => router.push(`/route/route-overview/${route.routeId}`)}>
+      <CardTitle>{route.title}</CardTitle>
+      <CardDescription>{route.description}</CardDescription>
+      <CardMeta>{t('chat.meta.costAmount', { amount: route.estimatedCost.toLocaleString() })} · {t('chat.meta.durationMin', { mins: route.durationMinutes })}</CardMeta>
+      <SeeMore>{t('chat.seeMore')}</SeeMore>
+    </CardWrapper>
+  );
+};
 
-const ExistingRoutesList = ({ routes }: { routes: ExistingRoute[] }) => (
-  <CardListContainer>
-    {routes.map((route) => (
-      <CardWrapper key={route.routeId} onPress={() => router.push(`/route/route-overview/${route.routeId}`)}>
-        <CardTitle>{route.title}</CardTitle>
-        <CardDescription>{route.description}</CardDescription>
-        <CardMeta>{t('chat.meta.costAmount', { amount: route.estimatedCost.toLocaleString() })} · {t('chat.meta.durationMin', { mins: route.durationMinutes })}</CardMeta>
-        <SeeMore>{t('chat.seeMore')}</SeeMore>
-      </CardWrapper>
-    ))}
-  </CardListContainer>
-);
+const ExistingRoutesList = ({ routes }: { routes: ExistingRoute[] }) => {
+  const { t } = useTranslation();
+  return (
+    <CardListContainer>
+      {routes.map((route) => (
+        <CardWrapper key={route.routeId} onPress={() => router.push(`/route/route-overview/${route.routeId}`)}>
+          <CardTitle>{route.title}</CardTitle>
+          <CardDescription>{route.description}</CardDescription>
+          <CardMeta>{t('chat.meta.costAmount', { amount: route.estimatedCost.toLocaleString() })} · {t('chat.meta.durationMin', { mins: route.durationMinutes })}</CardMeta>
+          <SeeMore>{t('chat.seeMore')}</SeeMore>
+        </CardWrapper>
+      ))}
+    </CardListContainer>
+  );
+};
 
-const PlacesList = ({ places }: { places: PlaceInfo[] }) => (
-  <CardListContainer>
-    {places.map((place) => (
-      <CardWrapper key={place.placeId} onPress={() => router.push(`/place/place-detail/${place.placeId}`)}>
-        <CardTitle>{place.name}</CardTitle>
-        <CardDescription>{place.description}</CardDescription>
-        <CardMeta> {t('chat.meta.addressLabel', { addr: place.address })} · {t('chat.meta.costLabel', { cost: place.costInfo || t('common.unknown') })}</CardMeta>
-        <SeeMore>{t('chat.seeMore')}</SeeMore>
-      </CardWrapper>
-    ))}
-  </CardListContainer>
-);
+const PlacesList = ({ places }: { places: PlaceInfo[] }) => {
+  const { t } = useTranslation();
+  return (
+    <CardListContainer>
+      {places.map((place) => (
+        <CardWrapper key={place.placeId} onPress={() => router.push(`/place/place-detail/${place.placeId}`)}>
+          <CardTitle>{place.name}</CardTitle>
+          <CardDescription>{place.description}</CardDescription>
+          <CardMeta> {t('chat.meta.addressLabel', { addr: place.address })} · {t('chat.meta.costLabel', { cost: place.costInfo || t('common.unknown') })}</CardMeta>
+          <SeeMore>{t('chat.seeMore')}</SeeMore>
+        </CardWrapper>
+      ))}
+    </CardListContainer>
+  );
+};
 
 
 // ===== Styles =====
