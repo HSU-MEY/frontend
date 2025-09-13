@@ -111,95 +111,100 @@ export default function EditRouteScreen() {
 
     return (
         <View style={styles.container}>
-        <Header title="루트 편집" />
-        <View style={styles.mapContainer}>
-            <KakaoMapWebView
-                ref={mapRef}
-                jsKey={JS_KEY}
-                style={styles.map}
-                onReady={() => setMapReady(true)}
-            />
-        </View>
-        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-
-            <View style={styles.routeInfo}>
-                <Text style={styles.routeTitle}>커스텀 루트 생성</Text>
-                <Text style={styles.routeSub}>
-                    선택한 장소 {selectedPlaces.length}곳
-                </Text>
-                <Text style={styles.tip}>플레이스 순서 변경, 삭제, 추가가 가능해요</Text>
-
-                <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={() => router.push('/route/add')}
-                >
-                    <Text style={styles.addButtonText}>장소 추가하기</Text>
-                </TouchableOpacity>
+            <Header title="루트 편집" />
+            <View style={styles.mapContainer}>
+                <KakaoMapWebView
+                    ref={mapRef}
+                    jsKey={JS_KEY}
+                    style={styles.map}
+                    onReady={() => setMapReady(true)}
+                />
             </View>
+            <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
 
-            {selectedPlaces.length === 0 ? (
-                <Text style={styles.empty}>선택된 장소가 없습니다.</Text>
-            ) : (
-                <View style={styles.listContainer}>
-                    {selectedPlaces.map((item, index) => (
-                        <View key={item.id} style={styles.cardWrap}>
-                            {index !== 0 && <View style={styles.verticalLine} />}
-                            <View style={styles.card}>
-                                <TouchableOpacity
-                                    style={styles.closeCircle}
-                                    onPress={() => handleDelete(item.id)}
-                                >
-                                    <Text style={styles.closeX}>×</Text>
-                                </TouchableOpacity>
+                <View style={styles.routeInfo}>
+                    <Text style={styles.routeTitle}>커스텀 루트 생성</Text>
+                    <Text style={styles.routeSub}>
+                        선택한 장소 {selectedPlaces.length}곳
+                    </Text>
+                    <Text style={styles.tip}>플레이스 순서 변경, 삭제, 추가가 가능해요</Text>
 
-                                <Image source={item.image} style={styles.image} />
+                    <TouchableOpacity
+                        style={styles.addButton}
+                        onPress={() => router.push('/route/add')}
+                    >
+                        <Text style={styles.addButtonText}>장소 추가하기</Text>
+                    </TouchableOpacity>
+                </View>
 
-                                <View style={styles.info}>
-                                    <Text style={styles.name}>{item.name}</Text>
-                                    <Text style={styles.address}>{item.address}</Text>
-                                    <Text style={styles.time}>{item.time}</Text>
+                {selectedPlaces.length === 0 ? (
+                    <Text style={styles.empty}>선택된 장소가 없습니다.</Text>
+                ) : (
+                    <View style={styles.listContainer}>
+                        {selectedPlaces.map((item, index) => (
+                            <View key={item.id} style={styles.cardWrap}>
+                                {index !== 0 && <View style={styles.verticalLine} />}
+                                <View style={styles.card}>
+                                    <TouchableOpacity
+                                        style={styles.closeCircle}
+                                        onPress={() => handleDelete(item.id)}
+                                    >
+                                        <Text style={styles.closeX}>×</Text>
+                                    </TouchableOpacity>
 
-                                    <View style={styles.bottomRow}>
-                                        <Text style={styles.tag}>{item.tag}</Text>
-                                        <View style={styles.orderButtons}>
-                                            <TouchableOpacity onPress={() => moveItem(index, index - 1)}>
-                                                <Ionicons name="arrow-up" size={18} color="#1C5BD8" />
-                                            </TouchableOpacity>
-                                            <TouchableOpacity onPress={() => moveItem(index, index + 1)}>
-                                                <Ionicons name="arrow-down" size={18} color="#1C5BD8" style={{ marginTop: 4 }} />
-                                            </TouchableOpacity>
+                                    <Image source={item.image} style={styles.image} />
+
+                                    <View style={styles.info}>
+                                        <Text style={styles.name}>{item.name}</Text>
+                                        <Text style={styles.address}>{item.address}</Text>
+                                        <Text style={styles.time}>{item.time}</Text>
+
+                                        <View style={styles.bottomRow}>
+                                            <Text style={styles.tag}>{item.tag}</Text>
+                                            <View style={styles.orderButtons}>
+                                                <TouchableOpacity onPress={() => moveItem(index, index - 1)}>
+                                                    <Ionicons name="arrow-up" size={18} color="#1C5BD8" />
+                                                </TouchableOpacity>
+                                                <TouchableOpacity onPress={() => moveItem(index, index + 1)}>
+                                                    <Ionicons name="arrow-down" size={18} color="#1C5BD8" style={{ marginTop: 4 }} />
+                                                </TouchableOpacity>
+                                            </View>
                                         </View>
                                     </View>
-                                </View>
 
-                                <View style={styles.iconBackground}>
-                                    <TouchableOpacity
-                                        onPress={() => router.push({ pathname: '/place/place-detail', params: { id: String(item.id) } })}
-                                    >
-                                        <Ionicons name="chevron-forward" size={24} color="#1C5BD8" />
-                                    </TouchableOpacity>
+                                    <View style={styles.iconBackground}>
+                                        <TouchableOpacity
+                                            onPress={() =>
+                                                router.push({
+                                                    pathname: '/place/place-detail/[id]',
+                                                    params: { id: String(item.raw?.id ?? item.id) },
+                                                })
+                                            }
+                                        >
+                                            <Ionicons name="chevron-forward" size={24} color="#1C5BD8" />
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
-                        </View>
-                    ))}
-                </View>
-            )}
+                        ))}
+                    </View>
+                )}
 
-            <View style={styles.bottomButtonWrapper}>
-                <TouchableOpacity
-                    onPress={handleCreate}
-                >
-                    <LinearGradient
-                        colors={['#69E8D9', '#0080FF']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        style={styles.startButton}
+                <View style={styles.bottomButtonWrapper}>
+                    <TouchableOpacity
+                        onPress={handleCreate}
                     >
-                        <Text style={styles.startButtonText}>루트 시작하기</Text>
-                    </LinearGradient>
-                </TouchableOpacity>
-            </View>
-        </ScrollView>
+                        <LinearGradient
+                            colors={['#69E8D9', '#0080FF']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.startButton}
+                        >
+                            <Text style={styles.startButtonText}>루트 시작하기</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
         </View>
     );
 }

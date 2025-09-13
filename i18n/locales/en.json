@@ -3,7 +3,8 @@
         "ongoingRouteTitle": "You have an ongoing route!",
         "language": "Language",
         "languageButton": "Change Language",
-        "recommendplace": "A popular spot on K-Route."
+        "recommendplace": "A popular spot on K-Route.",
+        "loginPrompt": "Please log in to view the content."
     },
     "theme": {
         "title": "Explore by Theme"
@@ -101,7 +102,70 @@
         "hoursUnknown": "Opening hours unavailable",
         "costUnknown": "Cost info unavailable",
         "closed": "Closed",
+        "alwaysOpen": "Open 24 hours",
         "relatedPosts": "Related Posts",
-        "nearby": "Nearby Spots"
+        "nearby": "Nearby Spots",
+        "locationTitle": "Location",
+        "infoTitle": "information"
+    },
+    "chat": {
+        "welcome": "Hi, I'm your AI guide, MEY! How can I help?",
+        "inputPlaceholder": "Ask MEY anything",
+        "newChat": "New chat",
+        "resetTitle": "Start a new chat",
+        "resetBody": "This will clear the current conversation. Continue?",
+        "errorGeneric": "Sorry, something went wrong. Please try again.",
+        "loginRequired": "Please log in to use the service.",
+        "seeMore": "See more →",
+        "suggestions": {
+            "kpopRoute": "Recommend a K-POP route",
+            "nearbyFood": "Recommend nearby restaurants"
+        },
+        "meta": {
+            "costAmount": "Cost: ₩{{amount}}",
+            "durationMin": "Duration: {{mins}} min",
+            "addressLabel": "Address: {{addr}}",
+            "costLabel": "Cost: {{cost}}"
+        }
+    },
+    "common": {
+        "cancel": "Cancel",
+        "confirm": "OK",
+        "unknown": "Unknown",
+        "loading": "Loading…",
+        "retry": "Retry",
+        "ok": "OK",
+        "loadFail": "Failed to load",
+        "close": "close"
+    },
+    "auth": {
+        "reauthTitle": "Re-authentication required",
+        "reauthBody": "Your email changed. Please log in again.",
+        "logoutTitle": "Log out",
+        "logoutConfirm": "Are you sure you want to log out?",
+        "logout": "Log out",
+        "logoutDone": "Logged out",
+        "login": "Log in",
+        "loginOrSignup": "Log in / Sign up"
+    },
+    "profile": {
+        "guest": "Guest",
+        "editProfile": "Edit profile"
+    },
+    "routes": {
+        "ongoing": "Ongoing routes",
+        "notStarted": "Not started",
+        "completed": "Completed routes"
+    },
+    "settings": {
+        "title": "Settings",
+        "language": "Language"
+    },
+    "tabs": {
+        "home": "Home",
+        "map": "Map",
+        "route": "Route",
+        "chatbot": "AI Chat",
+        "myroute": "My Route"
     }
 }

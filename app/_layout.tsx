@@ -87,7 +87,7 @@ export default function RootLayout() {
                   <Stack.Screen name="routehistory/ongoing" options={{ headerShown: false }} />
                   <Stack.Screen name="routehistory/pending" options={{ headerShown: false }} />
                   <Stack.Screen name="routehistory/completed" options={{ headerShown: false }} />
-                  <Stack.Screen name="place/place-detail" options={{ headerShown: false }} />
+                  {/* <Stack.Screen name="place/place-detail" options={{ headerShown: false }} /> */}
                   <Stack.Screen name="place/place-detail/[id]" options={{ headerShown: false }} />
                   <Stack.Screen name="place/place-favorite" options={{ headerShown: false }} />
                   <Stack.Screen name="account/edit-profile" options={{ headerShown: false }} />

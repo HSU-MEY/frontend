@@ -3,7 +3,8 @@
         "ongoingRouteTitle": "您有进行中的路线！",
         "language": "语言",
         "languageButton": "更改语言",
-        "recommendplace": "K-Route 上大家都喜欢的地方。"
+        "recommendplace": "K-Route 上大家都喜欢的地方。",
+        "loginPrompt": "要查看内容，请先登录。"
     },
     "theme": {
         "title": "按主题探索"
@@ -92,5 +93,79 @@
         "fri": "五",
         "sat": "六",
         "sun": "日"
+    },
+    "place": {
+        "title": "地点",
+        "loading": "加载中…",
+        "loadFail": "未能加载地点信息。",
+        "addressUnknown": "地址信息未知",
+        "hoursUnknown": "营业时间未知",
+        "costUnknown": "费用信息未知",
+        "closed": "休息",
+        "alwaysOpen": "24小时营业",
+        "relatedPosts": "相关帖子",
+        "nearby": "附近景点",
+        "locationTitle": "位置信息",
+        "infoTitle": "信息"
+    },
+    "chat": {
+        "welcome": "你好，我是你的AI向导 MEY！需要我做什么？",
+        "inputPlaceholder": "向 MEY 提问",
+        "newChat": "新对话",
+        "resetTitle": "开始新对话",
+        "resetBody": "这将清空当前对话，是否继续？",
+        "errorGeneric": "抱歉，发生错误。请重试。",
+        "loginRequired": "使用该服务需要先登录。",
+        "seeMore": "查看详情 →",
+        "suggestions": {
+            "kpopRoute": "推荐一条K-POP路线",
+            "nearbyFood": "推荐附近的美食"
+        },
+        "meta": {
+            "costAmount": "费用：₩{{amount}}",
+            "durationMin": "时长：{{mins}}分钟",
+            "addressLabel": "地址：{{addr}}",
+            "costLabel": "费用：{{cost}}"
+        }
+    },
+    "common": {
+        "cancel": "取消",
+        "confirm": "确定",
+        "unknown": "未知",
+        "loading": "正在加载…",
+        "retry": "重试",
+        "ok": "确定",
+        "loadFail": "加载失败",
+        "close": "关闭"
+    },
+    "auth": {
+        "reauthTitle": "需要重新验证",
+        "reauthBody": "邮箱已变更，请重新登录。",
+        "logoutTitle": "退出登录",
+        "logoutConfirm": "确定要退出登录吗？",
+        "logout": "退出登录",
+        "logoutDone": "已退出登录",
+        "login": "登录",
+        "loginOrSignup": "登录 / 注册"
+    },
+    "profile": {
+        "guest": "访客",
+        "editProfile": "编辑资料"
+    },
+    "routes": {
+        "ongoing": "进行中的路线",
+        "notStarted": "未开始的路线",
+        "completed": "已完成的路线"
+    },
+    "settings": {
+        "title": "设置",
+        "language": "语言设置"
+    },
+    "tabs": {
+        "home": "首页",
+        "map": "地图",
+        "route": "路线",
+        "chatbot": "AI 聊天",
+        "myroute": "我的路线"
     }
 }

@@ -3,7 +3,8 @@
         "ongoingRouteTitle": "현재 진행중인 루트가 있어요!",
         "language": "언어",
         "languageButton": "언어 바꾸기",
-        "recommendplace": "K-Route에서 다들 만족하는 장소예요"
+        "recommendplace": "K-Route에서 다들 만족하는 장소예요",
+        "loginPrompt": "콘텐츠를 보려면 로그인하세요."
     },
     "theme": {
         "title": "테마별 탐색"
@@ -101,7 +102,70 @@
         "hoursUnknown": "운영시간 정보 없음",
         "costUnknown": "비용 정보 없음",
         "closed": "휴무",
+        "alwaysOpen": "24시간 운영",
         "relatedPosts": "관련 게시물",
-        "nearby": "근처 명소"
+        "nearby": "근처 명소",
+        "locationTitle": "위치 정보",
+        "infoTitle": "정보"
+    },
+    "chat": {
+        "welcome": "안녕하세요, 저는 당신의 AI 가이드 MEY입니다! 무엇을 도와드릴까요?",
+        "inputPlaceholder": "MEY에게 물어보세요",
+        "newChat": "새 채팅",
+        "resetTitle": "새 채팅 시작",
+        "resetBody": "현재 대화 내용을 모두 지우고 새로 시작하시겠습니까?",
+        "errorGeneric": "죄송합니다, 오류가 발생했어요. 다시 시도해주세요.",
+        "loginRequired": "서비스를 이용하려면 로그인하세요.",
+        "seeMore": "자세히 보기 →",
+        "suggestions": {
+            "kpopRoute": "K-POP 루트 추천해줘",
+            "nearbyFood": "주변 맛집 추천해줘"
+        },
+        "meta": {
+            "costAmount": "비용: ₩{{amount}}",
+            "durationMin": "소요시간: {{mins}}분",
+            "addressLabel": "주소: {{addr}}",
+            "costLabel": "비용: {{cost}}"
+        }
+    },
+    "common": {
+        "cancel": "취소",
+        "confirm": "확인",
+        "unknown": "정보 없음",
+        "loading": "불러오는 중…",
+        "retry": "다시 시도",
+        "ok": "확인",
+        "loadFail": "불러오기 실패",
+        "close": "닫기"
+    },
+    "auth": {
+        "reauthTitle": "세션 재인증 필요",
+        "reauthBody": "이메일이 변경되어 다시 로그인해야 합니다.",
+        "logoutTitle": "로그아웃",
+        "logoutConfirm": "정말 로그아웃하시겠습니까?",
+        "logout": "로그아웃",
+        "logoutDone": "로그아웃 완료",
+        "login": "로그인",
+        "loginOrSignup": "로그인 / 회원가입"
+    },
+    "profile": {
+        "guest": "게스트",
+        "editProfile": "프로필 수정"
+    },
+    "routes": {
+        "ongoing": "진행중인 루트",
+        "notStarted": "미진행 루트",
+        "completed": "진행 완료 루트"
+    },
+    "settings": {
+        "title": "설정",
+        "language": "언어 설정"
+    },
+    "tabs": {
+        "home": "홈",
+        "map": "지도",
+        "route": "루트",
+        "chatbot": "AI 챗봇",
+        "myroute": "마이루트"
     }
 }
