@@ -12,7 +12,6 @@ import { KAKAO_JS_API_KEY } from '@/src/env';
 
 const PLACEHOLDER = { uri: 'https://placehold.co/600x400' };
 
-// i18n.language -> ko/en/ja/zh 정규화
 function normalizeUiLang(lang?: string): 'ko' | 'en' | 'ja' | 'zh' {
   const l = (lang || 'ko').toLowerCase();
   if (l.startsWith('ko')) return 'ko';

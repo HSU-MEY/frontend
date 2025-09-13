@@ -92,5 +92,19 @@
         "fri": "五",
         "sat": "六",
         "sun": "日"
+    },
+    "place": {
+        "title": "地点",
+        "loading": "加载中…",
+        "loadFail": "未能加载地点信息。",
+        "addressUnknown": "地址信息未知",
+        "hoursUnknown": "营业时间未知",
+        "costUnknown": "费用信息未知",
+        "closed": "休息",
+        "alwaysOpen": "24小时营业",
+        "relatedPosts": "相关帖子",
+        "nearby": "附近景点",
+        "locationTitle": "位置信息",
+        "infoTitle": "信息"
     }
 }

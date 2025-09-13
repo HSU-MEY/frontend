@@ -101,6 +101,7 @@
         "hoursUnknown": "Opening hours unavailable",
         "costUnknown": "Cost info unavailable",
         "closed": "Closed",
+        "alwaysOpen": "Open 24 hours",
         "relatedPosts": "Related Posts",
         "nearby": "Nearby Spots",
         "locationTitle": "Location",

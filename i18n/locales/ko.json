@@ -101,6 +101,7 @@
         "hoursUnknown": "운영시간 정보 없음",
         "costUnknown": "비용 정보 없음",
         "closed": "휴무",
+        "alwaysOpen": "24시간 운영",
         "relatedPosts": "관련 게시물",
         "nearby": "근처 명소",
         "locationTitle": "위치 정보",

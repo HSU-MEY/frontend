@@ -5,14 +5,31 @@ import { ROUTES } from './routes';
 export type PopularPlaceDTO = {
   id: number;
   regionId?: number;
+
+  // 이름
   nameKo?: string;
   nameEn?: string;
-  descriptionKo?: string;
-  descriptionEn?: string;
+  nameJp?: string;
+  nameCh?: string;
+
+  // 설명
+  descriptionKo?: string | null;
+  descriptionEn?: string | null;
+  descriptionJp?: string | null;
+  descriptionCh?: string | null;
+
+  // 좌표/이미지
   longitude?: number;
   latitude?: number;
   imageUrl?: string | null;
-  address?: string | null; // (하위 호환)
+
+  // 주소 (다국어) + 하위호환
+  addressKo?: string | null;
+  addressEn?: string | null;
+  addressJp?: string | null;
+  addressCh?: string | null;
+  address?: string | null;
+
   contactInfo?: string | null;
   websiteUrl?: string | null;
   kakaoPlaceId?: string | null;
