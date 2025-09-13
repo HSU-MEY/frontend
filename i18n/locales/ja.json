@@ -3,27 +3,27 @@
         "ongoingRouteTitle": "進行中のルートがあります！",
         "language": "言語",
         "languageButton": "言語を変更",
-        "recommendplace": "K-Route でみんなに人気の場所です。",
-        "loginPrompt": "コンテンツを表示するにはログインしてください。"
+        "recommendplace": "K-Routeで人気のスポット",
+        "loginPrompt": "コンテンツを見るにはログインしてください。"
     },
     "theme": {
-        "title": "テーマ別に探す"
+        "title": "テーマで探す"
     },
     "route": {
         "title": "ルート",
-        "whichCity": "どの地域に行きますか？",
-        "whichDate": "どの日に行きますか？",
-        "createRoute": "ルートを作成",
+        "whichCity": "どの地域へ行きますか？",
+        "whichDate": "いつ行きますか？",
+        "createRoute": "ルート作成",
         "cities": [
             "ソウル",
-            "インチョン",
-            "スウォン",
-            "プサン",
-            "キョンジュ",
-            "ウルサン",
-            "ヨス",
-            "テジョン",
-            "チェジュ"
+            "仁川",
+            "水原",
+            "釜山",
+            "慶州",
+            "蔚山",
+            "麗水",
+            "大田",
+            "済州"
         ]
     },
     "calendar": {
@@ -68,21 +68,21 @@
         ]
     },
     "aiGuide": {
-        "fetchPopularFailed": "人気スポットを読み込めませんでした。",
+        "fetchPopularFailed": "人気スポットの読み込みに失敗しました。",
         "searchFailed": "検索に失敗しました。",
         "searching": "検索中…",
-        "noResults": "検索結果がありません。",
+        "noResults": "該当結果がありません。",
         "resultsCount": "検索結果（{{count}}件）",
-        "recommendedByKRoute": "K-Route のおすすめスポット",
+        "recommendedByKRoute": "K-Routeのおすすめスポット",
         "searchTag": "検索結果",
-        "hoursUnknown": "営業時間の情報はありません",
-        "placeLabelDefault": "名所",
+        "hoursUnknown": "営業時間情報なし",
+        "placeLabelDefault": "スポット",
         "addressUnknown": "住所情報なし",
-        "searchPlaceholder": "行きたい場所を検索してください！",
+        "searchPlaceholder": "行きたい場所を検索してみましょう！",
         "loading": "読み込み中…",
         "retry": "再試行",
         "notice": "お知らせ",
-        "noCoords": "この場所には座標情報がありません。",
+        "noCoords": "このスポットには座標情報がありません。",
         "selectAtLeastOne": "少なくとも1つの場所を選択してください。"
     },
     "daysShort": {
@@ -95,31 +95,31 @@
         "sun": "日"
     },
     "place": {
-        "title": "場所",
+        "title": "スポット",
         "loading": "読み込み中…",
-        "loadFail": "場所情報を読み込めませんでした。",
+        "loadFail": "スポット情報の読み込みに失敗しました。",
         "addressUnknown": "住所情報なし",
         "hoursUnknown": "営業時間情報なし",
         "costUnknown": "費用情報なし",
         "closed": "休業",
         "alwaysOpen": "24時間営業",
         "relatedPosts": "関連投稿",
-        "nearby": "周辺の名所",
-        "locationTitle": "位置情報",
+        "nearby": "近くのスポット",
+        "locationTitle": "場所",
         "infoTitle": "情報"
     },
     "chat": {
-        "welcome": "こんにちは、AIガイドMEYです！何をお手伝いしましょうか？",
-        "inputPlaceholder": "MEYに質問してください",
+        "welcome": "こんにちは、AIガイドのMEYです！ご用件は何でしょうか？",
+        "inputPlaceholder": "MEYに質問する",
         "newChat": "新しいチャット",
         "resetTitle": "新しいチャットを開始",
-        "resetBody": "現在の会話を削除して最初から始めます。よろしいですか？",
-        "errorGeneric": "申し訳ありません。エラーが発生しました。もう一度お試しください。",
+        "resetBody": "現在の会話を消去してやり直しますか？",
+        "errorGeneric": "エラーが発生しました。もう一度お試しください。",
         "loginRequired": "サービスを利用するにはログインしてください。",
-        "seeMore": "詳しく見る →",
+        "seeMore": "詳細を見る →",
         "suggestions": {
             "kpopRoute": "K-POPルートをおすすめして",
-            "nearbyFood": "近くのグルメをおすすめして"
+            "nearbyFood": "近くのグルメを教えて"
         },
         "meta": {
             "costAmount": "費用: ₩{{amount}}",
@@ -131,16 +131,19 @@
     "common": {
         "cancel": "キャンセル",
         "confirm": "確認",
-        "unknown": "不明",
+        "unknown": "情報なし",
         "loading": "読み込み中…",
         "retry": "再試行",
         "ok": "OK",
-        "loadFail": "読み込みに失敗しました",
-        "close": "閉じる"
+        "loadFail": "読み込み失敗",
+        "close": "閉じる",
+        "info": "情報",
+        "error": "エラー",
+        "success": "成功"
     },
     "auth": {
-        "reauthTitle": "再認証が必要です",
-        "reauthBody": "メールアドレスが変更されました。もう一度ログインしてください。",
+        "reauthTitle": "再ログインが必要です",
+        "reauthBody": "メールが変更されたため、再度ログインしてください。",
         "logoutTitle": "ログアウト",
         "logoutConfirm": "本当にログアウトしますか？",
         "logout": "ログアウト",
@@ -150,12 +153,12 @@
     },
     "profile": {
         "guest": "ゲスト",
-        "editProfile": "プロフィールを編集"
+        "editProfile": "プロフィール編集"
     },
     "routes": {
-        "ongoing": "進行中のルート",
-        "notStarted": "未開始のルート",
-        "completed": "完了したルート"
+        "ongoing": "進行中",
+        "notStarted": "未開始",
+        "completed": "完了"
     },
     "settings": {
         "title": "設定",
@@ -163,34 +166,53 @@
     },
     "tabs": {
         "home": "ホーム",
-        "map": "マップ",
+        "map": "地図",
         "route": "ルート",
         "chatbot": "AIチャット",
         "myroute": "マイルート"
     },
     "routeEdit": {
         "title": "ルート編集",
-        "createCustom": "カスタムルートを作成",
-        "selectedCount": "選択した場所：{{count}}件",
-        "tip": "スポットの並べ替え・削除・追加ができます。",
+        "createCustom": "カスタムルート作成",
+        "selectedCount": "選択した場所 {{count}}件",
+        "tip": "場所の並び替え・削除・追加ができます。",
         "addPlace": "場所を追加",
         "empty": "選択された場所がありません。",
-        "start": "ルートを開始"
+        "start": "ルート開始"
     },
     "routeOverview": {
-        "title": "旅の概要",
+        "title": "旅行の概要",
         "thisJourney": "この旅は…",
-        "totalDistance": "合計で{{distance}}移動します",
-        "placesToVisit": "訪れる場所は…",
-        "placesCount": "{{count}}か所を回る予定です",
-        "totalTime": "想定総移動時間は{{time}}です",
+        "totalDistance": "合計 {{distance}} の移動",
+        "placesToVisit": "訪問予定は…",
+        "placesCount": "{{count}}か所を巡る予定です",
+        "totalTime": "想定合計移動時間は {{time}} です",
         "estimatedCostTitle": "予想費用",
-        "estimatedCost": "交通費は約{{cost}}になりそうです",
+        "estimatedCost": "交通費は約 {{cost}} の見込みです",
         "weatherTitle": "天気",
-        "weatherSentence": "今日の天気は{{desc}}、{{temp}}です。",
-        "doLater": "あとで行う",
+        "weatherSentence": "今日の天気は {{desc}}、{{temp}} です。",
+        "doLater": "後でやる",
         "start": "旅を始める",
-        "resume": "旅を再開",
+        "resume": "旅を再開する",
         "restart": "旅をやり直す"
+    },
+    "routeStep": {
+        "guiding": "案内中 ({{step}} / {{total}})",
+        "placeDetail": "スポット詳細を見る",
+        "stats": {
+            "totalDistance": "総距離",
+            "estimatedTime": "所要時間",
+            "estimatedCost": "予想費用"
+        },
+        "prevPlace": "前のスポット",
+        "nextPlace": "次のスポット",
+        "endRoute": "ルート終了",
+        "alerts": {
+            "placeNotFound": "スポット情報が見つかりません。",
+            "placeLoadFailed": "スポット情報の読み込みに失敗しました。",
+            "ongoingMissing": "進行中のルート情報を取得できませんでした。",
+            "currentRouteNotFound": "進行中リストに現在のルートが見つかりません。",
+            "completeSuccess": "ルートを正常に完了しました！"
+        }
     }
 }

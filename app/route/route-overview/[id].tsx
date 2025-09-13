@@ -10,7 +10,7 @@ import * as Location from "expo-location";
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, ImageBackground, StyleSheet, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 
 function langSuffix(langCode?: string): 'Ko' | 'En' | 'Jp' | 'Ch' {
@@ -190,14 +190,14 @@ export default function RouteOverviewScreen() {
     <Container>
       <Header title={t('routeOverview.title')} />
 
-      <ImageBackground
+      {/* <ImageBackground
         source={{ uri: 'https://placehold.co/300x300' }}
         style={styleSheet.HeaderSection}
       >
         <Title>{pickLocalizedField(route, 'title', i18n.language) || route?.title || ''}</Title>
         <Subtitle>{pickLocalizedField(route, 'regionName', i18n.language) || route?.theme || ''}</Subtitle>
         <Description>{pickLocalizedField(route, 'description', i18n.language) || route?.description || ''}</Description>
-      </ImageBackground>
+      </ImageBackground> */}
 
       <RouteInfoContainer>
         <Row>

@@ -5,14 +5,23 @@ import KakaoMapWebView, { KakaoMapHandle } from '@/components/KakaoMapWebView';
 import { useUserRoutes } from '@/hooks/useUserRoutes';
 import { KAKAO_JS_API_KEY } from '@/src/env';
 import { useRouteRunStore } from '@/store/useRouteRunStore';
+import {
+  formatCurrencyKRW,
+  formatDistanceMeters,
+  formatMeters,
+  formatMinutes,
+  localizeInstruction
+} from '@/utils/navI18n';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import styled from 'styled-components/native';
 
 export default function RouteStepScreen() {
+  const { i18n, t } = useTranslation();
   const { id: idString, step = "1" } = useLocalSearchParams<{ id: string; step: string }>();
   const id = Number(idString);
   const mapRef = useRef<KakaoMapHandle>(null);
@@ -48,7 +57,7 @@ export default function RouteStepScreen() {
       const placeId = places?.[0]?.id;
 
       if (!placeId) {
-        Alert.alert("정보", "플레이스 정보를 찾을 수 없습니다.");
+        Alert.alert(t('common.info'), t('routeStep.alerts.placeNotFound'));
         return;
       }
 
@@ -57,27 +66,27 @@ export default function RouteStepScreen() {
         params: { id: String(placeId) },
       });
     } catch (e) {
-      Alert.alert("오류", "플레이스 정보를 불러오지 못했습니다.");
+      Alert.alert(t('common.error'), t('routeStep.alerts.placeLoadFailed'));
     }
   };
 
   const handleEndRoute = async () => {
     if (!onGoingData?.savedRoutes) {
-      Alert.alert("오류", "진행중인 경로 정보를 불러올 수 없습니다.");
+      Alert.alert(t('common.error'), t('routeStep.alerts.ongoingMissing'));
       return;
     }
 
     const currentRoute = onGoingData.savedRoutes.find(r => r.routeId === id);
 
     if (!currentRoute) {
-      Alert.alert("오류", "현재 경로를 진행중인 경로 목록에서 찾을 수 없습니다.");
+      Alert.alert(t('common.error'), t('routeStep.alerts.currentRouteNotFound'));
       return;
     }
 
     try {
       await changeUserRouteStatus(currentRoute.savedRouteId, 'COMPLETED');
-      Alert.alert("성공", "경로를 성공적으로 완료했습니다!", [
-        { text: "OK", onPress: () => router.replace("/(tabs)") }
+      Alert.alert(t('common.success'), t('routeStep.alerts.completeSuccess'), [
+        { text: t('common.ok'), onPress: () => router.replace("/(tabs)") }
       ]);
     } catch (error) {
       console.error("Failed to change route status:", error);
@@ -87,7 +96,7 @@ export default function RouteStepScreen() {
 
   return (
     <Container>
-      <Header title="루트" />
+      <Header title={t('route.title')} />
       <View style={{ width: '100%', height: 300, backgroundColor: 'lightgrey' }}>
         <KakaoMapWebView
           ref={mapRef}
@@ -100,7 +109,9 @@ export default function RouteStepScreen() {
       </View>
       <ScrollView>
         <Section>
-          <Text style={{ textAlign: 'center', color: '#666', marginBottom: 8 }}>안내중 ({stepNum} / {segmentCount})</Text>
+          <Text style={{ textAlign: 'center', color: '#666', marginBottom: 8 }}>
+            {t('routeStep.guiding', { step: stepNum, total: segmentCount })}
+          </Text>
           <PlaceName>{segment.toName}</PlaceName>
           <InfoButton onPress={handlePlaceButtonPress}>
             <LinearGradient
@@ -109,23 +120,23 @@ export default function RouteStepScreen() {
               end={{ x: 1, y: 0 }}
               style={styleSheet.startButton}
             >
-              <InfoText>플레이스 상세보기</InfoText>
+              <InfoText>{t('routeStep.placeDetail')}</InfoText>
               <Ionicons name="chevron-forward" size={16} color="white" />
             </LinearGradient>
           </InfoButton>
 
           <StatsRow>
             <Stat>
-              <StatLabel>총 거리</StatLabel>
-              <StatValue>{(segment.distanceMeters / 1000).toFixed(1)}km</StatValue>
+              <StatLabel>{t('routeStep.stats.totalDistance')}</StatLabel>
+              <StatValue>{formatDistanceMeters(segment.distanceMeters, i18n.language)}</StatValue>
             </Stat>
             <Stat>
-              <StatLabel>예상 시간</StatLabel>
-              <StatValue>{(Math.round(segment.durationSeconds / 60))}분</StatValue>
+              <StatLabel>{t('routeStep.stats.estimatedTime')}</StatLabel>
+              <StatValue>{formatMinutes(segment.durationSeconds / 60, i18n.language)}</StatValue>
             </Stat>
             <Stat>
-              <StatLabel>예상 비용</StatLabel>
-              <StatValue>{segment.fare.toLocaleString()}원</StatValue>
+              <StatLabel>{t('routeStep.stats.estimatedCost')}</StatLabel>
+              <StatValue>{formatCurrencyKRW(segment.fare, i18n.language)}</StatValue>
             </Stat>
           </StatsRow>
         </Section>
@@ -141,14 +152,12 @@ export default function RouteStepScreen() {
                   {s.mode === 'BUS' && <Ionicons name="bus-outline" size={20} color="#2680eb" />}
                   {s.mode === 'SUBWAY' && <Ionicons name="subway-outline" size={20} color="#2680eb" />}
                   {/* s.mode === 'ARRIVE' && <Ionicons name="location-sharp" size={20} color="#2680eb" /> */}
+                  {s.mode === 'RAIL' && <Ionicons name="train-outline" size={20} color="#2680eb" />}
                 </StepIcon>
                 <StepText>
-                  {s.instruction}{
-                    '\n'}
+                  {localizeInstruction(s.instruction, i18n.language)}{'\n'}
                   <SubText>
-                    {Math.round(s.distanceMeters)}m · {Math.round(s.durationSeconds / 60)}분
-                    {/*s.lineName}번, {s.numStops ? `${s.numStops}정거장` : ""*/}
-                    {/*s.headsign ? `headsign · ${s.headsign}` : ""*/}
+                    {formatMeters(Math.round(s.distanceMeters), i18n.language)} · {formatMinutes(s.durationSeconds / 60, i18n.language)}
                   </SubText>
                 </StepText>
               </Step>
@@ -159,21 +168,21 @@ export default function RouteStepScreen() {
         <BottomButtons>
           {stepNum <= 1 ? (
             <InactiveButton>
-              <InactiveText>이전 플레이스</InactiveText>
+              <InactiveText>{t('routeStep.prevPlace')}</InactiveText>
             </InactiveButton>
           ) : (
             <ActiveButton onPress={() => goPrev()} >
-              <ActiveText>이전 플레이스</ActiveText>
+              <ActiveText>{t('routeStep.prevPlace')}</ActiveText>
             </ActiveButton>
           )
           }
           {stepNum >= segmentCount ? (
             <EndButton onPress={handleEndRoute}>
-              <EndText>루트 종료</EndText>
+              <EndText>{t('routeStep.endRoute')}</EndText>
             </EndButton>
           ) : (
             <ActiveButton onPress={() => goNext()} >
-              <ActiveText>다음 플레이스</ActiveText>
+              <ActiveText>{t('routeStep.nextPlace')}</ActiveText>
             </ActiveButton>
           )
           }

@@ -57,50 +57,50 @@ export default function EditRouteScreen() {
         router.replace(`/route/route-overview/${createdRouteId}`);
     };
 
-    const renderItem = ({ item, index }: any) => (
-        <View style={styles.cardWrap}>
-            {index !== 0 && <View style={styles.verticalLine} />}
+    // const renderItem = ({ item, index }: any) => (
+    //     <View style={styles.cardWrap}>
+    //         {index !== 0 && <View style={styles.verticalLine} />}
 
-            <View style={styles.card}>
-                {/* X 삭제 버튼 */}
-                <TouchableOpacity
-                    style={styles.closeCircle}
-                    onPress={() => handleDelete(item.id)}
-                >
-                    <Text style={styles.closeX}>×</Text>
-                </TouchableOpacity>
+    //         <View style={styles.card}>
+    //             {/* X 삭제 버튼 */}
+    //             <TouchableOpacity
+    //                 style={styles.closeCircle}
+    //                 onPress={() => handleDelete(item.id)}
+    //             >
+    //                 <Text style={styles.closeX}>×</Text>
+    //             </TouchableOpacity>
 
-                <Image source={item.image} style={styles.image} />
+    //             <Image source={item.image} style={styles.image} />
 
-                <View style={styles.info}>
-                    <Text style={styles.name}>{item.name}</Text>
-                    <Text style={styles.address}>{item.address}</Text>
-                    <Text style={styles.time}>{item.time}</Text>
-                    <View style={styles.bottomRow}>
-                        <Text style={styles.tag}>{item.tag}</Text>
+    //             <View style={styles.info}>
+    //                 <Text style={styles.name}>{item.name}</Text>
+    //                 <Text style={styles.address}>{item.address}</Text>
+    //                 <Text style={styles.time}>{item.time}</Text>
+    //                 <View style={styles.bottomRow}>
+    //                     <Text style={styles.tag}>{item.tag}</Text>
 
-                        {/* 순서 이동 버튼 */}
-                        <View style={styles.orderButtons}>
-                            <TouchableOpacity onPress={() => moveItem(index, index - 1)}>
-                                <Ionicons name="arrow-up" size={18} color="#1C5BD8" />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => moveItem(index, index + 1)}>
-                                <Ionicons
-                                    name="arrow-down"
-                                    size={18}
-                                    color="#1C5BD8"
-                                    style={{ marginTop: 4 }}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
+    //                     {/* 순서 이동 버튼 */}
+    //                     <View style={styles.orderButtons}>
+    //                         <TouchableOpacity onPress={() => moveItem(index, index - 1)}>
+    //                             <Ionicons name="arrow-up" size={18} color="#1C5BD8" />
+    //                         </TouchableOpacity>
+    //                         <TouchableOpacity onPress={() => moveItem(index, index + 1)}>
+    //                             <Ionicons
+    //                                 name="arrow-down"
+    //                                 size={18}
+    //                                 color="#1C5BD8"
+    //                                 style={{ marginTop: 4 }}
+    //                             />
+    //                         </TouchableOpacity>
+    //                     </View>
+    //                 </View>
+    //             </View>
 
-                {/* 상세 보기 화살표 */}
-                <Ionicons name="chevron-forward" size={20} color="#ccc" />
-            </View>
-        </View>
-    );
+    //             {/* 상세 보기 화살표 */}
+    //             <Ionicons name="chevron-forward" size={20} color="#ccc" />
+    //         </View>
+    //     </View>
+    // );
 
     const moveItem = (fromIndex: number, toIndex: number) => {
         if (toIndex < 0 || toIndex >= selectedPlaces.length) return;
@@ -163,18 +163,18 @@ export default function EditRouteScreen() {
 
                                         <View style={styles.bottomRow}>
                                             <Text style={styles.tag}>{item.tag}</Text>
-                                            <View style={styles.orderButtons}>
+                                            {/* <View style={styles.orderButtons}>
                                                 <TouchableOpacity onPress={() => moveItem(index, index - 1)}>
                                                     <Ionicons name="arrow-up" size={18} color="#1C5BD8" />
                                                 </TouchableOpacity>
                                                 <TouchableOpacity onPress={() => moveItem(index, index + 1)}>
                                                     <Ionicons name="arrow-down" size={18} color="#1C5BD8" style={{ marginTop: 4 }} />
                                                 </TouchableOpacity>
-                                            </View>
+                                            </View> */}
                                         </View>
                                     </View>
 
-                                    <View style={styles.iconBackground}>
+                                    {/* <View style={styles.iconBackground}>
                                         <TouchableOpacity
                                             onPress={() =>
                                                 router.push({
@@ -184,6 +184,42 @@ export default function EditRouteScreen() {
                                             }
                                         >
                                             <Ionicons name="chevron-forward" size={24} color="#1C5BD8" />
+                                        </TouchableOpacity>
+                                    </View> */}
+
+                                    <View style={styles.rightControls}>
+                                        <TouchableOpacity
+                                            disabled={index === 0}
+                                            onPress={() => moveItem(index, index - 1)}
+                                            style={[styles.iconCircleSmall, index === 0 && styles.iconDisabled]}
+                                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                        >
+                                            <Ionicons name="arrow-up" size={18} color="#1C5BD8" />
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            onPress={() =>
+                                                router.push({
+                                                    pathname: '/place/place-detail/[id]',
+                                                    params: { id: String(item.raw?.id ?? item.id) },
+                                                })
+                                            }
+                                            style={styles.iconCircleSmall}
+                                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                        >
+                                            <Ionicons name="chevron-forward" size={18} color="#1C5BD8" />
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            disabled={index === selectedPlaces.length - 1}
+                                            onPress={() => moveItem(index, index + 1)}
+                                            style={[
+                                                styles.iconCircleSmall,
+                                                index === selectedPlaces.length - 1 && styles.iconDisabled
+                                            ]}
+                                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                        >
+                                            <Ionicons name="arrow-down" size={18} color="#1C5BD8" />
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -384,22 +420,34 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginTop: 4,
     },
-    orderButtons: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginLeft: 8,
-    },
     scrollContent: {
         paddingBottom: 80,
     },
-    iconBackground: {
+
+    rightControls: {
+        alignSelf: 'stretch',          // 카드 높이를 따라 세로로 꽉 차게
+        justifyContent: 'space-between', // 위/가운데/아래 배치
+        alignItems: 'center',
+        marginLeft: 8,
+        paddingVertical: 2
+    },
+    iconCircle: {
         width: 32,
         height: 32,
-        borderRadius: 18, // 반지름 = 지름 / 2
+        borderRadius: 16,
         backgroundColor: '#DFEAFF',
         justifyContent: 'center',
-        alignItems: 'center',
-    }
-
+        alignItems: 'center'
+    },
+    iconCircleSmall: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: '#DFEAFF',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    iconDisabled: {
+        opacity: 0.35
+    },
 });

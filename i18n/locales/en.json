@@ -1,18 +1,18 @@
 {
     "home": {
-        "ongoingRouteTitle": "You have an ongoing route!",
+        "ongoingRouteTitle": "You have a route in progress!",
         "language": "Language",
-        "languageButton": "Change Language",
-        "recommendplace": "A popular spot on K-Route.",
-        "loginPrompt": "Please log in to view the content."
+        "languageButton": "Change language",
+        "recommendplace": "Popular places loved on K-Route",
+        "loginPrompt": "Please log in to see the content."
     },
     "theme": {
-        "title": "Explore by Theme"
+        "title": "Browse by Theme"
     },
     "route": {
         "title": "Route",
-        "whichCity": "Which city will you visit?",
-        "whichDate": "Which date will you go?",
+        "whichCity": "Which city are you going to?",
+        "whichDate": "Which date are you going?",
         "createRoute": "Create Route",
         "cities": [
             "Seoul",
@@ -64,7 +64,7 @@
     "routeStart": {
         "tabs": [
             "Recommended Routes",
-            "AI-guided Routes"
+            "AI Guide Recommended Routes"
         ]
     },
     "aiGuide": {
@@ -74,15 +74,15 @@
         "noResults": "No results found.",
         "resultsCount": "Search results ({{count}})",
         "recommendedByKRoute": "Places recommended by K-Route",
-        "searchTag": "Search Result",
-        "hoursUnknown": "Opening hours unavailable",
+        "searchTag": "Search Results",
+        "hoursUnknown": "No hours info",
         "placeLabelDefault": "Spot",
-        "addressUnknown": "Address unavailable",
-        "searchPlaceholder": "Search a place you want to visit!",
+        "addressUnknown": "No address info",
+        "searchPlaceholder": "Search for places you want to visit!",
         "loading": "Loading…",
         "retry": "Retry",
         "notice": "Notice",
-        "noCoords": "This place has no coordinate info.",
+        "noCoords": "This place has no coordinates.",
         "selectAtLeastOne": "Please select at least one place."
     },
     "daysShort": {
@@ -97,29 +97,29 @@
     "place": {
         "title": "Place",
         "loading": "Loading…",
-        "loadFail": "Failed to load place details.",
-        "addressUnknown": "Address unavailable",
-        "hoursUnknown": "Opening hours unavailable",
-        "costUnknown": "Cost info unavailable",
+        "loadFail": "Failed to load the place info.",
+        "addressUnknown": "No address info",
+        "hoursUnknown": "No hours info",
+        "costUnknown": "No cost info",
         "closed": "Closed",
         "alwaysOpen": "Open 24 hours",
         "relatedPosts": "Related Posts",
         "nearby": "Nearby Spots",
         "locationTitle": "Location",
-        "infoTitle": "information"
+        "infoTitle": "Info"
     },
     "chat": {
-        "welcome": "Hi, I'm your AI guide, MEY! How can I help?",
-        "inputPlaceholder": "Ask MEY anything",
-        "newChat": "New chat",
+        "welcome": "Hi! I'm your AI guide MEY. How can I help?",
+        "inputPlaceholder": "Ask MEY",
+        "newChat": "New Chat",
         "resetTitle": "Start a new chat",
-        "resetBody": "This will clear the current conversation. Continue?",
+        "resetBody": "Clear current conversation and start over?",
         "errorGeneric": "Sorry, something went wrong. Please try again.",
         "loginRequired": "Please log in to use the service.",
         "seeMore": "See more →",
         "suggestions": {
             "kpopRoute": "Recommend a K-POP route",
-            "nearbyFood": "Recommend nearby restaurants"
+            "nearbyFood": "Recommend restaurants nearby"
         },
         "meta": {
             "costAmount": "Cost: ₩{{amount}}",
@@ -130,17 +130,20 @@
     },
     "common": {
         "cancel": "Cancel",
-        "confirm": "OK",
+        "confirm": "Confirm",
         "unknown": "Unknown",
         "loading": "Loading…",
         "retry": "Retry",
         "ok": "OK",
         "loadFail": "Failed to load",
-        "close": "close"
+        "close": "Close",
+        "info": "Info",
+        "error": "Error",
+        "success": "Success"
     },
     "auth": {
-        "reauthTitle": "Re-authentication required",
-        "reauthBody": "Your email changed. Please log in again.",
+        "reauthTitle": "Reauthentication Required",
+        "reauthBody": "Email changed, please log in again.",
         "logoutTitle": "Log out",
         "logoutConfirm": "Are you sure you want to log out?",
         "logout": "Log out",
@@ -150,12 +153,12 @@
     },
     "profile": {
         "guest": "Guest",
-        "editProfile": "Edit profile"
+        "editProfile": "Edit Profile"
     },
     "routes": {
-        "ongoing": "Ongoing routes",
-        "notStarted": "Not started",
-        "completed": "Completed routes"
+        "ongoing": "Ongoing",
+        "notStarted": "Not Started",
+        "completed": "Completed"
     },
     "settings": {
         "title": "Settings",
@@ -165,32 +168,51 @@
         "home": "Home",
         "map": "Map",
         "route": "Route",
-        "chatbot": "AI Chat",
+        "chatbot": "AI Chatbot",
         "myroute": "My Route"
     },
     "routeEdit": {
         "title": "Edit Route",
-        "createCustom": "Create a custom route",
-        "selectedCount": "{{count}} place(s) selected",
+        "createCustom": "Create Custom Route",
+        "selectedCount": "{{count}} places selected",
         "tip": "You can reorder, delete, and add places.",
-        "addPlace": "Add a place",
+        "addPlace": "Add Place",
         "empty": "No places selected.",
-        "start": "Start route"
+        "start": "Start Route"
     },
     "routeOverview": {
         "title": "Trip Overview",
-        "thisJourney": "This journey...",
-        "totalDistance": "We will travel {{distance}} in total",
-        "placesToVisit": "Places to explore...",
-        "placesCount": "We plan to visit {{count}} places",
-        "totalTime": "Estimated total travel time is {{time}}",
+        "thisJourney": "This journey…",
+        "totalDistance": "Total travel: {{distance}}",
+        "placesToVisit": "We will visit…",
+        "placesCount": "We'll visit {{count}} places",
+        "totalTime": "Estimated total travel time: {{time}}",
         "estimatedCostTitle": "Estimated Cost",
-        "estimatedCost": "About {{cost}} for transportation",
+        "estimatedCost": "Approx. {{cost}} for transportation",
         "weatherTitle": "Weather",
-        "weatherSentence": "Today's weather is {{desc}}, {{temp}}.",
+        "weatherSentence": "Today's weather: {{desc}}, {{temp}}.",
         "doLater": "Do it later",
-        "start": "Start trip",
-        "resume": "Resume trip",
-        "restart": "Restart trip"
+        "start": "Start Trip",
+        "resume": "Resume Trip",
+        "restart": "Restart Trip"
+    },
+    "routeStep": {
+        "guiding": "Guiding ({{step}} / {{total}})",
+        "placeDetail": "View place details",
+        "stats": {
+            "totalDistance": "Total Distance",
+            "estimatedTime": "Estimated Time",
+            "estimatedCost": "Estimated Cost"
+        },
+        "prevPlace": "Previous Place",
+        "nextPlace": "Next Place",
+        "endRoute": "End Route",
+        "alerts": {
+            "placeNotFound": "Place information not found.",
+            "placeLoadFailed": "Failed to load place information.",
+            "ongoingMissing": "Failed to load your ongoing routes.",
+            "currentRouteNotFound": "Current route not found in the ongoing list.",
+            "completeSuccess": "Route completed successfully!"
+        }
     }
 }

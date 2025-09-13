@@ -72,7 +72,7 @@ export type CreateRouteRequest = {
 
 // 루트 시작 타입
 
-export type StepMode = 'WALK' | 'BUS' | 'SUBWAY';
+export type StepMode = 'WALK' | 'BUS' | 'SUBWAY' | 'RAIL';
 
 export interface PolyPoint { lat: number; lng: number }
 export interface Step {
