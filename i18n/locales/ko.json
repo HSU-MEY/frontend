@@ -214,5 +214,11 @@
             "currentRouteNotFound": "현재 경로를 진행중인 경로 목록에서 찾을 수 없습니다.",
             "completeSuccess": "경로를 성공적으로 완료했습니다!"
         }
+    },
+    "aiGuideRoutes": {
+        "title": "AI 가이드가 추천하는 루트를 만나보세요"
+    },
+    "themeRoutes": {
+        "emptyByTheme": "해당 테마의 추천 루트가 없습니다."
     }
 }

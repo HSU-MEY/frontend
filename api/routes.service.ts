@@ -2,6 +2,7 @@
 import { getAccess } from "@/utils/storage";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+export type RouteTheme = 'K_POP' | 'K_DRAMA' | 'K_BEAUTY' | 'K_FASHION' | 'K_FOOD';
 
 // ===== 공통 타입 =====
 export type ApiEnvelope<T> = {
@@ -39,7 +40,7 @@ export type Routes = {
   routeId: number;
   title: string;
   description: string;
-  theme: string;
+  //theme: string;
   totalDistanceKm: number;
   totalDurationMinutes: number;
   estimatedCost: number;
@@ -49,6 +50,8 @@ export type Routes = {
   routePlaces: RoutePlace[];
   regionNameKo?: string;
   regionNameEn?: string;
+  theme?: RouteTheme;
+  themes?: RouteTheme[];
 };
 
 export type RecommendedRoutes = {
@@ -88,7 +91,7 @@ export interface Step {
 export interface Segment {
   fromName: string;
   fromLat: number; fromLng: number;
-  toName: string;   toLat: number; toLng: number;
+  toName: string; toLat: number; toLng: number;
   distanceMeters: number;
   durationSeconds: number;
   fare: number;
@@ -172,9 +175,9 @@ export async function getRecommendRouteApi(
   return fetchJson<ApiEnvelope<RecommendedRoutes>>(
     `/routes/recommend` + `?${params.toString()}`,
     {
-    method: "GET",
-    headers: jsonHeaders(await getAccess() || undefined),
-  });
+      method: "GET",
+      headers: jsonHeaders(await getAccess() || undefined),
+    });
 }
 
 // Route 생성(TEST ONLY)
@@ -193,8 +196,8 @@ export async function startRouteApi(
   routeId: number,
   lat: number,
   lon: number
-): Promise<ApiEnvelope<{segments: Segment[]}>> {
-  return fetchJson<ApiEnvelope<{segments: Segment[]}>>(
+): Promise<ApiEnvelope<{ segments: Segment[] }>> {
+  return fetchJson<ApiEnvelope<{ segments: Segment[] }>>(
     `/routes/${routeId}/start?latitude=${lat}&longitude=${lon}`, {
     method: "POST",
     headers: jsonHeaders(await getAccess() || undefined),

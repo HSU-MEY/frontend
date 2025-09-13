@@ -214,5 +214,11 @@
             "currentRouteNotFound": "Current route not found in the ongoing list.",
             "completeSuccess": "Route completed successfully!"
         }
+    },
+    "aiGuideRoutes": {
+        "title": "AI-picked routes"
+    },
+    "themeRoutes": {
+        "emptyByTheme": "No recommended routes for this theme."
     }
 }

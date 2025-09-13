@@ -214,5 +214,11 @@
             "currentRouteNotFound": "在进行中的列表中未找到当前路线。",
             "completeSuccess": "路线已成功完成！"
         }
+    },
+    "aiGuideRoutes": {
+        "title": "来看看 AI 向导推荐的路线"
+    },
+    "themeRoutes": {
+        "emptyByTheme": "此主题暂无推荐路线。"
     }
 }

@@ -214,5 +214,11 @@
             "currentRouteNotFound": "進行中リストに現在のルートが見つかりません。",
             "completeSuccess": "ルートを正常に完了しました！"
         }
+    },
+    "aiGuideRoutes": {
+        "title": "AIガイドおすすめのルートをチェックしましょう"
+    },
+    "themeRoutes": {
+        "emptyByTheme": "このテーマのおすすめルートはありません。"
     }
 }
