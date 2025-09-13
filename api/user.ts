@@ -7,6 +7,7 @@ export type UserProfile = {
   nickname: string;
   email: string;
   role: 'USER' | 'ADMIN' | string;
+  profileImageUrl?: string | null;
 };
 
 /**

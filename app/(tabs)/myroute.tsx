@@ -32,6 +32,11 @@ export default function MyPage() {
   const { t } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
 
+  const avatarSource =
+    profile?.profileImageUrl && profile.profileImageUrl.trim().length > 0
+      ? { uri: profile.profileImageUrl }
+      : require('@/assets/images/sample-profile.png');
+
   const {
     data: upcomingData,
     loading: upcomingLoading,
@@ -179,7 +184,12 @@ export default function MyPage() {
           resizeMode="contain"
         />
         <AvatarWrapper>
-          <Avatar source={require('@/assets/images/sample-profile.png')} />
+          <Avatar
+            // key={avatarKey}
+            source={avatarSource}
+            // onError 시 기본 이미지로 폴백 (네트워크 오류 대비)
+            defaultSource={require('@/assets/images/sample-profile.png')}
+          />
           <UserName>{profile ? profile.nickname : 'Guest'}</UserName>
           <UserEmail>{profile ? profile.email : ''}</UserEmail>
           {profile && (

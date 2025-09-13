@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Dimensions,
     Image,
@@ -25,6 +26,7 @@ export default function EditRouteScreen() {
     const mapRef = useRef<KakaoMapHandle>(null);
     const JS_KEY = KAKAO_JS_API_KEY;
     const [isMapReady, setMapReady] = useState(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (isMapReady && mapRef.current && selectedPlaces.length > 0) {
@@ -55,50 +57,50 @@ export default function EditRouteScreen() {
         router.replace(`/route/route-overview/${createdRouteId}`);
     };
 
-    const renderItem = ({ item, index }: any) => (
-        <View style={styles.cardWrap}>
-            {index !== 0 && <View style={styles.verticalLine} />}
+    // const renderItem = ({ item, index }: any) => (
+    //     <View style={styles.cardWrap}>
+    //         {index !== 0 && <View style={styles.verticalLine} />}
 
-            <View style={styles.card}>
-                {/* X 삭제 버튼 */}
-                <TouchableOpacity
-                    style={styles.closeCircle}
-                    onPress={() => handleDelete(item.id)}
-                >
-                    <Text style={styles.closeX}>×</Text>
-                </TouchableOpacity>
+    //         <View style={styles.card}>
+    //             {/* X 삭제 버튼 */}
+    //             <TouchableOpacity
+    //                 style={styles.closeCircle}
+    //                 onPress={() => handleDelete(item.id)}
+    //             >
+    //                 <Text style={styles.closeX}>×</Text>
+    //             </TouchableOpacity>
 
-                <Image source={item.image} style={styles.image} />
+    //             <Image source={item.image} style={styles.image} />
 
-                <View style={styles.info}>
-                    <Text style={styles.name}>{item.name}</Text>
-                    <Text style={styles.address}>{item.address}</Text>
-                    <Text style={styles.time}>{item.time}</Text>
-                    <View style={styles.bottomRow}>
-                        <Text style={styles.tag}>{item.tag}</Text>
+    //             <View style={styles.info}>
+    //                 <Text style={styles.name}>{item.name}</Text>
+    //                 <Text style={styles.address}>{item.address}</Text>
+    //                 <Text style={styles.time}>{item.time}</Text>
+    //                 <View style={styles.bottomRow}>
+    //                     <Text style={styles.tag}>{item.tag}</Text>
 
-                        {/* 순서 이동 버튼 */}
-                        <View style={styles.orderButtons}>
-                            <TouchableOpacity onPress={() => moveItem(index, index - 1)}>
-                                <Ionicons name="arrow-up" size={18} color="#1C5BD8" />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => moveItem(index, index + 1)}>
-                                <Ionicons
-                                    name="arrow-down"
-                                    size={18}
-                                    color="#1C5BD8"
-                                    style={{ marginTop: 4 }}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
+    //                     {/* 순서 이동 버튼 */}
+    //                     <View style={styles.orderButtons}>
+    //                         <TouchableOpacity onPress={() => moveItem(index, index - 1)}>
+    //                             <Ionicons name="arrow-up" size={18} color="#1C5BD8" />
+    //                         </TouchableOpacity>
+    //                         <TouchableOpacity onPress={() => moveItem(index, index + 1)}>
+    //                             <Ionicons
+    //                                 name="arrow-down"
+    //                                 size={18}
+    //                                 color="#1C5BD8"
+    //                                 style={{ marginTop: 4 }}
+    //                             />
+    //                         </TouchableOpacity>
+    //                     </View>
+    //                 </View>
+    //             </View>
 
-                {/* 상세 보기 화살표 */}
-                <Ionicons name="chevron-forward" size={20} color="#ccc" />
-            </View>
-        </View>
-    );
+    //             {/* 상세 보기 화살표 */}
+    //             <Ionicons name="chevron-forward" size={20} color="#ccc" />
+    //         </View>
+    //     </View>
+    // );
 
     const moveItem = (fromIndex: number, toIndex: number) => {
         if (toIndex < 0 || toIndex >= selectedPlaces.length) return;
@@ -111,7 +113,7 @@ export default function EditRouteScreen() {
 
     return (
         <View style={styles.container}>
-            <Header title="루트 편집" />
+            <Header title={t('routeEdit.title')} />
             <View style={styles.mapContainer}>
                 <KakaoMapWebView
                     ref={mapRef}
@@ -123,22 +125,22 @@ export default function EditRouteScreen() {
             <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
 
                 <View style={styles.routeInfo}>
-                    <Text style={styles.routeTitle}>커스텀 루트 생성</Text>
+                    <Text style={styles.routeTitle}>{t('routeEdit.createCustom')}</Text>
                     <Text style={styles.routeSub}>
-                        선택한 장소 {selectedPlaces.length}곳
+                        {t('routeEdit.selectedCount', { count: selectedPlaces.length })}
                     </Text>
-                    <Text style={styles.tip}>플레이스 순서 변경, 삭제, 추가가 가능해요</Text>
+                    <Text style={styles.tip}>{t('routeEdit.tip')}</Text>
 
                     <TouchableOpacity
                         style={styles.addButton}
                         onPress={() => router.push('/route/add')}
                     >
-                        <Text style={styles.addButtonText}>장소 추가하기</Text>
+                        <Text style={styles.addButtonText}>{t('routeEdit.addPlace')}</Text>
                     </TouchableOpacity>
                 </View>
 
                 {selectedPlaces.length === 0 ? (
-                    <Text style={styles.empty}>선택된 장소가 없습니다.</Text>
+                    <Text style={styles.empty}>{t('routeEdit.empty')}</Text>
                 ) : (
                     <View style={styles.listContainer}>
                         {selectedPlaces.map((item, index) => (
@@ -161,18 +163,18 @@ export default function EditRouteScreen() {
 
                                         <View style={styles.bottomRow}>
                                             <Text style={styles.tag}>{item.tag}</Text>
-                                            <View style={styles.orderButtons}>
+                                            {/* <View style={styles.orderButtons}>
                                                 <TouchableOpacity onPress={() => moveItem(index, index - 1)}>
                                                     <Ionicons name="arrow-up" size={18} color="#1C5BD8" />
                                                 </TouchableOpacity>
                                                 <TouchableOpacity onPress={() => moveItem(index, index + 1)}>
                                                     <Ionicons name="arrow-down" size={18} color="#1C5BD8" style={{ marginTop: 4 }} />
                                                 </TouchableOpacity>
-                                            </View>
+                                            </View> */}
                                         </View>
                                     </View>
 
-                                    <View style={styles.iconBackground}>
+                                    {/* <View style={styles.iconBackground}>
                                         <TouchableOpacity
                                             onPress={() =>
                                                 router.push({
@@ -182,6 +184,42 @@ export default function EditRouteScreen() {
                                             }
                                         >
                                             <Ionicons name="chevron-forward" size={24} color="#1C5BD8" />
+                                        </TouchableOpacity>
+                                    </View> */}
+
+                                    <View style={styles.rightControls}>
+                                        <TouchableOpacity
+                                            disabled={index === 0}
+                                            onPress={() => moveItem(index, index - 1)}
+                                            style={[styles.iconCircleSmall, index === 0 && styles.iconDisabled]}
+                                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                        >
+                                            <Ionicons name="arrow-up" size={18} color="#1C5BD8" />
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            onPress={() =>
+                                                router.push({
+                                                    pathname: '/place/place-detail/[id]',
+                                                    params: { id: String(item.raw?.id ?? item.id) },
+                                                })
+                                            }
+                                            style={styles.iconCircleSmall}
+                                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                        >
+                                            <Ionicons name="chevron-forward" size={18} color="#1C5BD8" />
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            disabled={index === selectedPlaces.length - 1}
+                                            onPress={() => moveItem(index, index + 1)}
+                                            style={[
+                                                styles.iconCircleSmall,
+                                                index === selectedPlaces.length - 1 && styles.iconDisabled
+                                            ]}
+                                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                        >
+                                            <Ionicons name="arrow-down" size={18} color="#1C5BD8" />
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -200,7 +238,7 @@ export default function EditRouteScreen() {
                             end={{ x: 1, y: 0 }}
                             style={styles.startButton}
                         >
-                            <Text style={styles.startButtonText}>루트 시작하기</Text>
+                            <Text style={styles.startButtonText}>{t('routeEdit.start')}</Text>
                         </LinearGradient>
                     </TouchableOpacity>
                 </View>
@@ -382,22 +420,34 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginTop: 4,
     },
-    orderButtons: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginLeft: 8,
-    },
     scrollContent: {
         paddingBottom: 80,
     },
-    iconBackground: {
+
+    rightControls: {
+        alignSelf: 'stretch',          // 카드 높이를 따라 세로로 꽉 차게
+        justifyContent: 'space-between', // 위/가운데/아래 배치
+        alignItems: 'center',
+        marginLeft: 8,
+        paddingVertical: 2
+    },
+    iconCircle: {
         width: 32,
         height: 32,
-        borderRadius: 18, // 반지름 = 지름 / 2
+        borderRadius: 16,
         backgroundColor: '#DFEAFF',
         justifyContent: 'center',
-        alignItems: 'center',
-    }
-
+        alignItems: 'center'
+    },
+    iconCircleSmall: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: '#DFEAFF',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    iconDisabled: {
+        opacity: 0.35
+    },
 });

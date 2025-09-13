@@ -9,9 +9,40 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from "expo-location";
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, ImageBackground, StyleSheet, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 
+function langSuffix(langCode?: string): 'Ko' | 'En' | 'Jp' | 'Ch' {
+  const l = (langCode || 'ko').toLowerCase();
+  if (l.startsWith('ko')) return 'Ko';
+  if (l.startsWith('en')) return 'En';
+  if (l.startsWith('ja')) return 'Jp';
+  if (l.startsWith('zh')) return 'Ch';
+  return 'Ko';
+}
+
+function pickLocalizedField<T extends Record<string, any>>(
+  p: T | null | undefined,
+  base: string,
+  langCode?: string
+): string {
+  if (!p) return '';
+  const suf = langSuffix(langCode);
+  const tryKeys = [
+    `${base}${suf}`,
+    `${base}En`,
+    `${base}Ko`,
+    `${base}Jp`,
+    `${base}Ch`,
+    base, // 단일 필드(title, description 등) 지원
+  ];
+  for (const k of tryKeys) {
+    const v = (p as any)[k];
+    if (typeof v === 'string' && v.trim()) return v;
+  }
+  return '';
+}
 
 export default function RouteOverviewScreen() {
   const id = Number(useLocalSearchParams().id);
@@ -20,10 +51,11 @@ export default function RouteOverviewScreen() {
   const [distance, setDistance] = React.useState<string>("");
   const [estimatedTime, setEstimatedTime] = React.useState<string>("");
   const [estimatedCost, setEstimatedCost] = React.useState<string>("");
-  const [savedRouteId, setSavedRouteId ] = useState<number | null>(null);
+  const [savedRouteId, setSavedRouteId] = useState<number | null>(null);
   const upsertRoute = useRouteRunStore((s) => s.upsertRoute);
   const setCurrent = useRouteRunStore((s) => s.setCurrent);
-  
+  const { i18n, t } = useTranslation();
+
   // As per user instruction: call the hook for each status
   const { save: saveUserRoute } = useUserRoutes();
   const { data: notStartedRoutes, loading: notStartedLoading } = useUserRoutes('NOT_STARTED');
@@ -57,17 +89,17 @@ export default function RouteOverviewScreen() {
         const response_f = Array.isArray(response.result) ? response.result[0] : response.result;
         setRoute(response_f);
         setDistance(
-          response_f.totalDistanceKm.toString()
-          ? (response_f.totalDistanceKm / 1000).toFixed(1) + "km"
-          : "0"
+          Number.isFinite(response_f.totalDistanceKm)
+            ? `${Number(response_f.totalDistanceKm).toFixed(1)}km`
+            : "0km"
         );
         const hours = Math.floor(response_f.totalDurationMinutes / 60);
         const minutes = response_f.totalDurationMinutes % 60;
         setEstimatedTime(
-          `${hours}시간 ${minutes}분`
+          `${hours}h ${minutes}m`
         );
         setEstimatedCost(
-          response_f.estimatedCost.toString() + "원"
+          response_f.estimatedCost.toString() + "KRW"
         );
       }
     }
@@ -86,13 +118,13 @@ export default function RouteOverviewScreen() {
   } = useWeather(lat, lon, { precision: 4 });
 
   const weatherDescription =
-  weatherData?.weather?.[0]?.description ?? (weatherLoading ? "..." : weatherError ? "정보 없음" : "");
+    weatherData?.weather?.[0]?.description ?? (weatherLoading ? "..." : weatherError ? "정보 없음" : "");
   const temperature =
-  weatherData?.main?.temp != null ? `${weatherData.main.temp.toFixed(1)}°C` : "";
+    weatherData?.main?.temp != null ? `${weatherData.main.temp.toFixed(1)}°C` : "";
 
   const startRoute = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
-    if(status !== "granted") {
+    if (status !== "granted") {
       throw new Error("위치 권한이 거부되었습니다.");
     }
 
@@ -113,7 +145,7 @@ export default function RouteOverviewScreen() {
       const route = useRouteRunStore.getState().routes[String(id)];
       let segments;
 
-      if(route) {
+      if (route) {
         segments = route.segments;
         console.log("Using existing segments for route:", id);
       } else {
@@ -128,12 +160,12 @@ export default function RouteOverviewScreen() {
         });
       }
 
-      if(savedRouteId !== null && savedRouteId >= 0) {
+      if (savedRouteId !== null && savedRouteId >= 0) {
         changeUserRouteStatus(savedRouteId, 'ON_GOING').catch((error) => {
-        //console.error("Failed to change route status:", error);
-      });
+          //console.error("Failed to change route status:", error);
+        });
       }
-      
+
       //페이지 이동
       router.replace(`/route/route-step/${id}/1`);
     } catch (error) {
@@ -145,63 +177,69 @@ export default function RouteOverviewScreen() {
   }
 
   const handleLaterButton = () => {
-    if(routeStatus !== 'NOT_SAVED' && savedRouteId !== null) {
+    if (routeStatus !== 'NOT_SAVED' && savedRouteId !== null) {
       saveUserRoute(savedRouteId, new Date(), "09:00").catch((error) => {
-      //console.error("Failed to save route:", error);
+        //console.error("Failed to save route:", error);
       });
     }
-    
+
     router.back();
   }
 
   return (
     <Container>
-      <Header title="여행 개요" />
+      <Header title={t('routeOverview.title')} />
 
-      <ImageBackground
+      {/* <ImageBackground
         source={{ uri: 'https://placehold.co/300x300' }}
-        style={ styleSheet.HeaderSection }
+        style={styleSheet.HeaderSection}
       >
-        <Title>{ route?.title }</Title>
-        <Subtitle>{ route?.theme }</Subtitle>
-        <Description>
-          { route?.description }
-        </Description>
-      </ImageBackground>
+        <Title>{pickLocalizedField(route, 'title', i18n.language) || route?.title || ''}</Title>
+        <Subtitle>{pickLocalizedField(route, 'regionName', i18n.language) || route?.theme || ''}</Subtitle>
+        <Description>{pickLocalizedField(route, 'description', i18n.language) || route?.description || ''}</Description>
+      </ImageBackground> */}
 
       <RouteInfoContainer>
         <Row>
           <InfoBox>
-            <InfoTitle>이 여정은...</InfoTitle>
-            <InfoImage source={ require('../../../assets/images/plane.png') } style={{right: 0, width: 192}} />
-            <InfoHighlightA style={{marginTop: 42}}>총 <HighlightA>{ distance }</HighlightA>를 여행해요</InfoHighlightA>
+            <InfoTitle>{t('routeOverview.thisJourney')}</InfoTitle>
+            <InfoImage source={require('../../../assets/images/plane.png')} style={{ right: 0, width: 192 }} />
+            <InfoHighlightA style={{ marginTop: 42 }}>{t('routeOverview.totalDistance', { distance })}</InfoHighlightA>
           </InfoBox>
         </Row>
 
         <Row style={{ flex: 1 }}>
           <Column style={{ flex: 1 }}>
             <InfoBox style={{ flex: 2 }}>
-              <InfoTitle>우리가 둘러볼 곳은...</InfoTitle>
+              <InfoTitle>{t('routeOverview.placesToVisit')}</InfoTitle>
               <InfoSubtext>
-                { route?.routePlaces[0].place.name }
+                {pickLocalizedField(route?.routePlaces?.[0]?.place, 'name', i18n.language)
+                  || route?.routePlaces?.[0]?.place.name
+                  || ''}
                 {"\n"} ... {"\n"}
-                { route?.routePlaces[route?.routePlaces.length - 1].place.name }</InfoSubtext>
-              <InfoImage source={require('../../../assets/images/city.png')} style={{right: 0, top: 80, width: 124, height: 124}} />
-              <InfoHighlight style={{marginTop: 102}}><Highlight>{ route?.routePlaces.length }개</Highlight>의 장소를 둘러볼 예정이에요</InfoHighlight>
-              <InfoImage source={require('../../../assets/images/transport.png')} style={{bottom: 40, width: 178}} />
-              <InfoHighlight style={{marginTop: 86, textAlign: 'right'}}>예상 총 이동 시간은 <Highlight>{ estimatedTime }</Highlight>이에요</InfoHighlight>
+                {pickLocalizedField(
+                  route?.routePlaces?.[(route?.routePlaces?.length ?? 1) - 1]?.place,
+                  'name',
+                  i18n.language
+                ) || route?.routePlaces?.[(route?.routePlaces?.length ?? 1) - 1]?.place.name || ''}
+              </InfoSubtext>
+              <InfoImage source={require('../../../assets/images/city.png')} style={{ right: 0, top: 80, width: 124, height: 124 }} />
+              <InfoHighlight style={{ marginTop: 102 }}>{t('routeOverview.placesCount', { count: route?.routePlaces.length ?? 0 })}</InfoHighlight>
+              <InfoImage source={require('../../../assets/images/transport.png')} style={{ bottom: 40, width: 178 }} />
+              <InfoHighlight style={{ marginTop: 86, textAlign: 'right' }}>{t('routeOverview.totalTime', { time: estimatedTime })}</InfoHighlight>
             </InfoBox>
           </Column>
           <Column style={{ flex: 1 }}>
-            <InfoBox style={{ flex: 1}}>
-              <InfoTitle>예상 비용</InfoTitle>
-              <InfoImage source={require('../../../assets/images/money.png')} style={{top:20}} />
-              <InfoHighlight style={{marginTop: 82, textAlign: 'right'}}>교통비로 {"\n"}약 <Highlight>{ estimatedCost }</Highlight>을{"\n"}소모할 것 같아요</InfoHighlight>
+            <InfoBox style={{ flex: 1 }}>
+              <InfoTitle>{t('routeOverview.estimatedCostTitle')}</InfoTitle>
+              <InfoImage source={require('../../../assets/images/money.png')} style={{ top: 20 }} />
+              <InfoHighlight style={{ marginTop: 82, textAlign: 'right' }}>{t('routeOverview.estimatedCost', { cost: estimatedCost })}</InfoHighlight>
             </InfoBox>
 
             <InfoBox style={{ flex: 1 }}>
-              <InfoTitle>날씨</InfoTitle>
-              <InfoHighlight>오늘의 날씨는 <Highlight>{ weatherDescription }, { temperature }</Highlight>입니다. </InfoHighlight>
+              <InfoTitle>{t('routeOverview.weatherTitle')}</InfoTitle>
+              <InfoHighlight>{t('routeOverview.weatherSentence', { desc: weatherDescription, temp: temperature })}
+              </InfoHighlight>
             </InfoBox>
           </Column>
         </Row>
@@ -211,27 +249,27 @@ export default function RouteOverviewScreen() {
 
       <ButtonRow>
         <ButtonOutline onPress={handleLaterButton} disabled={isLoading}>
-          <ButtonText>다음에 할래요</ButtonText>
+          <ButtonText>{t('routeOverview.doLater')}</ButtonText>
         </ButtonOutline>
         <TouchableOpacity
-            onPress={handleStartRoute} disabled={isLoading || routeStatus === 'LOADING'} style={{ opacity: ((isLoading || routeStatus === 'LOADING') ? 0.7 : 1), width: '60%'  }}
+          onPress={handleStartRoute} disabled={isLoading || routeStatus === 'LOADING'} style={{ opacity: ((isLoading || routeStatus === 'LOADING') ? 0.7 : 1), width: '60%' }}
         >
-            <LinearGradient
-                colors={['#69E8D9', '#0080FF']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styleSheet.startButton}
-            >
-              {(isLoading || routeStatus === 'LOADING') ? <ActivityIndicator color="white" /> : (
-                <ButtonTextPrimary>
-                  {routeStatus === 'ON_GOING'
-                    ? '여행 이어하기'
-                    : routeStatus === 'COMPLETED'
-                    ? '여행 다시하기'
-                    : '여행 시작하기'}
-                </ButtonTextPrimary>
-              )}
-            </LinearGradient>
+          <LinearGradient
+            colors={['#69E8D9', '#0080FF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styleSheet.startButton}
+          >
+            {(isLoading || routeStatus === 'LOADING') ? <ActivityIndicator color="white" /> : (
+              <ButtonTextPrimary>
+                {routeStatus === 'ON_GOING'
+                  ? t('routeOverview.resume')
+                  : routeStatus === 'COMPLETED'
+                    ? t('routeOverview.restart')
+                    : t('routeOverview.start')}
+              </ButtonTextPrimary>
+            )}
+          </LinearGradient>
         </TouchableOpacity>
       </ButtonRow>
     </Container>

@@ -1,18 +1,18 @@
 {
     "home": {
-        "ongoingRouteTitle": "您有进行中的路线！",
+        "ongoingRouteTitle": "你有进行中的路线！",
         "language": "语言",
         "languageButton": "更改语言",
-        "recommendplace": "K-Route 上大家都喜欢的地方。",
-        "loginPrompt": "要查看内容，请先登录。"
+        "recommendplace": "K-Route 上大家都喜欢的地点",
+        "loginPrompt": "请登录后查看内容。"
     },
     "theme": {
-        "title": "按主题探索"
+        "title": "按主题浏览"
     },
     "route": {
         "title": "路线",
-        "whichCity": "您要去哪个地区？",
-        "whichDate": "您要在哪一天去？",
+        "whichCity": "你要去哪个地区？",
+        "whichDate": "你打算哪一天出发？",
         "createRoute": "创建路线",
         "cities": [
             "首尔",
@@ -64,22 +64,22 @@
     "routeStart": {
         "tabs": [
             "推荐路线",
-            "AI指南推荐路线"
+            "AI 向导推荐路线"
         ]
     },
     "aiGuide": {
-        "fetchPopularFailed": "未能加载热门地点。",
+        "fetchPopularFailed": "热门地点加载失败。",
         "searchFailed": "搜索失败。",
-        "searching": "搜索中…",
-        "noResults": "没有找到结果。",
-        "resultsCount": "搜索结果（{{count}}个）",
+        "searching": "正在搜索…",
+        "noResults": "未找到结果。",
+        "resultsCount": "搜索结果（{{count}}）",
         "recommendedByKRoute": "K-Route 推荐的地点",
         "searchTag": "搜索结果",
-        "hoursUnknown": "营业时间暂无信息",
-        "placeLabelDefault": "名胜",
-        "addressUnknown": "地址信息暂无",
+        "hoursUnknown": "无营业时间信息",
+        "placeLabelDefault": "地点",
+        "addressUnknown": "无地址信息",
         "searchPlaceholder": "搜索想去的地点！",
-        "loading": "加载中…",
+        "loading": "正在加载…",
         "retry": "重试",
         "notice": "提示",
         "noCoords": "该地点没有坐标信息。",
@@ -96,51 +96,54 @@
     },
     "place": {
         "title": "地点",
-        "loading": "加载中…",
-        "loadFail": "未能加载地点信息。",
-        "addressUnknown": "地址信息未知",
-        "hoursUnknown": "营业时间未知",
-        "costUnknown": "费用信息未知",
+        "loading": "正在加载…",
+        "loadFail": "地点信息加载失败。",
+        "addressUnknown": "无地址信息",
+        "hoursUnknown": "无营业时间信息",
+        "costUnknown": "无费用信息",
         "closed": "休息",
-        "alwaysOpen": "24小时营业",
+        "alwaysOpen": "24 小时营业",
         "relatedPosts": "相关帖子",
-        "nearby": "附近景点",
+        "nearby": "附近地点",
         "locationTitle": "位置信息",
         "infoTitle": "信息"
     },
     "chat": {
-        "welcome": "你好，我是你的AI向导 MEY！需要我做什么？",
-        "inputPlaceholder": "向 MEY 提问",
+        "welcome": "你好！我是你的 AI 向导 MEY，需要我做什么？",
+        "inputPlaceholder": "问问 MEY",
         "newChat": "新对话",
         "resetTitle": "开始新对话",
-        "resetBody": "这将清空当前对话，是否继续？",
-        "errorGeneric": "抱歉，发生错误。请重试。",
-        "loginRequired": "使用该服务需要先登录。",
-        "seeMore": "查看详情 →",
+        "resetBody": "清空当前对话并重新开始？",
+        "errorGeneric": "抱歉，发生错误，请重试。",
+        "loginRequired": "请登录后使用服务。",
+        "seeMore": "查看更多 →",
         "suggestions": {
-            "kpopRoute": "推荐一条K-POP路线",
+            "kpopRoute": "推荐一条 K-POP 路线",
             "nearbyFood": "推荐附近的美食"
         },
         "meta": {
             "costAmount": "费用：₩{{amount}}",
-            "durationMin": "时长：{{mins}}分钟",
+            "durationMin": "用时：{{mins}} 分钟",
             "addressLabel": "地址：{{addr}}",
             "costLabel": "费用：{{cost}}"
         }
     },
     "common": {
         "cancel": "取消",
-        "confirm": "确定",
-        "unknown": "未知",
+        "confirm": "确认",
+        "unknown": "信息缺失",
         "loading": "正在加载…",
         "retry": "重试",
         "ok": "确定",
         "loadFail": "加载失败",
-        "close": "关闭"
+        "close": "关闭",
+        "info": "信息",
+        "error": "错误",
+        "success": "成功"
     },
     "auth": {
-        "reauthTitle": "需要重新验证",
-        "reauthBody": "邮箱已变更，请重新登录。",
+        "reauthTitle": "需要重新登录",
+        "reauthBody": "邮箱已更改，请重新登录。",
         "logoutTitle": "退出登录",
         "logoutConfirm": "确定要退出登录吗？",
         "logout": "退出登录",
@@ -153,9 +156,9 @@
         "editProfile": "编辑资料"
     },
     "routes": {
-        "ongoing": "进行中的路线",
-        "notStarted": "未开始的路线",
-        "completed": "已完成的路线"
+        "ongoing": "进行中",
+        "notStarted": "未开始",
+        "completed": "已完成"
     },
     "settings": {
         "title": "设置",
@@ -167,5 +170,55 @@
         "route": "路线",
         "chatbot": "AI 聊天",
         "myroute": "我的路线"
+    },
+    "routeEdit": {
+        "title": "编辑路线",
+        "createCustom": "创建自定义路线",
+        "selectedCount": "已选地点 {{count}} 个",
+        "tip": "可调整顺序、删除或添加地点。",
+        "addPlace": "添加地点",
+        "empty": "尚未选择地点。",
+        "start": "开始路线"
+    },
+    "routeOverview": {
+        "title": "行程概览",
+        "thisJourney": "本次行程…",
+        "totalDistance": "总共行进 {{distance}}",
+        "placesToVisit": "将要前往…",
+        "placesCount": "计划游览 {{count}} 个地点",
+        "totalTime": "预计总用时 {{time}}",
+        "estimatedCostTitle": "预计费用",
+        "estimatedCost": "交通费用约 {{cost}}",
+        "weatherTitle": "天气",
+        "weatherSentence": "今日天气：{{desc}}，{{temp}}。",
+        "doLater": "稍后再说",
+        "start": "开始旅行",
+        "resume": "继续旅行",
+        "restart": "重新开始"
+    },
+    "routeStep": {
+        "guiding": "导航中 ({{step}} / {{total}})",
+        "placeDetail": "查看地点详情",
+        "stats": {
+            "totalDistance": "总距离",
+            "estimatedTime": "预计时间",
+            "estimatedCost": "预计费用"
+        },
+        "prevPlace": "上一个地点",
+        "nextPlace": "下一个地点",
+        "endRoute": "结束路线",
+        "alerts": {
+            "placeNotFound": "未找到地点信息。",
+            "placeLoadFailed": "地点信息加载失败。",
+            "ongoingMissing": "无法获取进行中的路线。",
+            "currentRouteNotFound": "在进行中的列表中未找到当前路线。",
+            "completeSuccess": "路线已成功完成！"
+        }
+    },
+    "aiGuideRoutes": {
+        "title": "来看看 AI 向导推荐的路线"
+    },
+    "themeRoutes": {
+        "emptyByTheme": "此主题暂无推荐路线。"
     }
 }

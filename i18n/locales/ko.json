@@ -136,7 +136,10 @@
         "retry": "다시 시도",
         "ok": "확인",
         "loadFail": "불러오기 실패",
-        "close": "닫기"
+        "close": "닫기",
+        "info": "정보",
+        "error": "오류",
+        "success": "성공"
     },
     "auth": {
         "reauthTitle": "세션 재인증 필요",
@@ -167,5 +170,55 @@
         "route": "루트",
         "chatbot": "AI 챗봇",
         "myroute": "마이루트"
+    },
+    "routeEdit": {
+        "title": "루트 편집",
+        "createCustom": "커스텀 루트 생성",
+        "selectedCount": "선택한 장소 {{count}}곳",
+        "tip": "플레이스 순서 변경, 삭제, 추가가 가능해요",
+        "addPlace": "장소 추가하기",
+        "empty": "선택된 장소가 없습니다.",
+        "start": "루트 시작하기"
+    },
+    "routeOverview": {
+        "title": "여행 개요",
+        "thisJourney": "이 여정은...",
+        "totalDistance": "총 {{distance}}를 여행해요",
+        "placesToVisit": "우리가 둘러볼 곳은...",
+        "placesCount": "{{count}}개의 장소를 둘러볼 예정이에요",
+        "totalTime": "예상 총 이동 시간은 {{time}}이에요",
+        "estimatedCostTitle": "예상 비용",
+        "estimatedCost": "교통비로 약 {{cost}}을 소모할 것 같아요",
+        "weatherTitle": "날씨",
+        "weatherSentence": "오늘의 날씨는 {{desc}}, {{temp}}입니다.",
+        "doLater": "다음에 할래요",
+        "start": "여행 시작하기",
+        "resume": "여행 이어하기",
+        "restart": "여행 다시하기"
+    },
+    "routeStep": {
+        "guiding": "안내중 ({{step}} / {{total}})",
+        "placeDetail": "플레이스 상세보기",
+        "stats": {
+            "totalDistance": "총 거리",
+            "estimatedTime": "예상 시간",
+            "estimatedCost": "예상 비용"
+        },
+        "prevPlace": "이전 플레이스",
+        "nextPlace": "다음 플레이스",
+        "endRoute": "루트 종료",
+        "alerts": {
+            "placeNotFound": "플레이스 정보를 찾을 수 없습니다.",
+            "placeLoadFailed": "플레이스 정보를 불러오지 못했습니다.",
+            "ongoingMissing": "진행중인 경로 정보를 불러올 수 없습니다.",
+            "currentRouteNotFound": "현재 경로를 진행중인 경로 목록에서 찾을 수 없습니다.",
+            "completeSuccess": "경로를 성공적으로 완료했습니다!"
+        }
+    },
+    "aiGuideRoutes": {
+        "title": "AI 가이드가 추천하는 루트를 만나보세요"
+    },
+    "themeRoutes": {
+        "emptyByTheme": "해당 테마의 추천 루트가 없습니다."
     }
 }

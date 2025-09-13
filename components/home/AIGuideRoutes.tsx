@@ -12,11 +12,44 @@ import {
 } from 'react-native';
 
 import { getRecommendRouteApi, Routes } from '@/api/routes.service';
+import { useTranslation } from 'react-i18next';
+
+// 언어코드 → 필드 접미사
+function langSuffix(langCode?: string): 'Ko' | 'En' | 'Jp' | 'Ch' {
+  const l = (langCode || 'ko').toLowerCase();
+  if (l.startsWith('ko')) return 'Ko';
+  if (l.startsWith('en')) return 'En';
+  if (l.startsWith('ja')) return 'Jp';
+  if (l.startsWith('zh')) return 'Ch';
+  return 'Ko';
+}
+function pickLocalizedField<T extends Record<string, any>>(
+  p: T | null | undefined,
+  base: string,
+  langCode?: string
+): string {
+  if (!p) return '';
+  const suf = langSuffix(langCode);
+  const tryKeys = [
+    `${base}${suf}`,
+    `${base}En`,
+    `${base}Ko`,
+    `${base}Jp`,
+    `${base}Ch`,
+    base, // 단일 필드 fallback
+  ];
+  for (const k of tryKeys) {
+    const v = (p as any)[k];
+    if (typeof v === 'string' && v.trim()) return v;
+  }
+  return '';
+}
 
 export default function AIGuideRoutes() {
   const router = useRouter();
   const [routes, setRoutes] = useState<Routes[]>([]);
   const [loading, setLoading] = useState(true);
+  const { i18n, t } = useTranslation();
 
   useEffect(() => {
     (async () => {
@@ -35,42 +68,53 @@ export default function AIGuideRoutes() {
     })();
   }, []);
 
-  const renderItem = ({ item }: { item: Routes }) => (
-    <TouchableOpacity
-      style={styles.cardContainer}
-      onPress={() => router.push(`/route/route-overview/${item.routeId ?? 1}`)} // routeId 없으면 1로 fallback
-    >
-      <ImageBackground
-        source={item.imageUrl ? { uri: item.imageUrl } : require('@/assets/images/placeholder-place.png')}
-        style={styles.cardImage}
-        imageStyle={styles.imageStyle}
+  const renderItem = ({ item }: { item: Routes }) => {
+    const title = pickLocalizedField(item, 'title', i18n.language) || item.title || '';
+    const regionName =
+      pickLocalizedField(item, 'regionName', i18n.language) ||
+      // 백엔드가 regionNameKo만 줄 때 대비
+      (item as any).regionNameKo ||
+      (item as any).regionName ||
+      '';
+    const description =
+      pickLocalizedField(item, 'description', i18n.language) || item.description || '';
+
+    return (
+      <TouchableOpacity
+        style={styles.cardContainer}
+        onPress={() => router.push(`/route/route-overview/${item.routeId ?? 1}`)}
       >
-        <LinearGradient
-          colors={['rgba(0,0,0,0.5)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.5)']}
-          locations={[0.1, 0.5, 0.9]}
-          style={styles.overlay}
+        <ImageBackground
+          source={item.imageUrl ? { uri: item.imageUrl } : require('@/assets/images/placeholder-place.png')}
+          style={styles.cardImage}
+          imageStyle={styles.imageStyle}
         >
-          <View style={styles.topTextContainer}>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.cardLocation}>{item.regionNameKo}</Text>
-          </View>
-          <View style={styles.bottomTextContainer}>
-            <Text style={styles.cardDescription}>{item.description}</Text>
-          </View>
-        </LinearGradient>
-      </ImageBackground>
-    </TouchableOpacity>
-  );
+          <LinearGradient
+            colors={['rgba(0,0,0,0.5)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.5)']}
+            locations={[0.1, 0.5, 0.9]}
+            style={styles.overlay}
+          >
+            <View style={styles.topTextContainer}>
+              <Text style={styles.cardTitle}>{title}</Text>
+              <Text style={styles.cardLocation}>{regionName}</Text>
+            </View>
+            <View style={styles.bottomTextContainer}>
+              <Text style={styles.cardDescription}>{description}</Text>
+            </View>
+          </LinearGradient>
+        </ImageBackground>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
-      {/* 섹션 제목 */}
+      {/* 섹션 제목 (다국어) */}
       <View style={styles.headerRow}>
         <Image source={require('../../assets/images/icons/robot.png')} style={styles.icon} />
-        <Text style={styles.title}>AI 가이드가 추천하는 루트를 만나보세요</Text>
+        <Text style={styles.title}>{t('aiGuideRoutes.title')}</Text>
       </View>
 
-      {/* routes가 비어도 뼈대는 보이게 유지하고 싶으면 그대로 렌더링 */}
       <FlatList
         data={routes}
         horizontal
@@ -86,7 +130,7 @@ export default function AIGuideRoutes() {
         ListEmptyComponent={
           !loading ? null : (
             <View style={{ width: 147, height: 98, justifyContent: 'center', alignItems: 'center' }}>
-              <Text style={{ color: '#999' }}>불러오는 중…</Text>
+              <Text style={{ color: '#999' }}>{t('aiGuide.loading')}</Text>
             </View>
           )
         }
@@ -95,7 +139,6 @@ export default function AIGuideRoutes() {
   );
 }
 
-/** routeId가 있는 것만 중복 제거, 없는 항목은 그대로 유지 */
 function dedupByRouteIdKeepUnknown(arr: Routes[]): Routes[] {
   const seen = new Set<number>();
   const withId: Routes[] = [];
