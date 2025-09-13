@@ -131,10 +131,33 @@
     "common": {
         "cancel": "Cancel",
         "confirm": "OK",
-        "unknown": "Unknown"
+        "unknown": "Unknown",
+        "loading": "Loading…",
+        "retry": "Retry",
+        "ok": "OK",
+        "loadFail": "Failed to load"
     },
     "auth": {
+        "reauthTitle": "Re-authentication required",
+        "reauthBody": "Your email changed. Please log in again.",
+        "logoutTitle": "Log out",
+        "logoutConfirm": "Are you sure you want to log out?",
+        "logout": "Log out",
+        "logoutDone": "Logged out",
         "login": "Log in",
         "loginOrSignup": "Log in / Sign up"
+    },
+    "profile": {
+        "guest": "Guest",
+        "editProfile": "Edit profile"
+    },
+    "routes": {
+        "ongoing": "Ongoing routes",
+        "notStarted": "Not started",
+        "completed": "Completed routes"
+    },
+    "settings": {
+        "title": "Settings",
+        "language": "Language"
     }
 }

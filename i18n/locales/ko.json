@@ -131,10 +131,33 @@
     "common": {
         "cancel": "취소",
         "confirm": "확인",
-        "unknown": "정보 없음"
+        "unknown": "정보 없음",
+        "loading": "불러오는 중…",
+        "retry": "다시 시도",
+        "ok": "확인",
+        "loadFail": "불러오기 실패"
     },
     "auth": {
+        "reauthTitle": "세션 재인증 필요",
+        "reauthBody": "이메일이 변경되어 다시 로그인해야 합니다.",
+        "logoutTitle": "로그아웃",
+        "logoutConfirm": "정말 로그아웃하시겠습니까?",
+        "logout": "로그아웃",
+        "logoutDone": "로그아웃 완료",
         "login": "로그인",
         "loginOrSignup": "로그인 / 회원가입"
+    },
+    "profile": {
+        "guest": "게스트",
+        "editProfile": "프로필 수정"
+    },
+    "routes": {
+        "ongoing": "진행중인 루트",
+        "notStarted": "미진행 루트",
+        "completed": "진행 완료 루트"
+    },
+    "settings": {
+        "title": "설정",
+        "language": "언어 설정"
     }
 }

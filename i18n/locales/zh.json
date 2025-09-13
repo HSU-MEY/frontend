@@ -131,10 +131,33 @@
     "common": {
         "cancel": "取消",
         "confirm": "确定",
-        "unknown": "未知"
+        "unknown": "未知",
+        "loading": "正在加载…",
+        "retry": "重试",
+        "ok": "确定",
+        "loadFail": "加载失败"
     },
     "auth": {
+        "reauthTitle": "需要重新验证",
+        "reauthBody": "邮箱已变更，请重新登录。",
+        "logoutTitle": "退出登录",
+        "logoutConfirm": "确定要退出登录吗？",
+        "logout": "退出登录",
+        "logoutDone": "已退出登录",
         "login": "登录",
         "loginOrSignup": "登录 / 注册"
+    },
+    "profile": {
+        "guest": "访客",
+        "editProfile": "编辑资料"
+    },
+    "routes": {
+        "ongoing": "进行中的路线",
+        "notStarted": "未开始的路线",
+        "completed": "已完成的路线"
+    },
+    "settings": {
+        "title": "设置",
+        "language": "语言设置"
     }
 }

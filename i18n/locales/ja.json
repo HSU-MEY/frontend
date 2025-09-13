@@ -131,10 +131,33 @@
     "common": {
         "cancel": "キャンセル",
         "confirm": "確認",
-        "unknown": "不明"
+        "unknown": "不明",
+        "loading": "読み込み中…",
+        "retry": "再試行",
+        "ok": "OK",
+        "loadFail": "読み込みに失敗しました"
     },
     "auth": {
+        "reauthTitle": "再認証が必要です",
+        "reauthBody": "メールアドレスが変更されました。もう一度ログインしてください。",
+        "logoutTitle": "ログアウト",
+        "logoutConfirm": "本当にログアウトしますか？",
+        "logout": "ログアウト",
+        "logoutDone": "ログアウトしました",
         "login": "ログイン",
         "loginOrSignup": "ログイン / 新規登録"
+    },
+    "profile": {
+        "guest": "ゲスト",
+        "editProfile": "プロフィールを編集"
+    },
+    "routes": {
+        "ongoing": "進行中のルート",
+        "notStarted": "未開始のルート",
+        "completed": "完了したルート"
+    },
+    "settings": {
+        "title": "設定",
+        "language": "言語設定"
     }
 }
