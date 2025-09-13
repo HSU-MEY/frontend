@@ -6,6 +6,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import styled from 'styled-components/native';
 
@@ -78,11 +79,13 @@ const useChatManager = () => {
   return { sendMessage, isInitialized, resetContext };
 };
 
+const { t, i18n } = useTranslation();
+
 const INITIAL_MESSAGE: Message = {
   id: '1',
   sender: 'ai',
-  text: '안녕하세요, 저는 당신의 AI 가이드 MEY입니다! 무엇을 도와드릴까요?',
-  suggestions: ["K-POP 루트 추천해줘", "주변 맛집 추천해줘"],
+  text: t('chat.welcome'),
+  suggestions: [t('chat.suggestions.kpopRoute'), t('chat.suggestions.nearbyFood')],
 };
 
 // ===== Main Component =====
@@ -140,7 +143,7 @@ export default function AiGuideScreen() {
     };
 
     if (isInitialized.current) {
-        saveMessages();
+      saveMessages();
     }
   }, [messages, isInitialized, accessToken]);
 
@@ -153,12 +156,12 @@ export default function AiGuideScreen() {
 
   const handleNewChat = () => {
     Alert.alert(
-      "새 채팅 시작",
-      "현재 대화 내용을 모두 지우고 새로 시작하시겠습니까?",
+      t('chat.resetTitle'),
+      t('chat.resetBody'),
       [
-        { text: "취소", style: "cancel" },
+        { text: t('common.cancel'), style: "cancel" },
         {
-          text: "확인",
+          text: t('common.confirm'),
           style: "destructive",
           onPress: async () => {
             await AsyncStorage.removeItem(CHAT_HISTORY_KEY);
@@ -199,7 +202,7 @@ export default function AiGuideScreen() {
       const errorMessage: Message = {
         id: (Date.now() + 2).toString(),
         sender: 'ai',
-        text: '죄송합니다, 오류가 발생했어요. 다시 시도해주세요.',
+        text: t('chat.errorGeneric'),
       };
       setMessages((prev) => [...prev.slice(0, -1), errorMessage]);
     }
@@ -260,9 +263,9 @@ export default function AiGuideScreen() {
   if (!accessToken) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', padding: 20 }}>
-        <Text style={{ fontSize: 16, color: '#333', marginBottom: 20, fontFamily: 'Pretendard-Regular' }}>서비스를 이용하려면 로그인하세요.</Text>
+        <Text style={{ fontSize: 16, color: '#333', marginBottom: 20, fontFamily: 'Pretendard-Regular' }}>{t('chat.loginRequired')}</Text>
         <TouchableOpacity style={{ backgroundColor: '#279FFF', paddingVertical: 12, paddingHorizontal: 30, borderRadius: 25 }} onPress={() => router.push('/account/login')}>
-          <Text style={{ color: 'white', fontSize: 16, fontFamily: 'Pretendard-SemiBold' }}>로그인</Text>
+          <Text style={{ color: 'white', fontSize: 16, fontFamily: 'Pretendard-SemiBold' }}>{t('auth.login')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -272,11 +275,11 @@ export default function AiGuideScreen() {
     <Container>
       <NewChatButton onPress={handleNewChat}>
         <Ionicons name="add-circle-outline" size={24} color="#333" />
-        <NewChatButtonText>새 채팅</NewChatButtonText>
+        <NewChatButtonText>{t('chat.newChat')}</NewChatButtonText>
       </NewChatButton>
 
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : "height"} 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 30}
       >
@@ -289,7 +292,7 @@ export default function AiGuideScreen() {
         />
 
         <InputArea>
-          <Input placeholder="MEY에게 물어보세요" value={input} onChangeText={setInput} />
+          <Input placeholder={t('chat.inputPlaceholder')} value={input} onChangeText={setInput} />
           <SendButton onPress={handleSend}>
             <Ionicons name="send" size={20} color="white" />
           </SendButton>
@@ -305,8 +308,8 @@ const RouteCard = ({ route }: { route: RouteRecommendation }) => (
   <CardWrapper onPress={() => router.push(`/route/route-overview/${route.routeId}`)}>
     <CardTitle>{route.title}</CardTitle>
     <CardDescription>{route.description}</CardDescription>
-    <CardMeta>{`비용: ${route.estimatedCost.toLocaleString()}원 · 소요시간: ${route.durationMinutes}분`}</CardMeta>
-    <SeeMore>자세히 보기 →</SeeMore>
+    <CardMeta>{t('chat.meta.costAmount', { amount: route.estimatedCost.toLocaleString() })} · {t('chat.meta.durationMin', { mins: route.durationMinutes })}</CardMeta>
+    <SeeMore>{t('chat.seeMore')}</SeeMore>
   </CardWrapper>
 );
 
@@ -316,8 +319,8 @@ const ExistingRoutesList = ({ routes }: { routes: ExistingRoute[] }) => (
       <CardWrapper key={route.routeId} onPress={() => router.push(`/route/route-overview/${route.routeId}`)}>
         <CardTitle>{route.title}</CardTitle>
         <CardDescription>{route.description}</CardDescription>
-        <CardMeta>{`비용: ${route.estimatedCost.toLocaleString()}원 · 소요시간: ${route.durationMinutes}분`}</CardMeta>
-        <SeeMore>자세히 보기 →</SeeMore>
+        <CardMeta>{t('chat.meta.costAmount', { amount: route.estimatedCost.toLocaleString() })} · {t('chat.meta.durationMin', { mins: route.durationMinutes })}</CardMeta>
+        <SeeMore>{t('chat.seeMore')}</SeeMore>
       </CardWrapper>
     ))}
   </CardListContainer>
@@ -329,8 +332,8 @@ const PlacesList = ({ places }: { places: PlaceInfo[] }) => (
       <CardWrapper key={place.placeId} onPress={() => router.push(`/place/place-detail/${place.placeId}`)}>
         <CardTitle>{place.name}</CardTitle>
         <CardDescription>{place.description}</CardDescription>
-        <CardMeta>{`주소: ${place.address} · 비용: ${place.costInfo}`}</CardMeta>
-        <SeeMore>자세히 보기 →</SeeMore>
+        <CardMeta> {t('chat.meta.addressLabel', { addr: place.address })} · {t('chat.meta.costLabel', { cost: place.costInfo || t('common.unknown') })}</CardMeta>
+        <SeeMore>{t('chat.seeMore')}</SeeMore>
       </CardWrapper>
     ))}
   </CardListContainer>

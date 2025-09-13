@@ -106,5 +106,33 @@
         "nearby": "Nearby Spots",
         "locationTitle": "Location",
         "infoTitle": "information"
+    },
+    "chat": {
+        "welcome": "Hi, I'm your AI guide, MEY! How can I help?",
+        "inputPlaceholder": "Ask MEY anything",
+        "newChat": "New chat",
+        "resetTitle": "Start a new chat",
+        "resetBody": "This will clear the current conversation. Continue?",
+        "errorGeneric": "Sorry, something went wrong. Please try again.",
+        "loginRequired": "Please log in to use the service.",
+        "seeMore": "See more →",
+        "suggestions": {
+            "kpopRoute": "Recommend a K-POP route",
+            "nearbyFood": "Recommend nearby restaurants"
+        },
+        "meta": {
+            "costAmount": "Cost: ₩{{amount}}",
+            "durationMin": "Duration: {{mins}} min",
+            "addressLabel": "Address: {{addr}}",
+            "costLabel": "Cost: {{cost}}"
+        }
+    },
+    "common": {
+        "cancel": "Cancel",
+        "confirm": "OK",
+        "unknown": "Unknown"
+    },
+    "auth": {
+        "login": "Log in"
     }
 }

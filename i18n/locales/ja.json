@@ -106,5 +106,33 @@
         "nearby": "周辺の名所",
         "locationTitle": "位置情報",
         "infoTitle": "情報"
+    },
+    "chat": {
+        "welcome": "こんにちは、AIガイドMEYです！何をお手伝いしましょうか？",
+        "inputPlaceholder": "MEYに質問してください",
+        "newChat": "新しいチャット",
+        "resetTitle": "新しいチャットを開始",
+        "resetBody": "現在の会話を削除して最初から始めます。よろしいですか？",
+        "errorGeneric": "申し訳ありません。エラーが発生しました。もう一度お試しください。",
+        "loginRequired": "サービスを利用するにはログインしてください。",
+        "seeMore": "詳しく見る →",
+        "suggestions": {
+            "kpopRoute": "K-POPルートをおすすめして",
+            "nearbyFood": "近くのグルメをおすすめして"
+        },
+        "meta": {
+            "costAmount": "費用: ₩{{amount}}",
+            "durationMin": "所要時間: {{mins}}分",
+            "addressLabel": "住所: {{addr}}",
+            "costLabel": "費用: {{cost}}"
+        }
+    },
+    "common": {
+        "cancel": "キャンセル",
+        "confirm": "確認",
+        "unknown": "不明"
+    },
+    "auth": {
+        "login": "ログイン"
     }
 }

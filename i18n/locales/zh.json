@@ -106,5 +106,33 @@
         "nearby": "附近景点",
         "locationTitle": "位置信息",
         "infoTitle": "信息"
+    },
+    "chat": {
+        "welcome": "你好，我是你的AI向导 MEY！需要我做什么？",
+        "inputPlaceholder": "向 MEY 提问",
+        "newChat": "新对话",
+        "resetTitle": "开始新对话",
+        "resetBody": "这将清空当前对话，是否继续？",
+        "errorGeneric": "抱歉，发生错误。请重试。",
+        "loginRequired": "使用该服务需要先登录。",
+        "seeMore": "查看详情 →",
+        "suggestions": {
+            "kpopRoute": "推荐一条K-POP路线",
+            "nearbyFood": "推荐附近的美食"
+        },
+        "meta": {
+            "costAmount": "费用：₩{{amount}}",
+            "durationMin": "时长：{{mins}}分钟",
+            "addressLabel": "地址：{{addr}}",
+            "costLabel": "费用：{{cost}}"
+        }
+    },
+    "common": {
+        "cancel": "取消",
+        "confirm": "确定",
+        "unknown": "未知"
+    },
+    "auth": {
+        "login": "登录"
     }
 }
