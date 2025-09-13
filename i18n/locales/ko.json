@@ -3,7 +3,8 @@
         "ongoingRouteTitle": "현재 진행중인 루트가 있어요!",
         "language": "언어",
         "languageButton": "언어 바꾸기",
-        "recommendplace": "K-Route에서 다들 만족하는 장소예요"
+        "recommendplace": "K-Route에서 다들 만족하는 장소예요",
+        "loginPrompt": "콘텐츠를 보려면 로그인하세요."
     },
     "theme": {
         "title": "테마별 탐색"
@@ -133,6 +134,7 @@
         "unknown": "정보 없음"
     },
     "auth": {
-        "login": "로그인"
+        "login": "로그인",
+        "loginOrSignup": "로그인 / 회원가입"
     }
 }

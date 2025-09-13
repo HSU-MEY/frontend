@@ -3,7 +3,8 @@
         "ongoingRouteTitle": "You have an ongoing route!",
         "language": "Language",
         "languageButton": "Change Language",
-        "recommendplace": "A popular spot on K-Route."
+        "recommendplace": "A popular spot on K-Route.",
+        "loginPrompt": "Please log in to view the content."
     },
     "theme": {
         "title": "Explore by Theme"
@@ -133,6 +134,7 @@
         "unknown": "Unknown"
     },
     "auth": {
-        "login": "Log in"
+        "login": "Log in",
+        "loginOrSignup": "Log in / Sign up"
     }
 }

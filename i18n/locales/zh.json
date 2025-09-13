@@ -3,7 +3,8 @@
         "ongoingRouteTitle": "您有进行中的路线！",
         "language": "语言",
         "languageButton": "更改语言",
-        "recommendplace": "K-Route 上大家都喜欢的地方。"
+        "recommendplace": "K-Route 上大家都喜欢的地方。",
+        "loginPrompt": "要查看内容，请先登录。"
     },
     "theme": {
         "title": "按主题探索"
@@ -133,6 +134,7 @@
         "unknown": "未知"
     },
     "auth": {
-        "login": "登录"
+        "login": "登录",
+        "loginOrSignup": "登录 / 注册"
     }
 }

@@ -3,7 +3,8 @@
         "ongoingRouteTitle": "進行中のルートがあります！",
         "language": "言語",
         "languageButton": "言語を変更",
-        "recommendplace": "K-Route でみんなに人気の場所です。"
+        "recommendplace": "K-Route でみんなに人気の場所です。",
+        "loginPrompt": "コンテンツを表示するにはログインしてください。"
     },
     "theme": {
         "title": "テーマ別に探す"
@@ -133,6 +134,7 @@
         "unknown": "不明"
     },
     "auth": {
-        "login": "ログイン"
+        "login": "ログイン",
+        "loginOrSignup": "ログイン / 新規登録"
     }
 }
