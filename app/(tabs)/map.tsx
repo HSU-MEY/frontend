@@ -4,12 +4,13 @@ import ThemeTabs from '@/components/theme/ThemeTabs';
 import { places as dummyPlaces } from '@/data/dummyPlaces';
 import { KAKAO_JS_API_KEY } from '@/src/env';
 
-import { fetchPlaceDetail, fetchThemePlaces, PopularPlaceDTO } from '@/api/places.service';
+import { fetchThemePlaces, PopularPlaceDTO } from '@/api/places.service';
 import { summarizeOpeningHours } from '@/utils/openingHours';
 
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   ImageSourcePropType,
@@ -30,6 +31,17 @@ type UIPlace = {
   category: ThemeCategory;
 };
 
+type ThemeListItem = PopularPlaceDTO & {
+  nameJp?: string | null;
+  nameCh?: string | null;
+  addressKo?: string | null;
+  addressEn?: string | null;
+  addressJp?: string | null;
+  addressCh?: string | null;
+  imageUrl?: string | null;
+  openingHours?: any;
+};
+
 const THEME_TO_KEYWORD: Record<ThemeCategory, string> = {
   'K-Pop': 'K_pop',
   'K-Drama': 'K_drama',
@@ -41,62 +53,57 @@ const THEME_TO_KEYWORD: Record<ThemeCategory, string> = {
 const PAGE_SIZE = 10;
 
 type ThemeState = {
+  raw: ThemeListItem[];
   items: UIPlace[];
   loading: boolean;
   error: string | null;
   hasMore: boolean;
 };
 
-function formatOpeningHours(hours: any): string {
-  if (!hours) return '운영시간 정보 없음';
-  if (typeof hours === 'string') return hours.toLowerCase().includes('closed') ? '휴무' : hours;
-  if (Array.isArray(hours)) return hours.filter(Boolean).join(', ');
-  if (typeof hours === 'object') {
-    const map: Record<string, string> = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토', sun: '일' };
-    const label = (k: string) => {
-      const l = k.toLowerCase();
-      if (l.startsWith('mon')) return map.mon;
-      if (l.startsWith('tue')) return map.tue;
-      if (l.startsWith('wed')) return map.wed;
-      if (l.startsWith('thu')) return map.thu;
-      if (l.startsWith('fri')) return map.fri;
-      if (l.startsWith('sat')) return map.sat;
-      if (l.startsWith('sun')) return map.sun;
-      return k;
-    };
-    const parts = Object.entries(hours).map(([day, val]) => {
-      const d = label(day);
-      if (typeof val === 'string') return `${d} ${val.toLowerCase().includes('closed') ? '휴무' : val}`;
-      if (val && typeof val === 'object') {
-        const open = (val as any).open ?? (val as any).start ?? '';
-        const close = (val as any).close ?? (val as any).end ?? '';
-        if (open && close) return `${d} ${open}~${close}`;
-        if (open || close) return `${d} ${open || close}`;
-      }
-      return d;
-    }).filter(Boolean);
-    return parts.length <= 2 ? parts.join(' · ') : `${parts.slice(0, 2).join(' · ')} …`;
-  }
-  return String(hours);
+function normalizeUiLang(lang?: string): 'ko' | 'en' | 'ja' | 'zh' {
+  const l = (lang || 'ko').toLowerCase();
+  if (l.startsWith('ko')) return 'ko';
+  if (l.startsWith('en')) return 'en';
+  if (l.startsWith('ja')) return 'ja';
+  if (l.startsWith('zh')) return 'zh';
+  return 'ko';
+}
+
+function pickByLang4(
+  uiLang: 'ko' | 'en' | 'ja' | 'zh',
+  ko?: string | null,
+  en?: string | null,
+  ja?: string | null,
+  zh?: string | null
+): string {
+  const by = { ko, en, ja, zh } as const;
+  const candidates = [by[uiLang], ko, en, ja, zh];
+  for (const c of candidates) if (c && c.trim().length) return c;
+  return '';
+}
+
+function formatDistanceLabel(d?: string) {
+  return d ?? '—';
 }
 
 export default function MapScreen() {
+  const { i18n } = useTranslation();
+  const uiLang = normalizeUiLang(i18n.language);
+
   const [selectedCategory, setSelectedCategory] = useState<ThemeCategory>('K-Pop');
   const mapRef = useRef<KakaoMapHandle>(null);
   const isInitialMapLoad = useRef(true);
   const JS_KEY = KAKAO_JS_API_KEY;
-  const [detailCache, setDetailCache] = useState<Record<number, any>>({});
 
   const [currentLocation, setCurrentLocation] = useState<Location.LocationObjectCoords | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
 
-
   const [byTheme, setByTheme] = useState<Record<ThemeCategory, ThemeState>>({
-    'K-Pop': { items: [], loading: false, error: null, hasMore: true },
-    'K-Drama': { items: [], loading: false, error: null, hasMore: true },
-    'K-Beauty': { items: [], loading: false, error: null, hasMore: true },
-    'K-Fashion': { items: [], loading: false, error: null, hasMore: true },
-    'K-Food': { items: [], loading: false, error: null, hasMore: true },
+    'K-Pop':    { raw: [], items: [], loading: false, error: null, hasMore: true },
+    'K-Drama':  { raw: [], items: [], loading: false, error: null, hasMore: true },
+    'K-Beauty': { raw: [], items: [], loading: false, error: null, hasMore: true },
+    'K-Fashion':{ raw: [], items: [], loading: false, error: null, hasMore: true },
+    'K-Food':   { raw: [], items: [], loading: false, error: null, hasMore: true },
   });
 
   const themeState = byTheme[selectedCategory];
@@ -106,7 +113,7 @@ export default function MapScreen() {
     [selectedCategory]
   );
 
-  // ===== Location Tracking Effect =====
+  // 위치 권한/트래킹
   useEffect(() => {
     let watcher: Location.LocationSubscription | undefined;
 
@@ -116,126 +123,78 @@ export default function MapScreen() {
         console.error('Permission to access location was denied');
         return;
       }
-
       watcher = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 5000, // 5 seconds
-          distanceInterval: 10, // 10 meters
-        },
-        (location) => {
-          setCurrentLocation(location.coords);
-        }
+        { accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 10 },
+        (location) => { setCurrentLocation(location.coords); }
       );
     };
 
     startWatching();
-
-    return () => {
-      watcher?.remove();
-    };
+    return () => { watcher?.remove(); };
   }, []);
 
-  // ===== Map Update Effect =====
+  // 지도 센터/현재 위치 마커
   useEffect(() => {
     if (currentLocation && mapRef.current && isMapReady) {
       const { latitude, longitude } = currentLocation;
-      mapRef.current.setCurrentLocationMarker(latitude, longitude, 'https://firebasestorage.googleapis.com/v0/b/apporium-d7aef.firebasestorage.app/o/temp%2Fcurrent-location.png?alt=media&token=e6b6469f-ee4a-4274-beb3-2b6fa0802aa7');
-
+      mapRef.current.setCurrentLocationMarker(
+        latitude,
+        longitude,
+        'https://firebasestorage.googleapis.com/v0/b/apporium-d7aef.firebasestorage.app/o/temp%2Fcurrent-location.png?alt=media&token=e6b6469f-ee4a-4274-beb3-2b6fa0802aa7'
+      );
       if (isInitialMapLoad.current) {
         mapRef.current.setCenter(latitude, longitude, 4);
         isInitialMapLoad.current = false;
       } else {
-        mapRef.current.setCenter(latitude, longitude); // Update center without full reload
+        mapRef.current.setCenter(latitude, longitude);
       }
     }
   }, [currentLocation, isMapReady]);
 
-
-
-  const mapBackendToUI = (b: PopularPlaceDTO, idx: number): UIPlace => {
+  const mapBackendToUI = (b: ThemeListItem, idx: number): UIPlace => {
     const base = dummyForCategory[idx % Math.max(1, dummyForCategory.length)];
-    const title = b.nameKo || b.nameEn || `장소 #${b.id}`;
-    const detail = detailCache[b.id]; // 캐시된 상세
+    const title =
+      pickByLang4(uiLang, b.nameKo ?? null, b.nameEn ?? null, b.nameJp ?? null, b.nameCh ?? null) ||
+      b.nameKo || b.nameEn || `장소 #${b.id}`;
+
+    const address =
+      pickByLang4(uiLang, b.addressKo ?? null, b.addressEn ?? null, b.addressJp ?? null, b.addressCh ?? null) ||
+      base?.address || '주소 정보 없음';
+
+    const time = b.openingHours ? summarizeOpeningHours(b.openingHours) : base?.time;
+
+    const thumbnail = b.imageUrl
+      ? ({ uri: b.imageUrl } as ImageSourcePropType)
+      : (base?.thumbnail as ImageSourcePropType) ?? require('@/assets/images/placeholder-place.png');
 
     return {
       id: b.id,
       title,
-      type: base?.type ?? 'Place',          // ← (더미)
-      distance: base?.distance ?? '—',      // ← (더미)
-      time: detail?.openingHours ? summarizeOpeningHours(detail.openingHours) : base?.time, // 실제 운영시간 있으면 반영
-      address: detail?.address || base?.address || '주소 정보 없음',                      // 실제 주소 있으면 반영
-      thumbnail: (base?.thumbnail as ImageSourcePropType) ?? require('@/assets/images/placeholder-place.png'),
+      type: base?.type ?? 'Place',
+      distance: formatDistanceLabel(base?.distance),
+      time,
+      address,
+      thumbnail,
       category: selectedCategory,
     };
   };
 
   const setThemeState = (cat: ThemeCategory, patch: Partial<ThemeState>) => {
-    setByTheme(prev => ({
-      ...prev,
-      [cat]: { ...prev[cat], ...patch },
-    }));
+    setByTheme(prev => ({ ...prev, [cat]: { ...prev[cat], ...patch } }));
   };
 
-  // theme 목록을 받은 직후, 새 id들만 상세 요청 → 캐시에 넣고 리스트 업데이트
-  const fetchDetailsFor = async (ids: number[]) => {
-    const unseen = ids.filter(id => !detailCache[id]);
-    if (unseen.length === 0) return;
-
-    // 탭이 바뀌어도 올바른 카테고리에 반영되도록 스냅샷
-    const categoryAtRequest = selectedCategory;
-
-    const chunk = async (arr: number[], size = 5) => {
-      for (let i = 0; i < arr.length; i += size) {
-        const slice = arr.slice(i, i + size);
-
-        // 1) 상세 응답 받기
-        const results = await Promise.allSettled(slice.map(id => fetchPlaceDetail(id)));
-
-        // 2) "지역 변수"로 캐시를 합성
-        const updatedDetails: Record<number, any> = { ...detailCache };
-        results.forEach((r, idx) => {
-          if (r.status === 'fulfilled') {
-            updatedDetails[slice[idx]] = r.value;
-          }
-        });
-
-        // 3) 실제 상태에 반영 (캐시 업데이트)
-        setDetailCache(updatedDetails);
-
-        // 4) 현재 카테고리 아이템들에서 address/time만 상세로 보강
-        setByTheme(prev => {
-          const cur = prev[categoryAtRequest];
-          if (!cur) return prev;
-
-          const patchedItems = (cur.items ?? []).map(it => {
-            const detail = updatedDetails[it.id];
-            return {
-              ...it,
-              address: detail?.address ?? it.address,
-              time: detail?.openingHours ? summarizeOpeningHours(detail.openingHours) : it.time,
-            };
-          });
-
-          return {
-            ...prev,
-            [categoryAtRequest]: {
-              ...cur,
-              items: patchedItems,
-            },
-          };
-        });
-      }
-    };
-
-    await chunk(unseen);
+  const dedupRawById = (arr: ThemeListItem[]) => {
+    const m = new Map<number, ThemeListItem>();
+    for (const it of arr) m.set(it.id, it);
+    return Array.from(m.values());
   };
 
-  // 최초/탭 변경 시 자동 로드
+  // 최초/탭 변경 시 로드
   useEffect(() => {
     if (themeState.items.length === 0 && !themeState.loading) {
       loadMore();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory]);
 
   const loadMore = async () => {
@@ -244,20 +203,18 @@ export default function MapScreen() {
 
     try {
       setThemeState(selectedCategory, { loading: true, error: null });
+
       const nextLimit = themeState.items.length + PAGE_SIZE;
-      const backend = await fetchThemePlaces(keyword, nextLimit); // [{ id, nameKo, themes }...]
-      const ui = backend.map((b, i) => mapBackendToUI(b, i));
-      const dedup = deduplicateById([...ui]);
-      const had = themeState.items.length;
-      const got = dedup.length;
-      //const hasMore = got > had;
+      const backend = (await fetchThemePlaces(keyword, nextLimit)) as ThemeListItem[];
 
-      // 여기서 상세 보강 실행 (주소/운영시간 채우기)
-      const ids = backend.map(b => b.id);
-      fetchDetailsFor(ids).catch(() => { });
+      // 원본 누적 + 중복 제거
+      const newRaw = dedupRawById([...(themeState.raw ?? []), ...backend]);
 
-      const hasMore = dedup.length > themeState.items.length;
-      setThemeState(selectedCategory, { items: dedup, hasMore });
+      // 현재 언어로 매핑
+      const ui = newRaw.map((b, i) => mapBackendToUI(b, i));
+
+      const hasMore = newRaw.length > (themeState.raw?.length ?? 0);
+      setThemeState(selectedCategory, { raw: newRaw, items: ui, hasMore });
     } catch (e: any) {
       setThemeState(selectedCategory, { error: '데이터를 불러오지 못했어요.' });
     } finally {
@@ -265,8 +222,15 @@ export default function MapScreen() {
     }
   };
 
+  useEffect(() => {
+    const st = byTheme[selectedCategory];
+    if (!st?.raw?.length) return;
+    const ui = st.raw.map((b, i) => mapBackendToUI(b, i));
+    setThemeState(selectedCategory, { items: ui });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uiLang, selectedCategory]);
 
-  // ScrollView 끝 감지
+  // 스크롤 끝 감지 → 추가 로드
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
     const paddingToBottom = 120;
@@ -276,6 +240,7 @@ export default function MapScreen() {
 
   const listForRender = useMemo<UIPlace[]>(() => {
     if (themeState.items.length > 0) return themeState.items;
+    // 초기엔 더미
     return dummyForCategory.map<UIPlace>((d) => ({
       id: d.id,
       title: d.title ?? `장소 #${d.id}`,
@@ -284,8 +249,7 @@ export default function MapScreen() {
       time: d.time ?? undefined,
       address: d.address ?? '주소 정보 없음',
       thumbnail:
-        (d.thumbnail as ImageSourcePropType) ??
-        require('@/assets/images/placeholder-place.png'),
+        (d.thumbnail as ImageSourcePropType) ?? require('@/assets/images/placeholder-place.png'),
       category: selectedCategory,
     }));
   }, [themeState.items, dummyForCategory, selectedCategory]);
@@ -303,38 +267,31 @@ export default function MapScreen() {
       </View>
 
       <View style={{ marginTop: 20 }}>
-        <ThemeTabs
-          selected={selectedCategory}
-          onSelect={setSelectedCategory}
-        />
+        <ThemeTabs selected={selectedCategory} onSelect={setSelectedCategory} />
       </View>
 
-      <ListContainer
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-      >
+      <ListContainer onScroll={onScroll} scrollEventThrottle={16}>
         <PlaceList>
           {listForRender
             .filter(place => place.category === selectedCategory)
             .map((place) => (
-              <PlaceItem key={`${selectedCategory}-${place.id}`}
+              <PlaceItem
+                key={`${selectedCategory}-${place.id}`}
                 onPress={() =>
                   router.push({
                     pathname: '/place/place-detail/[id]',
                     params: { id: String(place.id) },
                   })
-                }>
+                }
+              >
                 <PlaceInfo>
                   <PlaceHeader>
                     <PlaceNumber>{place.id}</PlaceNumber>
                     <PlaceTitle>{place.title}</PlaceTitle>
                   </PlaceHeader>
-                  <PlaceSub>{place.type}, {place.distance}</PlaceSub>
-                  {place.time
-                    ? <PlaceTime>{place.time}</PlaceTime>
-                    : <NoTime> </NoTime>
-                  }
-                  <PlaceAddress>{place.address}</PlaceAddress>
+                  {/* <PlaceSub>{place.type}, {place.distance}</PlaceSub> */}
+                  {place.time ? <PlaceTime>{place.time}</PlaceTime> : <NoTime> </NoTime>}
+                  <PlaceAddress numberOfLines={1}>{place.address}</PlaceAddress>
                 </PlaceInfo>
                 <PlaceThumb source={place.thumbnail} />
               </PlaceItem>
@@ -349,12 +306,6 @@ export default function MapScreen() {
       </ListContainer>
     </Container>
   );
-}
-
-function deduplicateById(arr: UIPlace[]) {
-  const map = new Map<number, UIPlace>();
-  for (const it of arr) map.set(it.id, it);
-  return Array.from(map.values());
 }
 
 const Container = styled.View`
