@@ -3,7 +3,8 @@
         "ongoingRouteTitle": "현재 진행중인 루트가 있어요!",
         "language": "언어",
         "languageButton": "언어 바꾸기",
-        "recommendplace": "K-Route에서 다들 만족하는 장소예요"
+        "recommendplace": "K-Route에서 다들 만족하는 장소예요",
+        "loginPrompt": "콘텐츠를 보려면 로그인하세요."
     },
     "theme": {
         "title": "테마별 탐색"
@@ -101,7 +102,209 @@
         "hoursUnknown": "운영시간 정보 없음",
         "costUnknown": "비용 정보 없음",
         "closed": "휴무",
+        "alwaysOpen": "24시간 운영",
         "relatedPosts": "관련 게시물",
-        "nearby": "근처 명소"
+        "nearby": "근처 명소",
+        "locationTitle": "위치 정보",
+        "infoTitle": "정보"
+    },
+    "chat": {
+        "welcome": "안녕하세요, 저는 당신의 AI 가이드 MEY입니다! 무엇을 도와드릴까요?",
+        "inputPlaceholder": "MEY에게 물어보세요",
+        "newChat": "새 채팅",
+        "resetTitle": "새 채팅 시작",
+        "resetBody": "현재 대화 내용을 모두 지우고 새로 시작하시겠습니까?",
+        "errorGeneric": "죄송합니다, 오류가 발생했어요. 다시 시도해주세요.",
+        "loginRequired": "서비스를 이용하려면 로그인하세요.",
+        "seeMore": "자세히 보기 →",
+        "suggestions": {
+            "kpopRoute": "K-POP 루트 추천해줘",
+            "nearbyFood": "주변 맛집 추천해줘"
+        },
+        "meta": {
+            "costAmount": "비용: ₩{{amount}}",
+            "durationMin": "소요시간: {{mins}}분",
+            "addressLabel": "주소: {{addr}}",
+            "costLabel": "비용: {{cost}}"
+        }
+    },
+    "common": {
+        "cancel": "취소",
+        "confirm": "확인",
+        "unknown": "정보 없음",
+        "loading": "불러오는 중…",
+        "retry": "다시 시도",
+        "ok": "확인",
+        "loadFail": "불러오기 실패",
+        "close": "닫기",
+        "info": "정보",
+        "error": "오류",
+        "success": "성공"
+    },
+    "auth": {
+        "reauthTitle": "세션 재인증 필요",
+        "reauthBody": "이메일이 변경되어 다시 로그인해야 합니다.",
+        "logoutTitle": "로그아웃",
+        "logoutConfirm": "정말 로그아웃하시겠습니까?",
+        "logout": "로그아웃",
+        "logoutDone": "로그아웃 완료",
+        "login": "로그인",
+        "loginOrSignup": "로그인 / 회원가입",
+        "welcomeTitle": "환영합니다!",
+        "alreadyLoggedInTitle": "이미 로그인되어 있습니다.",
+        "alreadyLoggedInBody": "메인 화면으로 이동합니다.",
+        "inputErrorTitle": "입력 오류",
+        "inputErrorBody": "이메일과 비밀번호를 입력해주세요.",
+        "loginFailTitle": "로그인 실패",
+        "loginFailBody": "이메일 또는 비밀번호가 올바르지 않습니다.",
+        "loginSuccessTitle": "로그인 성공",
+        "loginSuccessBody": "환영합니다!",
+        "checkingLogin": "로그인 상태 확인 중…",
+        "loggingIn": "로그인 중…",
+        "email": "이메일",
+        "password": "비밀번호",
+        "forgotPassword": "비밀번호를 잊으셨나요?",
+        "noAccountQ": "계정이 없으신가요?",
+        "signup": "회원가입",
+        "loginFailBodyFallback": "잠시 후 다시 시도해주세요."
+    },
+    "profile": {
+        "guest": "게스트",
+        "editProfile": "프로필 수정"
+    },
+    "routes": {
+        "ongoing": "진행중인 루트",
+        "notStarted": "미진행 루트",
+        "completed": "진행 완료 루트"
+    },
+    "settings": {
+        "title": "설정",
+        "language": "언어 설정"
+    },
+    "tabs": {
+        "home": "홈",
+        "map": "지도",
+        "route": "루트",
+        "chatbot": "AI 챗봇",
+        "myroute": "마이루트"
+    },
+    "routeEdit": {
+        "title": "루트 편집",
+        "createCustom": "커스텀 루트 생성",
+        "selectedCount": "선택한 장소 {{count}}곳",
+        "tip": "플레이스 순서 변경, 삭제, 추가가 가능해요",
+        "addPlace": "장소 추가하기",
+        "empty": "선택된 장소가 없습니다.",
+        "start": "루트 시작하기"
+    },
+    "routeOverview": {
+        "title": "여행 개요",
+        "thisJourney": "이 여정은...",
+        "totalDistance": "총 {{distance}}를 여행해요",
+        "placesToVisit": "우리가 둘러볼 곳은...",
+        "placesCount": "{{count}}개의 장소를 둘러볼 예정이에요",
+        "totalTime": "예상 총 이동 시간은 {{time}}이에요",
+        "estimatedCostTitle": "예상 비용",
+        "estimatedCost": "교통비로 약 {{cost}}을 소모할 것 같아요",
+        "weatherTitle": "날씨",
+        "weatherSentence": "오늘의 날씨는 {{desc}}, {{temp}}입니다.",
+        "doLater": "다음에 할래요",
+        "start": "여행 시작하기",
+        "resume": "여행 이어하기",
+        "restart": "여행 다시하기"
+    },
+    "routeStep": {
+        "guiding": "안내중 ({{step}} / {{total}})",
+        "placeDetail": "플레이스 상세보기",
+        "stats": {
+            "totalDistance": "총 거리",
+            "estimatedTime": "예상 시간",
+            "estimatedCost": "예상 비용"
+        },
+        "prevPlace": "이전 플레이스",
+        "nextPlace": "다음 플레이스",
+        "endRoute": "루트 종료",
+        "alerts": {
+            "placeNotFound": "플레이스 정보를 찾을 수 없습니다.",
+            "placeLoadFailed": "플레이스 정보를 불러오지 못했습니다.",
+            "ongoingMissing": "진행중인 경로 정보를 불러올 수 없습니다.",
+            "currentRouteNotFound": "현재 경로를 진행중인 경로 목록에서 찾을 수 없습니다.",
+            "completeSuccess": "경로를 성공적으로 완료했습니다!"
+        }
+    },
+    "aiGuideRoutes": {
+        "title": "AI 가이드가 추천하는 루트를 만나보세요"
+    },
+    "themeRoutes": {
+        "emptyByTheme": "해당 테마의 추천 루트가 없습니다."
+    },
+    "register": {
+        "title": "회원가입",
+        "nickname": "닉네임",
+        "email": "이메일",
+        "password": "비밀번호",
+        "confirmPassword": "비밀번호 확인",
+        "nicknamePlaceholder": "사용하실 닉네임",
+        "emailPlaceholder": "이메일 주소",
+        "passwordPlaceholder": "비밀번호 (6자 이상)",
+        "confirmPasswordPlaceholder": "비밀번호 다시 입력",
+        "privacyPolicy": "개인정보처리방침",
+        "agreeSuffix": "에 동의합니다.",
+        "pickImage": "이미지 선택",
+        "imagePermTitle": "권한 필요",
+        "imagePermBody": "프로필 이미지를 설정하려면 갤러리 접근 권한이 필요합니다.",
+        "agreeNeededTitle": "동의 필요",
+        "agreeNeededBody": "개인정보처리방침에 동의해주세요.",
+        "inputErrorTitle": "입력 오류",
+        "inputAllRequired": "모든 필수 항목을 입력해주세요.",
+        "emailInvalid": "유효한 이메일 주소를 입력해주세요.",
+        "passwordTooShort": "비밀번호는 6자 이상이어야 합니다.",
+        "passwordMismatch": "비밀번호가 일치하지 않습니다.",
+        "nicknameTooShort": "닉네임은 2자 이상이어야 합니다.",
+        "signupInProgress": "가입 중…",
+        "signup": "회원가입",
+        "signupSuccessTitle": "회원가입 완료",
+        "signupSuccessBody": "회원가입이 성공적으로 완료되었습니다. 로그인해주세요.",
+        "signupFailTitle": "회원가입 실패",
+        "signupFailFallback": "알 수 없는 오류가 발생했습니다.",
+        "alreadyHaveAccountQ": "이미 계정이 있으신가요?",
+        "loginLink": "로그인"
+    },
+    "profileEdit": {
+        "title": "프로필 수정",
+        "loading": "불러오는 중…",
+        "pickImage": "이미지 선택",
+        "imagePermTitle": "권한 필요",
+        "imagePermBody": "갤러리 접근 권한이 필요합니다.",
+        "fetchFailTitle": "프로필 불러오기 실패",
+        "fetchFailBody": "잠시 후 다시 시도해주세요.",
+        "noChangesTitle": "안내",
+        "noChangesBody": "변경할 항목이 없습니다.",
+        "emailInvalid": "유효한 이메일 주소를 입력해주세요.",
+        "emailNeedsPwdTitle": "안내",
+        "emailNeedsPwdBody": "이메일을 변경하려면 새 비밀번호도 함께 입력해주세요.",
+        "pwdTooShort": "비밀번호는 6자 이상이어야 합니다.",
+        "pwdMismatch": "비밀번호 확인이 일치하지 않습니다.",
+        "avatarNeededTitle": "프로필 이미지가 필요합니다.",
+        "avatarNeededBody": "이미지를 선택해 주세요.",
+        "save": "저장",
+        "saving": "저장 중…",
+        "saveFailTitle": "저장 실패",
+        "saveFailBody": "잠시 후 다시 시도해주세요.",
+        "saveSuccessTitle": "프로필 저장 완료",
+        "saveSuccessBodyWithEmail": "변경된 계정 정보로 다시 로그인해주세요.\n이메일: {{email}}",
+        "labels": {
+            "nickname": "닉네임",
+            "email": "이메일",
+            "newPasswordOptional": "새 비밀번호 (선택)",
+            "confirmNewPassword": "새 비밀번호 확인"
+        },
+        "placeholders": {
+            "nickname": "닉네임",
+            "email": "이메일",
+            "newPasswordOptional": "새 비밀번호 (선택)",
+            "confirmNewPassword": "새 비밀번호 확인"
+        },
+        "updateFailServer": "업데이트 실패"
     }
 }

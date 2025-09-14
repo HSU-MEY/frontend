@@ -54,6 +54,36 @@ const PLACEHOLDER = require('@/assets/images/placeholder-place.png');
 //     thursday: '목', friday: '금', saturday: '토', sunday: '일',
 // };
 
+function langSuffix(langCode: string): 'Ko' | 'En' | 'Jp' | 'Ch' {
+    const l = (langCode || 'ko').toLowerCase();
+    if (l.startsWith('ko')) return 'Ko';
+    if (l.startsWith('en')) return 'En';
+    if (l.startsWith('ja')) return 'Jp';
+    if (l.startsWith('zh')) return 'Ch';
+    return 'Ko';
+}
+
+function pickLocalized<T extends Record<string, any>>(
+    p: T,
+    base: 'name' | 'address' | 'description' | 'costInfo',
+    langCode: string,
+    fallbacks: Array<'Ko' | 'En' | 'Jp' | 'Ch'> = ['Ko', 'En', 'Jp', 'Ch']
+): string | undefined {
+    const suf = langSuffix(langCode);
+    const tryKeys = [`${base}${suf}`, ...fallbacks.filter(f => f !== suf).map(f => `${base}${f}`)];
+    for (const k of tryKeys) {
+        const v = p[k];
+        if (typeof v === 'string' && v.trim().length > 0) return v;
+    }
+    // 하위호환(예: address 필드 단일 문자열)
+    if (base === 'address' && typeof (p as any).address === 'string' && (p as any).address.trim()) {
+        return (p as any).address;
+    }
+    // name의 최후 폴백
+    if (base === 'name' && p.id != null) return `#${p.id}`;
+    return undefined;
+}
+
 function formatOpeningHours(hours: any, daysShort: Record<string, string>, t: (k: string, o?: any) => string): string {
     if (!hours) return t('aiGuide.hoursUnknown');
     if (typeof hours === 'string') return hours;
@@ -199,36 +229,51 @@ export default function AiGuideTab() {
     };
 
     const uiPopular: UiPlace[] = useMemo(() => {
+        const lang = i18n.language; // 현재 앱 언어
         return apiPlaces.map((p) => {
-            const name = p.nameKo || p.nameEn || `#${p.id}`;
-            const address = typeof p.address === 'string'
-                ? p.address
-                : (p.regionId ? `Region ${p.regionId}` : t('aiGuide.addressUnknown')); // ★
-            const time = formatOpeningHours(p.openingHours, DAYS_SHORT, t); // ★
-            const tag = formatThemes(p.themes, t); // ★
+            const name = pickLocalized(p, 'name', lang) || `#${p.id}`;
+            const address = pickLocalized(p, 'address', lang) || t('aiGuide.addressUnknown');
+            const time = formatOpeningHours(p.openingHours, DAYS_SHORT, t);
+            const tag = formatThemes(p.themes, t);
             const image = p.imageUrl ? { uri: p.imageUrl } : PLACEHOLDER;
             return { id: p.id, name, address, time, tag, image, isRecommended: true, raw: p };
         });
-    }, [apiPlaces, DAYS_SHORT, t]);
+    }, [apiPlaces, i18n.language, DAYS_SHORT, t]);
 
     const uiSearched: UiPlace[] = useMemo(() => {
+        const lang = i18n.language;
         return searchResults.map((s) => {
-            const name = s.nameKo || s.nameEn || `#${s.id}`;
-            const address = s.regionId ? `Region ${s.regionId}` : t('aiGuide.addressUnknown'); // ★
-            const time = t('aiGuide.hoursUnknown'); // ★
-            const tag = t('aiGuide.searchTag'); // ★
-            const image = PLACEHOLDER;
+            const name = pickLocalized(s as any, 'name', lang) || `#${s.id}`;
+            const address =
+                pickLocalized(s as any, 'address', lang) ||
+                (s.regionId ? `Region ${s.regionId}` : t('aiGuide.addressUnknown'));
+
+            const time = s.openingHours ? formatOpeningHours(s.openingHours, DAYS_SHORT, t) : t('aiGuide.hoursUnknown');
+            const tag = t('aiGuide.searchTag');
+
+            const image = s.imageUrl ? { uri: s.imageUrl } : PLACEHOLDER;
+
+            // 검색 결과를 PopularPlaceDTO 비슷하게 raw로 만들어 둠
             const raw: PopularPlaceDTO = {
                 id: s.id,
                 nameKo: s.nameKo,
                 nameEn: s.nameEn,
+                nameJp: s.nameJp,
+                nameCh: s.nameCh,
                 latitude: s.latitude,
                 longitude: s.longitude,
                 regionId: s.regionId,
+                addressKo: s.addressKo,
+                addressEn: s.addressEn,
+                addressJp: s.addressJp,
+                addressCh: s.addressCh,
+                imageUrl: s.imageUrl,
+                openingHours: s.openingHours,
             };
+
             return { id: s.id, name, address, time, tag, image, isRecommended: true, raw };
         });
-    }, [searchResults, t]);
+    }, [searchResults, i18n.language, DAYS_SHORT, t]);
 
     const showingSearch = search.trim().length >= 2;
     const filteredPlaces = useMemo(() => {
@@ -445,7 +490,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         resizeMode: 'cover',
         marginRight: 20,
-        backgroundColor: 'black'
+        backgroundColor: '#eee',
     },
     info: { flex: 1 },
     title: {

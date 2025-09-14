@@ -7,6 +7,7 @@ import { ActivityIndicator, Dimensions, Image, ScrollView, StyleSheet, Text, Tou
 // 컴포넌트 import
 import LanguagePicker from '@/components/common/LanguagePicker';
 import ThemeTitle from '@/components/home/ThemeTitle';
+import { useTranslation } from 'react-i18next';
 import AIGuideRoutes from '../../components/home/AIGuideRoutes';
 import BannerSection from '../../components/home/BannerSection';
 import OngoingRoute from '../../components/home/OngoingRoute';
@@ -20,11 +21,12 @@ const { width } = Dimensions.get('window');
 // 비로그인 시 보여줄 컴포넌트
 const LoginPrompt = () => {
   const router = useRouter();
+  const { t } = useTranslation();
   return (
     <View style={styles.promptContainer}>
-      <Text style={styles.promptText}>콘텐츠를 보려면 로그인하세요.</Text>
+      <Text style={styles.promptText}>{t('home.loginPrompt')}</Text>
       <TouchableOpacity style={styles.loginButton} onPress={() => router.push('/account/login')}>
-        <Text style={styles.loginButtonText}>로그인 / 회원가입</Text>
+        <Text style={styles.loginButtonText}>{t('auth.loginOrSignup')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -48,7 +50,7 @@ export default function HomeScreen() {
   // 로딩 중일 때 전체 화면 로딩 인디케이터 표시
   if (isLoading) {
     return (
-      <View style={[styles.container, styles.center, { backgroundColor: 'white'}]}>
+      <View style={[styles.container, styles.center, { backgroundColor: 'white' }]}>
         <ActivityIndicator size="large" color="#279FFF" />
       </View>
     );

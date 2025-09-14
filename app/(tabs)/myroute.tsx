@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import styled from 'styled-components/native';
 
 import { Route } from '@/api/users.routes.service';
+import LanguageSheet from '@/components/common/LanguageSheet';
 
 import { favoritePlaceList } from '@/data/favoritePlace';
 //import { completedRoutes, inProgressRoutes, upcomingRoutes } from '@/data/routesInProgress';
@@ -18,6 +19,7 @@ import { getMyProfile, type UserProfile } from '@/api/user';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { useIsFocused } from '@react-navigation/native';
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet } from 'react-native';
 
 const favoritePlaces = places.filter((place: Place) => favoritePlaceList.includes(place.id));
@@ -27,6 +29,13 @@ export default function MyPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
+  const [langOpen, setLangOpen] = useState(false);
+
+  const avatarSource =
+    profile?.profileImageUrl && profile.profileImageUrl.trim().length > 0
+      ? { uri: profile.profileImageUrl }
+      : require('@/assets/images/sample-profile.png');
 
   const {
     data: upcomingData,
@@ -34,28 +43,28 @@ export default function MyPage() {
     error: upcomingError,
     refetch: refetchUpcoming,
   } = useUserRoutes("NOT_STARTED");
-  
+
   const {
     data: inProgressData,
     loading: inProgressLoading,
     error: inProgressError,
     refetch: refetchInProgress,
   } = useUserRoutes("ON_GOING");
-  
+
   const {
     data: completedData,
     loading: completedLoading,
     error: completedError,
     refetch: refetchCompleted,
   } = useUserRoutes("COMPLETED");
-  
-  const upcomingRoutes   = upcomingData?.savedRoutes   ?? [];
+
+  const upcomingRoutes = upcomingData?.savedRoutes ?? [];
   const inProgressRoutes = inProgressData?.savedRoutes ?? [];
-  const completedRoutes  = completedData?.savedRoutes  ?? [];
+  const completedRoutes = completedData?.savedRoutes ?? [];
 
 
   const loadingAll = upcomingLoading || inProgressLoading || completedLoading;
-  const errorAll   = upcomingError || inProgressError || completedError;
+  const errorAll = upcomingError || inProgressError || completedError;
   const refetchAll = () => Promise.all([
     refetchUpcoming(), refetchInProgress(), refetchCompleted(),
   ]);
@@ -102,11 +111,11 @@ export default function MyPage() {
         // getMyProfile()에서 `(HTTP 403)` 같은 메시지 던지고 있을 가능성
         if (msg.includes('HTTP 403') || msg.includes('403')) {
           Alert.alert(
-            '세션 재인증 필요',
-            '이메일이 변경되어 다시 로그인해야 합니다.',
+            t('auth.reauthTitle'),
+            t('auth.reauthBody'),
             [
               {
-                text: '확인',
+                text: t('common.ok'),
                 onPress: async () => {
                   await logout();
                   router.replace('/account/login');
@@ -116,7 +125,7 @@ export default function MyPage() {
           );
           return; // 더 진행하지 않음
         }
-        if (mounted) setError(msg || '불러오기 실패');
+        if (mounted) setError(msg || t('common.loadFail'));
       } finally {
         if (mounted) setLoading(false);
         fetchingRef.current = false;
@@ -131,25 +140,26 @@ export default function MyPage() {
   }, [isFocused]); // 포커스 변화에만 반응
 
   const handleLogout = async () => {
-    Alert.alert("로그아웃", "정말 로그아웃하시겠습니까?", [
-      { text: "취소", style: "cancel" },
-      {
-        text: "로그아웃",
-        style: "destructive",
-        onPress: async () => {
-          await logout();
-          router.replace('/');
-          Alert.alert("로그아웃 완료");
+    Alert.alert(
+      t('auth.logoutTitle'),
+      t('auth.logoutConfirm'),
+      [
+        { text: t('common.cancel'), style: "cancel" },
+        {
+          text: t('auth.logout'), style: "destructive", onPress: async () => {
+            await logout();
+            router.replace('/');
+            Alert.alert(t('auth.logoutDone'));
+          }
         }
-      }
-    ]);
+      ]);
   };
 
 
   if (loading) {
     return (
       <LoadingContainer>
-        <LoadingText>불러오는 중...</LoadingText>
+        <LoadingText>{t('common.loading')}</LoadingText>
       </LoadingContainer>
     );
   }
@@ -159,7 +169,7 @@ export default function MyPage() {
       <ErrorContainer>
         <ErrorText>{error}</ErrorText>
         <RetryButton onPress={() => router.replace('/(tabs)/myroute')}>
-          <RetryButtonText>다시 시도</RetryButtonText>
+          <RetryButtonText>{t('common.retry')}</RetryButtonText>
         </RetryButton>
       </ErrorContainer>
     );
@@ -174,12 +184,17 @@ export default function MyPage() {
           resizeMode="contain"
         />
         <AvatarWrapper>
-          <Avatar source={require('@/assets/images/sample-profile.png')} />
+          <Avatar
+            // key={avatarKey}
+            source={avatarSource}
+            // onError 시 기본 이미지로 폴백 (네트워크 오류 대비)
+            defaultSource={require('@/assets/images/sample-profile.png')}
+          />
           <UserName>{profile ? profile.nickname : 'Guest'}</UserName>
           <UserEmail>{profile ? profile.email : ''}</UserEmail>
           {profile && (
             <EditButton onPress={() => router.push('/account/edit-profile')}>
-              <EditText>프로필 수정</EditText>
+              <EditText>{t('profile.editProfile')}</EditText>
             </EditButton>
           )}
         </AvatarWrapper>
@@ -188,92 +203,92 @@ export default function MyPage() {
       {profile ?
         (
           <>
-            { inProgressRoutes.length > 0 &&
-            <Section>
-              <SectionHeader
-                onPress={() => router.push('/routehistory/ongoing')}
-              >
-                <SectionIcon
-                  source={require('@/assets/images/icons/route.png')}
-                />
-                <SectionTitle>진행중인 루트</SectionTitle>
-                <SectionIcon
-                  source={require('@/assets/images/icons/arrow_forward.png')}
-                  style={{ marginLeft: 'auto' }}
-                />
-              </SectionHeader>
-              <Row>
-                {
-                inProgressRoutes.map((route: Route, index: number) => (
-                  <RouteCard
-                    key={index}
-                    thumbnail=""
-                    title={route.title}
-                    date={route.preferredStartDate}
-                    onPress={() => router.push(`/route/route-overview/${route.routeId}`)}
-                    //progress={route.progress}
-                  /*onPress={() => router.push(`/route/${route.id}`)}*/
+            {inProgressRoutes.length > 0 &&
+              <Section>
+                <SectionHeader
+                  onPress={() => router.push('/routehistory/ongoing')}
+                >
+                  <SectionIcon
+                    source={require('@/assets/images/icons/route.png')}
                   />
-                ))
-                }
-              </Row>
-            </Section>
+                  <SectionTitle>{t('routes.ongoing')}</SectionTitle>
+                  <SectionIcon
+                    source={require('@/assets/images/icons/arrow_forward.png')}
+                    style={{ marginLeft: 'auto' }}
+                  />
+                </SectionHeader>
+                <Row>
+                  {
+                    inProgressRoutes.map((route: Route, index: number) => (
+                      <RouteCard
+                        key={index}
+                        thumbnail=""
+                        title={route.title}
+                        date={route.preferredStartDate}
+                        onPress={() => router.push(`/route/route-overview/${route.routeId}`)}
+                      //progress={route.progress}
+                      /*onPress={() => router.push(`/route/${route.id}`)}*/
+                      />
+                    ))
+                  }
+                </Row>
+              </Section>
             }
-            { upcomingRoutes.length > 0 &&
-            <Section>
-              <SectionHeader
-                onPress={() => router.push('/routehistory/pending')}
-              >
-                <SectionIcon
-                  source={require('@/assets/images/icons/route.png')}
-                />
-                <SectionTitle>미진행 루트</SectionTitle>
-                <SectionIcon
-                  source={require('@/assets/images/icons/arrow_forward.png')}
-                  style={{ marginLeft: 'auto' }}
-                />
-              </SectionHeader>
-              <Row>
-                {upcomingRoutes.map((route: Route, index: number) => (
-                  <RouteCard
-                    key={index}
-                    thumbnail=""
-                    title={route.title}
-                    date={route.preferredStartDate}
-                    onPress={() => router.push(`/route/route-overview/${route.routeId}`)}
-                    //progress={route.progress}
+            {upcomingRoutes.length > 0 &&
+              <Section>
+                <SectionHeader
+                  onPress={() => router.push('/routehistory/pending')}
+                >
+                  <SectionIcon
+                    source={require('@/assets/images/icons/route.png')}
                   />
-                ))}
-              </Row>
-            </Section>
+                  <SectionTitle>{t('routes.notStarted')}</SectionTitle>
+                  <SectionIcon
+                    source={require('@/assets/images/icons/arrow_forward.png')}
+                    style={{ marginLeft: 'auto' }}
+                  />
+                </SectionHeader>
+                <Row>
+                  {upcomingRoutes.map((route: Route, index: number) => (
+                    <RouteCard
+                      key={index}
+                      thumbnail=""
+                      title={route.title}
+                      date={route.preferredStartDate}
+                      onPress={() => router.push(`/route/route-overview/${route.routeId}`)}
+                    //progress={route.progress}
+                    />
+                  ))}
+                </Row>
+              </Section>
             }
-            { completedRoutes.length > 0 &&
-            <Section>
-              <SectionHeader
-                onPress={() => router.push('/routehistory/completed')}
-              >
-                <SectionIcon
-                  source={require('@/assets/images/icons/route.png')}
-                />
-                <SectionTitle>진행 완료 루트</SectionTitle>
-                <SectionIcon
-                  source={require('@/assets/images/icons/arrow_forward.png')}
-                  style={{ marginLeft: 'auto' }}
-                />
-              </SectionHeader>
-              <Row>
-                {completedRoutes.map((route: Route, index: number) => (
-                  <RouteCard
-                    key={index}
-                    onPress={() => router.push(`/route/route-overview/${route.routeId}`)}
-                    thumbnail=""
-                    title={route.title}
-                    date={route.preferredStartDate}
-                    //progress={route.progress}
+            {completedRoutes.length > 0 &&
+              <Section>
+                <SectionHeader
+                  onPress={() => router.push('/routehistory/completed')}
+                >
+                  <SectionIcon
+                    source={require('@/assets/images/icons/route.png')}
                   />
-                ))}
-              </Row>
-            </Section>
+                  <SectionTitle>{t('routes.completed')}</SectionTitle>
+                  <SectionIcon
+                    source={require('@/assets/images/icons/arrow_forward.png')}
+                    style={{ marginLeft: 'auto' }}
+                  />
+                </SectionHeader>
+                <Row>
+                  {completedRoutes.map((route: Route, index: number) => (
+                    <RouteCard
+                      key={index}
+                      onPress={() => router.push(`/route/route-overview/${route.routeId}`)}
+                      thumbnail=""
+                      title={route.title}
+                      date={route.preferredStartDate}
+                    //progress={route.progress}
+                    />
+                  ))}
+                </Row>
+              </Section>
             }
             {/* 좋아하는 장소 섹션 
             <Section>
@@ -309,7 +324,7 @@ export default function MyPage() {
           <Section>
             <LoginButton onPress={() => router.push('/account/login')}>
               <SectionTitle>
-                <LoginButtonText>로그인</LoginButtonText>
+                <LoginButtonText>{t('auth.login')}</LoginButtonText>
               </SectionTitle>
             </LoginButton>
           </Section>
@@ -317,16 +332,17 @@ export default function MyPage() {
       <Section>
         <SectionHeader>
           <SectionIcon source={require('@/assets/images/icons/settings.png')} />
-          <SectionTitle>설정</SectionTitle>
+          <SectionTitle>{t('settings.title')}</SectionTitle>
         </SectionHeader>
 
-        <SettingItem>
-          <SettingText>언어 설정</SettingText>
+        <SettingItem onPress={() => setLangOpen(true)}>
+          <SettingText>{t('settings.language')}</SettingText>
         </SettingItem>
+
         {profile && (
           <>
             <SettingItem onPress={handleLogout}>
-              <SettingText>로그아웃</SettingText>
+              <SettingText>{t('auth.logout')}</SettingText>
             </SettingItem>
             {/*
             <SettingItem>
@@ -336,6 +352,8 @@ export default function MyPage() {
           </>
         )}
       </Section>
+
+      <LanguageSheet visible={langOpen} onClose={() => setLangOpen(false)} />
     </Container>
   );
 }

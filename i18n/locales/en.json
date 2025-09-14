@@ -1,17 +1,18 @@
 {
     "home": {
-        "ongoingRouteTitle": "You have an ongoing route!",
+        "ongoingRouteTitle": "You have a route in progress!",
         "language": "Language",
-        "languageButton": "Change Language",
-        "recommendplace": "A popular spot on K-Route."
+        "languageButton": "Change language",
+        "recommendplace": "Popular places loved on K-Route",
+        "loginPrompt": "Please log in to see the content."
     },
     "theme": {
-        "title": "Explore by Theme"
+        "title": "Browse by Theme"
     },
     "route": {
         "title": "Route",
-        "whichCity": "Which city will you visit?",
-        "whichDate": "Which date will you go?",
+        "whichCity": "Which city are you going to?",
+        "whichDate": "Which date are you going?",
         "createRoute": "Create Route",
         "cities": [
             "Seoul",
@@ -63,7 +64,7 @@
     "routeStart": {
         "tabs": [
             "Recommended Routes",
-            "AI-guided Routes"
+            "AI Guide Recommended Routes"
         ]
     },
     "aiGuide": {
@@ -73,15 +74,15 @@
         "noResults": "No results found.",
         "resultsCount": "Search results ({{count}})",
         "recommendedByKRoute": "Places recommended by K-Route",
-        "searchTag": "Search Result",
-        "hoursUnknown": "Opening hours unavailable",
+        "searchTag": "Search Results",
+        "hoursUnknown": "No hours info",
         "placeLabelDefault": "Spot",
-        "addressUnknown": "Address unavailable",
-        "searchPlaceholder": "Search a place you want to visit!",
+        "addressUnknown": "No address info",
+        "searchPlaceholder": "Search for places you want to visit!",
         "loading": "Loading…",
         "retry": "Retry",
         "notice": "Notice",
-        "noCoords": "This place has no coordinate info.",
+        "noCoords": "This place has no coordinates.",
         "selectAtLeastOne": "Please select at least one place."
     },
     "daysShort": {
@@ -96,12 +97,214 @@
     "place": {
         "title": "Place",
         "loading": "Loading…",
-        "loadFail": "Failed to load place details.",
-        "addressUnknown": "Address unavailable",
-        "hoursUnknown": "Opening hours unavailable",
-        "costUnknown": "Cost info unavailable",
+        "loadFail": "Failed to load the place info.",
+        "addressUnknown": "No address info",
+        "hoursUnknown": "No hours info",
+        "costUnknown": "No cost info",
         "closed": "Closed",
+        "alwaysOpen": "Open 24 hours",
         "relatedPosts": "Related Posts",
-        "nearby": "Nearby Spots"
+        "nearby": "Nearby Spots",
+        "locationTitle": "Location",
+        "infoTitle": "Info"
+    },
+    "chat": {
+        "welcome": "Hi! I'm your AI guide MEY. How can I help?",
+        "inputPlaceholder": "Ask MEY",
+        "newChat": "New Chat",
+        "resetTitle": "Start a new chat",
+        "resetBody": "Clear current conversation and start over?",
+        "errorGeneric": "Sorry, something went wrong. Please try again.",
+        "loginRequired": "Please log in to use the service.",
+        "seeMore": "See more →",
+        "suggestions": {
+            "kpopRoute": "Recommend a K-POP route",
+            "nearbyFood": "Recommend restaurants nearby"
+        },
+        "meta": {
+            "costAmount": "Cost: ₩{{amount}}",
+            "durationMin": "Duration: {{mins}} min",
+            "addressLabel": "Address: {{addr}}",
+            "costLabel": "Cost: {{cost}}"
+        }
+    },
+    "common": {
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "unknown": "Unknown",
+        "loading": "Loading…",
+        "retry": "Retry",
+        "ok": "OK",
+        "loadFail": "Failed to load",
+        "close": "Close",
+        "info": "Info",
+        "error": "Error",
+        "success": "Success"
+    },
+    "auth": {
+        "reauthTitle": "Re-authentication Required",
+        "reauthBody": "Your email changed. Please log in again.",
+        "logoutTitle": "Log out",
+        "logoutConfirm": "Are you sure you want to log out?",
+        "logout": "Log out",
+        "logoutDone": "Logged out",
+        "login": "Log in",
+        "loginOrSignup": "Log in / Sign up",
+        "welcomeTitle": "Welcome!",
+        "alreadyLoggedInTitle": "You are already logged in.",
+        "alreadyLoggedInBody": "Redirecting to the main screen.",
+        "inputErrorTitle": "Input Error",
+        "inputErrorBody": "Please enter your email and password.",
+        "loginFailTitle": "Login Failed",
+        "loginFailBody": "Incorrect email or password.",
+        "loginSuccessTitle": "Login Successful",
+        "loginSuccessBody": "Welcome!",
+        "checkingLogin": "Checking login status…",
+        "loggingIn": "Logging in…",
+        "email": "Email",
+        "password": "Password",
+        "forgotPassword": "Forgot your password?",
+        "noAccountQ": "Don’t have an account?",
+        "signup": "Sign up",
+        "loginFailBodyFallback": "Please try again later."
+    },
+    "profile": {
+        "guest": "Guest",
+        "editProfile": "Edit Profile"
+    },
+    "routes": {
+        "ongoing": "Ongoing",
+        "notStarted": "Not Started",
+        "completed": "Completed"
+    },
+    "settings": {
+        "title": "Settings",
+        "language": "Language"
+    },
+    "tabs": {
+        "home": "Home",
+        "map": "Map",
+        "route": "Route",
+        "chatbot": "AI Chatbot",
+        "myroute": "My Route"
+    },
+    "routeEdit": {
+        "title": "Edit Route",
+        "createCustom": "Create Custom Route",
+        "selectedCount": "{{count}} places selected",
+        "tip": "You can reorder, delete, and add places.",
+        "addPlace": "Add Place",
+        "empty": "No places selected.",
+        "start": "Start Route"
+    },
+    "routeOverview": {
+        "title": "Trip Overview",
+        "thisJourney": "This journey…",
+        "totalDistance": "Total travel: {{distance}}",
+        "placesToVisit": "We will visit…",
+        "placesCount": "We'll visit {{count}} places",
+        "totalTime": "Estimated total travel time: {{time}}",
+        "estimatedCostTitle": "Estimated Cost",
+        "estimatedCost": "Approx. {{cost}} for transportation",
+        "weatherTitle": "Weather",
+        "weatherSentence": "Today's weather: {{desc}}, {{temp}}.",
+        "doLater": "Do it later",
+        "start": "Start Trip",
+        "resume": "Resume Trip",
+        "restart": "Restart Trip"
+    },
+    "routeStep": {
+        "guiding": "Guiding ({{step}} / {{total}})",
+        "placeDetail": "View place details",
+        "stats": {
+            "totalDistance": "Total Distance",
+            "estimatedTime": "Estimated Time",
+            "estimatedCost": "Estimated Cost"
+        },
+        "prevPlace": "Previous Place",
+        "nextPlace": "Next Place",
+        "endRoute": "End Route",
+        "alerts": {
+            "placeNotFound": "Place information not found.",
+            "placeLoadFailed": "Failed to load place information.",
+            "ongoingMissing": "Failed to load your ongoing routes.",
+            "currentRouteNotFound": "Current route not found in the ongoing list.",
+            "completeSuccess": "Route completed successfully!"
+        }
+    },
+    "aiGuideRoutes": {
+        "title": "AI-picked routes"
+    },
+    "themeRoutes": {
+        "emptyByTheme": "No recommended routes for this theme."
+    },
+    "register": {
+        "title": "Sign Up",
+        "nickname": "Nickname",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "nicknamePlaceholder": "Your nickname",
+        "emailPlaceholder": "Email address",
+        "passwordPlaceholder": "Password (min 6 chars)",
+        "confirmPasswordPlaceholder": "Re-enter password",
+        "privacyPolicy": "Privacy Policy",
+        "agreeSuffix": "I agree.",
+        "pickImage": "Pick Image",
+        "imagePermTitle": "Permission Required",
+        "imagePermBody": "Gallery access is required to set a profile image.",
+        "agreeNeededTitle": "Agreement Required",
+        "agreeNeededBody": "Please agree to the Privacy Policy.",
+        "inputErrorTitle": "Input Error",
+        "inputAllRequired": "Please fill in all required fields.",
+        "emailInvalid": "Please enter a valid email address.",
+        "passwordTooShort": "Password must be at least 6 characters.",
+        "passwordMismatch": "Passwords do not match.",
+        "nicknameTooShort": "Nickname must be at least 2 characters.",
+        "signupInProgress": "Signing up…",
+        "signup": "Sign Up",
+        "signupSuccessTitle": "Sign-up Complete",
+        "signupSuccessBody": "Your account has been created. Please log in.",
+        "signupFailTitle": "Sign-up Failed",
+        "signupFailFallback": "An unknown error occurred.",
+        "alreadyHaveAccountQ": "Already have an account?",
+        "loginLink": "Log in"
+    },
+    "profileEdit": {
+        "title": "Edit Profile",
+        "loading": "Loading…",
+        "pickImage": "Pick Image",
+        "imagePermTitle": "Permission Required",
+        "imagePermBody": "Gallery access is required.",
+        "fetchFailTitle": "Failed to load profile",
+        "fetchFailBody": "Please try again later.",
+        "noChangesTitle": "Notice",
+        "noChangesBody": "There’s nothing to update.",
+        "emailInvalid": "Please enter a valid email address.",
+        "emailNeedsPwdTitle": "Notice",
+        "emailNeedsPwdBody": "To change your email, please also enter a new password.",
+        "pwdTooShort": "Password must be at least 6 characters.",
+        "pwdMismatch": "Passwords do not match.",
+        "avatarNeededTitle": "Profile image required",
+        "avatarNeededBody": "Please select an image.",
+        "save": "Save",
+        "saving": "Saving…",
+        "saveFailTitle": "Save Failed",
+        "saveFailBody": "Please try again later.",
+        "saveSuccessTitle": "Profile Saved",
+        "saveSuccessBodyWithEmail": "Please log in again with your updated account.\nEmail: {{email}}",
+        "labels": {
+            "nickname": "Nickname",
+            "email": "Email",
+            "newPasswordOptional": "New Password (optional)",
+            "confirmNewPassword": "Confirm New Password"
+        },
+        "placeholders": {
+            "nickname": "Nickname",
+            "email": "Email",
+            "newPasswordOptional": "New Password (optional)",
+            "confirmNewPassword": "Confirm New Password"
+        },
+        "updateFailServer": "Update failed"
     }
 }
