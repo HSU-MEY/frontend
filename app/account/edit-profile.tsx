@@ -12,9 +12,11 @@ import { getMyProfile, type UserProfile } from '@/api/user';
 import Header from '@/components/common/Header';
 import GradientText from '@/components/GradientText';
 import { useAuthSession } from '@/hooks/useAuthSession';
+import { useTranslation } from 'react-i18next';
 
 export default function EditProfileScreen() {
   const { ensureValidAccessToken, logout } = useAuthSession();
+  const { t } = useTranslation();
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [originalProfileImageUrl, setOriginalProfileImageUrl] = useState<string | null>(null); // ★ 추가
@@ -90,7 +92,10 @@ export default function EditProfileScreen() {
         setOriginalProfileImageUrl(me.profileImageUrl ?? null); // ★ 프사
         setProfileImage(me.profileImageUrl ?? null);            // ★ 프사(미리보기)
       } catch (e: any) {
-        if (mounted) Alert.alert('프로필 불러오기 실패', e?.message ?? '잠시 후 다시 시도해주세요.');
+        if (mounted) Alert.alert(
+          t('profileEdit.fetchFailTitle'),
+          e?.message ?? t('profileEdit.fetchFailBody')
+        );
       } finally {
         if (mounted) setLoading(false);
         fetchingRef.current = false;
@@ -103,7 +108,7 @@ export default function EditProfileScreen() {
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('갤러리 접근 권한이 필요합니다.');
+      Alert.alert(t('profileEdit.imagePermTitle'), t('profileEdit.imagePermBody'));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -128,24 +133,24 @@ export default function EditProfileScreen() {
     const avatarChanged = profileImage != null && profileImage !== originalProfileImageUrl;
 
     if (!emailChanged && !pwdChanged && !nicknameChanged && !avatarChanged) {
-      Alert.alert('변경할 항목이 없습니다.');
+      Alert.alert(t('profileEdit.noChangesTitle'), t('profileEdit.noChangesBody'));
       return;
     }
     if (emailChanged && !trimmedEmail.includes('@')) {
-      Alert.alert('유효한 이메일 주소를 입력해주세요.');
+      Alert.alert(t('profileEdit.noChangesTitle'), t('profileEdit.emailInvalid'));
       return;
     }
     if (emailChanged && !pwdChanged) {
-      Alert.alert('안내', '이메일을 변경하려면 새 비밀번호도 함께 입력해주세요.');
+      Alert.alert(t('profileEdit.emailNeedsPwdTitle'), t('profileEdit.emailNeedsPwdBody'));
       return;
     }
     if (pwdChanged) {
       if (trimmedPwd.length < 6) {
-        Alert.alert('비밀번호는 6자 이상이어야 합니다.');
+        Alert.alert(t('profileEdit.noChangesTitle'), t('profileEdit.pwdTooShort'));
         return;
       }
       if (trimmedPwd !== confirmPassword.trim()) {
-        Alert.alert('비밀번호 확인이 일치하지 않습니다.');
+        Alert.alert(t('profileEdit.noChangesTitle'), t('profileEdit.pwdMismatch'));
         return;
       }
     }
@@ -171,7 +176,7 @@ export default function EditProfileScreen() {
       }
 
       if (!fileUriToSend) {
-        Alert.alert('프로필 이미지가 필요합니다.', '이미지를 선택해 주세요.');
+        Alert.alert(t('profileEdit.avatarNeededTitle'), t('profileEdit.avatarNeededBody'));
         setSaving(false);
         return;
       }
@@ -200,23 +205,22 @@ export default function EditProfileScreen() {
       );
 
       if (!resp?.isSuccess) {
-        throw new Error(resp?.message || '업데이트 실패');
+        throw new Error(resp?.message || t('profileEdit.updateFailServer'));
       }
 
-      // 성공 → 즉시 로그아웃(토큰 레이스 방지)
       await logout();
 
       const shownEmail = emailChanged ? trimmedEmail : originalEmail;
       Alert.alert(
-        '프로필 저장 완료',
-        `변경된 계정 정보로 다시 로그인해주세요.\n이메일: ${shownEmail}`,
-        [{ text: '확인', onPress: () => router.replace('/account/login') }]
+        t('profileEdit.saveSuccessTitle'),
+        t('profileEdit.saveSuccessBodyWithEmail', { email: shownEmail }),
+        [{ text: t('common.ok'), onPress: () => router.replace('/account/login') }]
       );
 
       setNewPassword('');
       setConfirmPassword('');
     } catch (e: any) {
-      Alert.alert('저장 실패', e?.message ?? '잠시 후 다시 시도해주세요.');
+      Alert.alert(t('profileEdit.saveFailTitle'), e?.message ?? t('profileEdit.saveFailBody'));
     } finally {
       setSaving(false);
     }
@@ -226,14 +230,14 @@ export default function EditProfileScreen() {
   if (loading) {
     return (
       <Center>
-        <CenterText>불러오는 중…</CenterText>
+        <CenterText>{t('profileEdit.loading')}</CenterText>
       </Center>
     );
   }
 
   return (
     <Container>
-      <Header title="프로필 수정" />
+      <Header title={t('profileEdit.title')} />
       <HeaderImage
         source={require('../../assets/images/header.png')}
         resizeMode="cover"
@@ -243,7 +247,7 @@ export default function EditProfileScreen() {
           colors={['#0080FF', '#53BDFF']}
           style={{ fontSize: 24, textAlign: 'center', marginBottom: 20, fontFamily: 'Pretendard-Bold' }}
         >
-          프로필 수정
+          {t('profileEdit.title')}
         </GradientText>
 
         {/* 프로필 이미지 */}
@@ -253,24 +257,24 @@ export default function EditProfileScreen() {
               <ProfileImage source={{ uri: profileImage }} />
             ) : (
               <Placeholder>
-                <PlaceholderText>이미지 선택</PlaceholderText>
+                <PlaceholderText>{t('profileEdit.pickImage')}</PlaceholderText>
               </Placeholder>
             )}
           </Pressable>
         </ProfileImageContainer>
 
         {/* 닉네임 */}
-        <InputLabel>닉네임</InputLabel>
+        <InputLabel>{t('profileEdit.labels.nickname')}</InputLabel>
         <Input
-          placeholder="닉네임"
+          placeholder={t('profileEdit.placeholders.nickname')}
           value={nickname}
           onChangeText={setNickname}
         />
 
         {/* 이메일 */}
-        <InputLabel>이메일</InputLabel>
+        <InputLabel>{t('profileEdit.labels.email')}</InputLabel>
         <Input
-          placeholder="이메일"
+          placeholder={t('profileEdit.placeholders.email')}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -278,16 +282,16 @@ export default function EditProfileScreen() {
         />
 
         {/* 비밀번호 */}
-        <InputLabel>새 비밀번호 (선택)</InputLabel>
+        <InputLabel>{t('profileEdit.labels.newPasswordOptional')}</InputLabel>
         <Input
-          placeholder="새 비밀번호 (선택)"
+          placeholder={t('profileEdit.placeholders.newPasswordOptional')}
           value={newPassword}
           onChangeText={setNewPassword}
           secureTextEntry
         />
-        <InputLabel>새 비밀번호 확인</InputLabel>
+        <InputLabel>{t('profileEdit.labels.confirmNewPassword')}</InputLabel>
         <Input
-          placeholder="새 비밀번호 확인"
+          placeholder={t('profileEdit.placeholders.confirmNewPassword')}
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
@@ -295,7 +299,7 @@ export default function EditProfileScreen() {
 
         <CustomButton onPress={handleSave} disabled={saving}>
           <Text style={{ color: 'white', fontSize: 16, fontFamily: 'Pretendard-SemiBold' }}>
-            {saving ? '저장 중…' : '저장'}
+            {saving ? t('profileEdit.saving') : t('profileEdit.save')}
           </Text>
         </CustomButton>
       </ContentContainer>

@@ -1,15 +1,18 @@
 // app/account/register.tsx
 import { signupApi } from '@/api/auth.service';
 import Header from '@/components/common/Header';
+import LanguagePicker from '@/components/common/LanguagePicker';
 import GradientText from '@/components/GradientText';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, Switch, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Alert, KeyboardAvoidingView, Platform, Switch, Text, View } from 'react-native';
 import styled from 'styled-components/native';
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [nickname, setNickname] = useState('');
@@ -22,7 +25,7 @@ export default function RegisterScreen() {
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('권한 필요', '프로필 이미지를 설정하려면 갤러리 접근 권한이 필요합니다.');
+      Alert.alert(t('register.imagePermTitle'), t('register.imagePermBody'));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -40,7 +43,7 @@ export default function RegisterScreen() {
     if (submitting) return;
 
     if (!agreedToPrivacyPolicy) {
-      Alert.alert('동의 필요', '개인정보처리방침에 동의해주세요.');
+      Alert.alert(t('register.agreeNeededTitle'), t('register.agreeNeededBody'));
       return;
     }
 
@@ -50,23 +53,23 @@ export default function RegisterScreen() {
     const confirmTrim = confirmPassword.trim();
 
     if (!emailNorm || !nicknameTrim || !pwdTrim) {
-      Alert.alert('입력 오류', '모든 필수 항목을 입력해주세요.');
+      Alert.alert(t('register.inputErrorTitle'), t('register.inputAllRequired'));
       return;
     }
     if (!emailNorm.includes('@')) {
-      Alert.alert('입력 오류', '유효한 이메일 주소를 입력해주세요.');
+      Alert.alert(t('register.inputErrorTitle'), t('register.emailInvalid'));
       return;
     }
     if (pwdTrim.length < 6) {
-      Alert.alert('입력 오류', '비밀번호는 6자 이상이어야 합니다.');
+      Alert.alert(t('register.inputErrorTitle'), t('register.passwordTooShort'));
       return;
     }
     if (pwdTrim !== confirmTrim) {
-      Alert.alert('입력 오류', '비밀번호가 일치하지 않습니다.');
+      Alert.alert(t('register.inputErrorTitle'), t('register.passwordMismatch'));
       return;
     }
     if (nicknameTrim.length < 2) {
-      Alert.alert('입력 오류', '닉네임은 2자 이상이어야 합니다.');
+      Alert.alert(t('register.inputErrorTitle'), t('register.nicknameTooShort'));
       return;
     }
 
@@ -80,13 +83,13 @@ export default function RegisterScreen() {
         // profileImage: profileImage, // This needs API modification
       });
       if (!resp?.isSuccess) {
-        throw new Error(resp?.message || '회원가입에 실패했습니다.');
+        throw new Error(resp?.message || t('register.signupFailFallback'));
       }
-      Alert.alert('회원가입 완료', '회원가입이 성공적으로 완료되었습니다. 로그인해주세요.');
+      Alert.alert(t('register.signupSuccessTitle'), t('register.signupSuccessBody'));
       router.replace('/account/login');
     } catch (error: any) {
       console.error('회원가입 에러:', error);
-      Alert.alert('회원가입 실패', error?.message ?? '알 수 없는 오류가 발생했습니다.');
+      Alert.alert(t('register.signupFailTitle'), error?.message ?? t('register.signupFailFallback'));
     } finally {
       setSubmitting(false);
     }
@@ -94,20 +97,30 @@ export default function RegisterScreen() {
 
   const renderContent = () => (
     <>
-      <Header title="회원가입" />
+      <Header title={t('register.title')} />
       <HeaderImage
         source={require('../../assets/images/header.png')}
         resizeMode="cover"
       />
       <ContentContainer>
-        <GradientText
-          colors={['#0080FF', '#53BDFF']}
-          style={{ fontSize: 24, textAlign: 'center', marginBottom: 20, fontFamily: 'Pretendard-Bold' }}
-        >
-          회원가입
-        </GradientText>
+        <View style={{ marginBottom: 12, alignItems: 'center', justifyContent: 'center' }}>
+          <GradientText
+            colors={['#0080FF', '#53BDFF']}
+            style={{ fontSize: 24, fontFamily: 'Pretendard-Bold', textAlign: 'center' }}
+          >
+            {t('register.title')}
+          </GradientText>
 
-        <ProfileImageContainer>
+          <View style={{ position: 'absolute', right: 0, top: 0 }}>
+            <LanguagePicker
+              variant="link"
+              color="#0080FF"
+              textStyle={{ fontFamily: 'Pretendard-SemiBold', fontSize: 18 }}
+            />
+          </View>
+        </View>
+
+        {/* <ProfileImageContainer>
           <Pressable onPress={pickImage}>
             {profileImage ? (
               <ProfileImage source={{ uri: profileImage }} />
@@ -117,40 +130,39 @@ export default function RegisterScreen() {
               </Placeholder>
             )}
           </Pressable>
-        </ProfileImageContainer>
+        </ProfileImageContainer> */}
 
-        <InputLabel>닉네임</InputLabel>
+        <InputLabel> {t('register.nickname')}</InputLabel>
         <Input
-          placeholder="사용하실 닉네임"
+          placeholder={t('register.nicknamePlaceholder')}
           value={nickname}
           onChangeText={setNickname}
         />
 
-        <InputLabel>이메일</InputLabel>
+        <InputLabel> {t('register.email')}</InputLabel>
         <Input
-          placeholder="이메일 주소"
+          placeholder={t('register.emailPlaceholder')}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
         />
 
-        <InputLabel>비밀번호</InputLabel>
+        <InputLabel>{t('register.password')}</InputLabel>
         <Input
-          placeholder="비밀번호 (6자 이상)"
+          placeholder={t('register.passwordPlaceholder')}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
 
-        <InputLabel>비밀번호 확인</InputLabel>
+        <InputLabel>{t('register.confirmPassword')}</InputLabel>
         <Input
-          placeholder="비밀번호 다시 입력"
+          placeholder={t('register.confirmPasswordPlaceholder')}
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
         />
-
 
         <AgreementContainer>
           <Switch
@@ -161,22 +173,26 @@ export default function RegisterScreen() {
           />
           <AgreementText>
             <Text onPress={() => router.push('/account/privacy-policy')} style={{ color: '#0080FF', textDecorationLine: 'underline' }}>
-              개인정보처리방침
+              {t('register.privacyPolicy')}
             </Text>
-            에 동의합니다.
+            {t('register.agreeSuffix')}
           </AgreementText>
         </AgreementContainer>
 
-        <CustomButton title={submitting ? '가입 중…' : '회원가입'} onPress={handleRegister} disabled={submitting}>
+        <CustomButton
+          title={submitting ? t('register.signupInProgress') : t('register.signup')}
+          onPress={handleRegister}
+          disabled={submitting}
+        >
           <Text style={{ color: 'white', fontSize: 16, fontFamily: 'Pretendard-SemiBold' }}>
-            {submitting ? '가입 중…' : '회원가입'}
+            {submitting ? t('register.signupInProgress') : t('register.signup')}
           </Text>
         </CustomButton>
 
         <Text style={{ textAlign: 'center', marginTop: 16, fontFamily: 'Pretendard-Regular' }}>
-          이미 계정이 있으신가요?{' '}
+          {t('register.alreadyHaveAccountQ')}{' '}
           <Text onPress={() => router.push('/account/login')} style={{ color: '#0080FF', fontFamily: 'Pretendard-SemiBold' }}>
-            로그인
+            {t('register.loginLink')}
           </Text>
         </Text>
       </ContentContainer>
@@ -184,7 +200,7 @@ export default function RegisterScreen() {
   );
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
       keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 30}
