@@ -32,7 +32,7 @@ export type Route = {
 }
 
 export type SavedUserRoute = {
-  savedRouteId: number;
+  userRouteId: number;
   status: string; // "NOT_STARTED", "ON_GOING", "COMPLETED"
 }
 

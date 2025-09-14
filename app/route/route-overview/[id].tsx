@@ -71,7 +71,7 @@ export default function RouteOverviewScreen() {
       try {
         const response = await getUserRoutesIdByRouteId(id);
         if (response.isSuccess && response.result) {
-          setSavedRouteId(response.result.savedRouteId);
+          setSavedRouteId(response.result.userRouteId);
           setRouteStatus(response.result.status as UserRouteStatus); // "NOT_STARTED", "ON_GOING", "COMPLETED"
         } else {
           // This case might not be hit if API throws on non-success
