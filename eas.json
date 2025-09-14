@@ -1,0 +1,31 @@
+{
+  "cli": {
+    "version": ">= 16.19.1",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "autoIncrement": true,
+      "android": {
+        "resourceClass": "medium",
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "http://13.209.188.74:8080/api",
+        "EXPO_PUBLIC_KAKAO_JS_API_KEY": "d85a4fbeed3ea9db9d99c435ce5064fe",
+        "EXPO_PUBLIC_KAKAO_NATIVE_API_KEY": "90480ab3242a56f37bef2ef03e474894",
+        "EXPO_PUBLIC_OPEN_WEATHER_API_KEY": "0698ee7649c26dd61375d6dce2615ec5"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

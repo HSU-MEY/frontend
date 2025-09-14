@@ -35,6 +35,9 @@ export default function RouteStepScreen() {
   }, [step]);
 
   const getSegment = useRouteRunStore((s) => s.getSegment);
+  const goToNextSegment = useRouteRunStore((s) => s.goToNextSegment);
+  const routeRun = useRouteRunStore((s) => s.routes[String(id)]);
+
   const segment = getSegment(String(id), stepNum - 1);
   const segmentCount = useRouteRunStore((s) => s.routes[id]?.segments.length ?? 0);
 
@@ -44,7 +47,10 @@ export default function RouteStepScreen() {
     return null;
   }
 
-  const goNext = () => router.replace(`/route/route-step/${id}/${stepNum + 1}`);
+  const goNext = () => {
+    goToNextSegment(String(id)); // Update currentSegmentIndex in store
+    router.replace(`/route/route-step/${id}/${stepNum + 1}`);
+  };
   const goPrev = () => router.replace(`/route/route-step/${id}/${Math.max(1, stepNum - 1)}`);
 
   const handlePanTo = (lat: number, lng: number) => {

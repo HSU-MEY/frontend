@@ -1,6 +1,6 @@
 import React from 'react';
-import { Dimensions, Image, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Dimensions, Image, StyleSheet, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -10,6 +10,7 @@ const bannerImages: { [key: string]: any } = {
   zh: require('../../assets/images/banner-temp-zh.png'),
   ko: require('../../assets/images/banner-temp.png'),
 };
+// Photo by Brady Bellini on Unsplash
 
 export default function BannerSection() {
   const { i18n } = useTranslation();

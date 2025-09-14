@@ -222,7 +222,7 @@ export default function MyPage() {
                     inProgressRoutes.map((route: Route, index: number) => (
                       <RouteCard
                         key={index}
-                        thumbnail=""
+                        thumbnail={route.imageUrl}
                         title={route.title}
                         date={route.preferredStartDate}
                         onPress={() => router.push(`/route/route-overview/${route.routeId}`)}
@@ -252,7 +252,7 @@ export default function MyPage() {
                   {upcomingRoutes.map((route: Route, index: number) => (
                     <RouteCard
                       key={index}
-                      thumbnail=""
+                      thumbnail={route.imageUrl}
                       title={route.title}
                       date={route.preferredStartDate}
                       onPress={() => router.push(`/route/route-overview/${route.routeId}`)}
@@ -281,7 +281,7 @@ export default function MyPage() {
                     <RouteCard
                       key={index}
                       onPress={() => router.push(`/route/route-overview/${route.routeId}`)}
-                      thumbnail=""
+                      thumbnail={route.imageUrl}
                       title={route.title}
                       date={route.preferredStartDate}
                     //progress={route.progress}

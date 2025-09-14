@@ -1,6 +1,6 @@
 // app/route/route
 import { getRouteApi, Routes, startRouteApi } from '@/api/routes.service';
-import { changeUserRouteStatus } from '@/api/users.routes.service';
+import { changeUserRouteStatus, getUserRoutesIdByRouteId } from '@/api/users.routes.service';
 import Header from '@/components/common/Header';
 import { useUserRoutes } from '@/hooks/useUserRoutes';
 import { useWeather } from '@/hooks/useWeathers';
@@ -8,7 +8,7 @@ import { useRouteRunStore } from '@/store/useRouteRunStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from "expo-location";
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
@@ -44,6 +44,9 @@ function pickLocalizedField<T extends Record<string, any>>(
   return '';
 }
 
+type UserRouteStatus = 'LOADING' | 'NOT_SAVED' | 'NOT_STARTED' | 'ON_GOING' | 'COMPLETED';
+
+
 export default function RouteOverviewScreen() {
   const id = Number(useLocalSearchParams().id);
   const [route, setRoute] = useState<Routes | null>(null);
@@ -52,34 +55,41 @@ export default function RouteOverviewScreen() {
   const [estimatedTime, setEstimatedTime] = React.useState<string>("");
   const [estimatedCost, setEstimatedCost] = React.useState<string>("");
   const [savedRouteId, setSavedRouteId] = useState<number | null>(null);
+  const [routeStatus, setRouteStatus] = useState<UserRouteStatus>('LOADING');
+
   const upsertRoute = useRouteRunStore((s) => s.upsertRoute);
   const setCurrent = useRouteRunStore((s) => s.setCurrent);
+  const clearRoute = useRouteRunStore((s) => s.clearRoute);
   const { i18n, t } = useTranslation();
 
-  // As per user instruction: call the hook for each status
   const { save: saveUserRoute } = useUserRoutes();
-  const { data: notStartedRoutes, loading: notStartedLoading } = useUserRoutes('NOT_STARTED');
-  const { data: onGoingRoutes, loading: onGoingLoading } = useUserRoutes('ON_GOING');
-  const { data: completedRoutes, loading: completedLoading } = useUserRoutes('COMPLETED');
 
-  const routeStatus = useMemo(() => {
-    const isLoading = onGoingLoading || completedLoading || notStartedLoading;
-    if (isLoading) return 'LOADING';
+  useEffect(() => {
+    async function fetchRouteStatus() {
+      if (isNaN(id)) return;
 
-    if (onGoingRoutes?.savedRoutes && onGoingRoutes.savedRoutes.some((r: any) => r.routeId === id)) {
-      setSavedRouteId(onGoingRoutes.savedRoutes.find((r: any) => r.routeId === id)?.savedRouteId ?? null);
-      return 'ON_GOING';
+      setRouteStatus('LOADING');
+      try {
+        const response = await getUserRoutesIdByRouteId(id);
+        if (response.isSuccess && response.result) {
+          setSavedRouteId(response.result.userRouteId);
+          setRouteStatus(response.result.status as UserRouteStatus); // "NOT_STARTED", "ON_GOING", "COMPLETED"
+        } else {
+          // This case might not be hit if API throws on non-success
+          setRouteStatus('NOT_SAVED');
+        }
+      } catch (error: any) {
+        if (error.response && error.response.status === 404) {
+          setRouteStatus('NOT_SAVED');
+        } else {
+          console.error("Failed to fetch route status:", error);
+          setRouteStatus('NOT_SAVED'); // Or some error status
+        }
+      }
     }
-    if (notStartedRoutes?.savedRoutes && notStartedRoutes.savedRoutes.some((r: any) => r.routeId === id)) {
-      setSavedRouteId(notStartedRoutes.savedRoutes.find((r: any) => r.routeId === id)?.savedRouteId ?? null);
-      return 'NOT_STARTED';
-    }
-    if (completedRoutes?.savedRoutes && completedRoutes.savedRoutes.some((r: any) => r.routeId === id)) {
-      setSavedRouteId(completedRoutes.savedRoutes.find((r: any) => r.routeId === id)?.savedRouteId ?? null);
-      return 'COMPLETED';
-    }
-    return 'NOT_SAVED';
-  }, [id, onGoingRoutes, completedRoutes, onGoingLoading, completedLoading]);
+
+    fetchRouteStatus();
+  }, [id]);
 
 
   useEffect(() => {
@@ -142,6 +152,10 @@ export default function RouteOverviewScreen() {
   const handleStartRoute = async () => {
     setIsLoading(true);
     try {
+      if (routeStatus === 'COMPLETED') {
+        clearRoute(String(id));
+      }
+
       const route = useRouteRunStore.getState().routes[String(id)];
       let segments;
 
@@ -155,9 +169,14 @@ export default function RouteOverviewScreen() {
         upsertRoute({ id: String(id), segments, startedAt: Date.now() });
         setCurrent(String(id));
 
-        saveUserRoute(id, new Date(), "09:00").catch((error) => {
-          console.error("Failed to save route:", error);
-        });
+        // If the route was not saved, save it now.
+        if (routeStatus === 'NOT_SAVED') {
+            const saveResponse = await saveUserRoute(id, new Date(), "09:00");
+            if (saveResponse && saveResponse.savedRouteId) {
+                setSavedRouteId(saveResponse.savedRouteId);
+                await changeUserRouteStatus(saveResponse.savedRouteId, 'ON_GOING');
+            }
+        }
       }
 
       if (savedRouteId !== null && savedRouteId >= 0) {
@@ -167,7 +186,8 @@ export default function RouteOverviewScreen() {
       }
 
       //페이지 이동
-      router.replace(`/route/route-step/${id}/1`);
+      const startStep = (route?.currentSegmentIndex ?? 0) + 1;
+      router.replace(`/route/route-step/${id}/${startStep}`);
     } catch (error) {
       console.error("Failed to start route:", error);
       alert("경로 시작에 실패했습니다. 위치 권한을 확인해주세요.");
@@ -177,8 +197,10 @@ export default function RouteOverviewScreen() {
   }
 
   const handleLaterButton = () => {
-    if (routeStatus !== 'NOT_SAVED' && savedRouteId !== null) {
-      saveUserRoute(savedRouteId, new Date(), "09:00").catch((error) => {
+    if (routeStatus === 'NOT_SAVED') {
+      saveUserRoute(id, new Date(), "09:00").then(() => {
+        setRouteStatus('NOT_STARTED');
+      }).catch((error) => {
         //console.error("Failed to save route:", error);
       });
     }
@@ -190,14 +212,20 @@ export default function RouteOverviewScreen() {
     <Container>
       <Header title={t('routeOverview.title')} />
 
-      {/* <ImageBackground
-        source={{ uri: 'https://placehold.co/300x300' }}
-        style={styleSheet.HeaderSection}
+      {/*
+      <ImageBackground
+        source={ route?.imageUrl ? { uri: route.imageUrl } : require('../../../assets/images/placeholder-place.png') }
+        style={ styleSheet.HeaderSection }
       >
-        <Title>{pickLocalizedField(route, 'title', i18n.language) || route?.title || ''}</Title>
-        <Subtitle>{pickLocalizedField(route, 'regionName', i18n.language) || route?.theme || ''}</Subtitle>
-        <Description>{pickLocalizedField(route, 'description', i18n.language) || route?.description || ''}</Description>
-      </ImageBackground> */}
+        <HeaderContainer>
+          <Title>{ route?.title }</Title>
+          <Subtitle>{ route?.theme }</Subtitle>
+          <Description>
+            { route?.description }
+          </Description>
+        </HeaderContainer>
+      </ImageBackground>
+      */}
 
       <RouteInfoContainer>
         <Row>
@@ -216,7 +244,7 @@ export default function RouteOverviewScreen() {
                 {pickLocalizedField(route?.routePlaces?.[0]?.place, 'name', i18n.language)
                   || route?.routePlaces?.[0]?.place.name
                   || ''}
-                {"\n"} ... {"\n"}
+                {'\n'} ... {'\n'}
                 {pickLocalizedField(
                   route?.routePlaces?.[(route?.routePlaces?.length ?? 1) - 1]?.place,
                   'name',
@@ -280,9 +308,6 @@ export default function RouteOverviewScreen() {
 const styleSheet = StyleSheet.create(
   {
     HeaderSection: {
-      padding: 16,
-      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-      borderRadius: 12,
       marginBottom: 16,
       textAlign: 'center',
     },
@@ -300,21 +325,33 @@ const Container = styled.ScrollView`
   background-color: white;
 `;
 
+const HeaderContainer = styled.View`
+  background-color: rgba(0, 0, 0, 0.4);  
+  width: 100%;
+  padding: 16px;
+`;
+
 const Title = styled.Text`
   font-size: 22px;
-  font-weight: bold;
+  font-family: 'Pretendard-Bold';
+  color: white;
+  text-align: center;
 `;
 
 const Subtitle = styled.Text`
   font-size: 16px;
-  color: #666;
+  color: white;
+  font-family: 'Pretendard-Medium';
   margin-top: 4px;
+  text-align: center;
 `;
 
 const Description = styled.Text`
   margin-top: 12px;
   line-height: 20px;
-  color: #444;
+  font-family: 'Pretendard-Regular';
+  color: white;
+  text-align: center;
 `;
 
 const RouteInfoContainer = styled.View`

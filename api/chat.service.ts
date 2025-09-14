@@ -1,6 +1,4 @@
-import { apiPost, ApiEnvelope } from "./http";
-
-// ===== रिक्वेस्ट और रिस्पांस टाइप्स =====
+import { ApiEnvelope, apiPost } from "./http";
 
 // 컨텍스트 타입
 export interface ChatContext {
@@ -14,12 +12,14 @@ export interface ChatContext {
   lastBotQuestion?: string;
   sessionId?: string;
   conversationStartTime?: number;
+  userLanguage?: 'ko' | 'en' | 'ja' | 'zh';
 }
 
 // 챗 쿼리 요청 타입
 export interface ChatQueryRequest {
   query: string;
   context: ChatContext;
+  language: 'ko' | 'en' | 'ja' | 'zh';
 }
 
 // 루트 추천 타입

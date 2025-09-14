@@ -23,12 +23,18 @@ export type Route = {
   routeId: number;
   title: string;
   description: string;
+  imageUrl: string;
   totalDurationMinutes: number;
   preferredStartDate: string;
   preferredStartTime: string;
   isPastDate: boolean;
   daysUntilTrip: number;
   savedAt: string; // 저장된 날짜 (ISO 8601)
+}
+
+export type SavedUserRoute = {
+  userRouteId: number;
+  status: string; // "NOT_STARTED", "ON_GOING", "COMPLETED"
 }
 
 // ===== 엔드포인트 =====
@@ -92,5 +98,14 @@ export async function changeUserRouteStatus(
     `${ROUTES.users.routes}/${id}/${status}`,
     undefined,
     'changeUserRouteStatus'
+  );
+}
+
+export async function getUserRoutesIdByRouteId(
+  routeId: number
+): Promise<ApiEnvelope<SavedUserRoute>> {
+  return apiGet<ApiEnvelope<SavedUserRoute>>(
+    `${ROUTES.users.routes}/${routeId}`,
+    'getUserRoutesIdByRouteId'
   );
 }

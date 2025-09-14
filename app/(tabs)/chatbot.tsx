@@ -1,5 +1,7 @@
 import { ChatContext, ChatQueryResult, ExistingRoute, PlaceInfo, postChatQuery, RouteRecommendation } from '@/api/chat.service';
 import { useAuthSession } from '@/hooks/useAuthSession';
+import i18n from '@/i18n';
+import { SupportedLng } from '@/i18n';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
@@ -53,7 +55,11 @@ const useChatManager = () => {
       };
     }
 
-    const response = await postChatQuery({ query, context: contextRef.current });
+    const response = await postChatQuery({
+      query,
+      context: contextRef.current,
+      language: i18n.language as SupportedLng,
+    });
     contextRef.current = response.result.context;
     await saveContext(contextRef.current);
 

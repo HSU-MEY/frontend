@@ -79,6 +79,7 @@ export default ({ config }) => ({
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: "krouteapp",
+  splash: "./assets/images/splash.png",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
 
@@ -93,6 +94,7 @@ export default ({ config }) => ({
     },
     edgeToEdgeEnabled: true,
     package: "com.mey.kroute",
+    versionCode: 1,
   },
   web: {
     bundler: "metro",
@@ -103,17 +105,25 @@ export default ({ config }) => ({
   // .env 값들을 런타임에 쓸 수 있게 넘겨줌
   extra: {
     API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL,
-    KAKAO_JS_API_KEY: process.env.KAKAO_JS_API_KEY,
-    KAKAO_NATIVE_API_KEY: process.env.KAKAO_NATIVE_API_KEY,
-    OPEN_WEATHER_API_KEY: process.env.OPEN_WEATHER_API_KEY,
+    KAKAO_JS_API_KEY: process.env.EXPO_PUBLIC_KAKAO_JS_API_KEY,
+    KAKAO_NATIVE_API_KEY: process.env.EXPO_PUBLIC_KAKAO_NATIVE_API_KEY,
+    OPEN_WEATHER_API_KEY: process.env.EXPO_PUBLIC_OPEN_WEATHER_API_KEY,
+    eas: {
+      projectId: "5a3a223f-02ea-472c-aad3-a581a5aa4e07"
+    }
   },
 
   plugins: [
+    ["expo-build-properties", {
+      android: {
+        usesCleartextTraffic: true,
+      },
+    }],
     "expo-router",
     [
       "expo-splash-screen",
       {
-        image: "./assets/images/splash-icon.png",
+        image: "./assets/images/icon.png",
         imageWidth: 200,
         resizeMode: "contain",
         backgroundColor: "#ffffff",

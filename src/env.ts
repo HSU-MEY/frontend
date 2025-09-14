@@ -10,7 +10,7 @@ type Extra = {
 
 const extra = (Constants.expoConfig?.extra ?? {}) as Extra;
 
-export const API_BASE_URL = extra.API_BASE_URL ?? '';
-export const KAKAO_JS_API_KEY = extra.KAKAO_JS_API_KEY ?? '';
-export const KAKAO_NATIVE_API_KEY = extra.KAKAO_NATIVE_API_KEY ?? '';
-export const OPEN_WEATHER_API_KEY = extra.OPEN_WEATHER_API_KEY ?? '';
+export const API_BASE_URL = extra.API_BASE_URL ?? process.env.EXPO_PUBLIC_API_BASE_URL ?? '';
+export const KAKAO_JS_API_KEY = extra.KAKAO_JS_API_KEY ?? process.env.EXPO_PUBLIC_KAKAO_JS_API_KEY ?? '';
+export const KAKAO_NATIVE_API_KEY = extra.KAKAO_NATIVE_API_KEY ?? process.env.EXPO_PUBLIC_KAKAO_NATIVE_API_KEY ?? '';
+export const OPEN_WEATHER_API_KEY = extra.OPEN_WEATHER_API_KEY ?? process.env.EXPO_PUBLIC_OPEN_WEATHER_API_KEY ?? '';
