@@ -1,5 +1,6 @@
 import TicketCard from '@/components/TicketCard';
 import { useUserRoutes } from '@/hooks/useUserRoutes';
+import { useRouteRunStore } from '@/store/useRouteRunStore';
 import { useIsFocused } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React, { useEffect } from 'react';
@@ -15,6 +16,7 @@ export default function OngoingRoute() {
         refetch: refetchOngoing,
     } = useUserRoutes("ON_GOING");
 
+    const runStoreRoutes = useRouteRunStore((s) => s.routes);
     const isFocused = useIsFocused();
 
     useEffect(() => {
@@ -26,6 +28,22 @@ export default function OngoingRoute() {
     const firstData = ongoingData?.savedRoutes[0];
 
     if (ongoingLoading || ongoingError || !ongoingData || !firstData) return null;
+
+    const routeRunData = runStoreRoutes[firstData.routeId];
+
+    let progress = 0;
+    if (routeRunData && routeRunData.segments?.length > 0) {
+        const totalSteps = routeRunData.segments.length;
+        // The user is considered to have completed the step at currentSegmentIndex
+        // So progress is (index + 1) / total
+        const currentProgress = routeRunData.currentSegmentIndex + 1;
+        progress = Math.round((currentProgress / totalSteps) * 100);
+    }
+
+    const imageSource = firstData.imageUrl
+        ? { uri: firstData.imageUrl }
+        : require('@/assets/images/sample-stage.png');
+
 
     return (
         <>
@@ -41,13 +59,12 @@ export default function OngoingRoute() {
                     </View>
 
                     {/* 동적 카드 */}
-                    {/* <RouteTicketCard {...currentRoute} /> */}
                     <TicketCard
                         title={firstData.title}
-                        location={""}
+                        location={""} // Location is not available in the Route object
                         startDate={firstData.preferredStartDate}
-                        progress={88}   //TODO: Change to dynamic value
-                        imageSource={require('@/assets/images/sample-stage.png')}
+                        progress={progress}
+                        imageSource={imageSource}
                     />
                 </TouchableOpacity>
             }
