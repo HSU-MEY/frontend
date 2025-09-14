@@ -93,6 +93,7 @@ export default ({ config }) => ({
     },
     edgeToEdgeEnabled: true,
     package: "com.mey.kroute",
+    versionCode: 1,
   },
   web: {
     bundler: "metro",
@@ -106,6 +107,20 @@ export default ({ config }) => ({
     KAKAO_JS_API_KEY: process.env.KAKAO_JS_API_KEY,
     KAKAO_NATIVE_API_KEY: process.env.KAKAO_NATIVE_API_KEY,
     OPEN_WEATHER_API_KEY: process.env.OPEN_WEATHER_API_KEY,
+  },
+
+  expo: {
+    name: "kroute-app",
+    slug: "kroute-app",
+    android: {
+      package: "com.mey.kroute",
+      versionCode: 1,
+    },
+    extra: {
+      eas: {
+        projectId: "5a3a223f-02ea-472c-aad3-a581a5aa4e07"
+      }
+    }
   },
 
   plugins: [

@@ -135,7 +135,8 @@ export default function RouteOverviewScreen() {
       }
       
       //페이지 이동
-      router.replace(`/route/route-step/${id}/1`);
+      const startStep = (route?.currentSegmentIndex ?? 0) + 1;
+      router.replace(`/route/route-step/${id}/${startStep}`);
     } catch (error) {
       console.error("Failed to start route:", error);
       alert("경로 시작에 실패했습니다. 위치 권한을 확인해주세요.");
@@ -145,7 +146,7 @@ export default function RouteOverviewScreen() {
   }
 
   const handleLaterButton = () => {
-    if(routeStatus !== 'NOT_SAVED' && savedRouteId !== null) {
+    if(routeStatus === 'NOT_SAVED' && savedRouteId !== null) {
       saveUserRoute(savedRouteId, new Date(), "09:00").catch((error) => {
       //console.error("Failed to save route:", error);
       });
@@ -159,14 +160,16 @@ export default function RouteOverviewScreen() {
       <Header title="여행 개요" />
 
       <ImageBackground
-        source={{ uri: 'https://placehold.co/300x300' }}
+        source={ route?.imageUrl ? { uri: route.imageUrl } : require('../../../assets/images/placeholder-place.png') }
         style={ styleSheet.HeaderSection }
       >
-        <Title>{ route?.title }</Title>
-        <Subtitle>{ route?.theme }</Subtitle>
-        <Description>
-          { route?.description }
-        </Description>
+        <HeaderContainer>
+          <Title>{ route?.title }</Title>
+          <Subtitle>{ route?.theme }</Subtitle>
+          <Description>
+            { route?.description }
+          </Description>
+        </HeaderContainer>
       </ImageBackground>
 
       <RouteInfoContainer>
@@ -242,9 +245,6 @@ export default function RouteOverviewScreen() {
 const styleSheet = StyleSheet.create(
   {
     HeaderSection: {
-      padding: 16,
-      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-      borderRadius: 12,
       marginBottom: 16,
       textAlign: 'center',
     },
@@ -262,21 +262,33 @@ const Container = styled.ScrollView`
   background-color: white;
 `;
 
+const HeaderContainer = styled.View`
+  background-color: rgba(0, 0, 0, 0.4);  
+  width: 100%;
+  padding: 16px;
+`;
+
 const Title = styled.Text`
   font-size: 22px;
-  font-weight: bold;
+  font-family: 'Pretendard-Bold';
+  color: white;
+  text-align: center;
 `;
 
 const Subtitle = styled.Text`
   font-size: 16px;
-  color: #666;
+  color: white;
+  font-family: 'Pretendard-Medium';
   margin-top: 4px;
+  text-align: center;
 `;
 
 const Description = styled.Text`
   margin-top: 12px;
   line-height: 20px;
-  color: #444;
+  font-family: 'Pretendard-Regular';
+  color: white;
+  text-align: center;
 `;
 
 const RouteInfoContainer = styled.View`

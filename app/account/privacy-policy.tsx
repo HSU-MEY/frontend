@@ -47,7 +47,7 @@ const PrivacyPolicyScreen = () => {
 
         <Text style={styles.sectionTitle}>5. 문의</Text>
         <Text style={styles.paragraph}>
-          개인정보처리방침에 대한 문의는 kroute@example.com 으로 연락주시기 바랍니다.
+          개인정보처리방침에 대한 문의는 abcd030119@gmail.com 으로 연락주시기 바랍니다.
         </Text>
       </ScrollView>
     </SafeAreaView>
