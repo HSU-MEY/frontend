@@ -269,5 +269,42 @@
         "signupFailFallback": "An unknown error occurred.",
         "alreadyHaveAccountQ": "Already have an account?",
         "loginLink": "Log in"
+    },
+    "profileEdit": {
+        "title": "Edit Profile",
+        "loading": "Loading…",
+        "pickImage": "Pick Image",
+        "imagePermTitle": "Permission Required",
+        "imagePermBody": "Gallery access is required.",
+        "fetchFailTitle": "Failed to load profile",
+        "fetchFailBody": "Please try again later.",
+        "noChangesTitle": "Notice",
+        "noChangesBody": "There’s nothing to update.",
+        "emailInvalid": "Please enter a valid email address.",
+        "emailNeedsPwdTitle": "Notice",
+        "emailNeedsPwdBody": "To change your email, please also enter a new password.",
+        "pwdTooShort": "Password must be at least 6 characters.",
+        "pwdMismatch": "Passwords do not match.",
+        "avatarNeededTitle": "Profile image required",
+        "avatarNeededBody": "Please select an image.",
+        "save": "Save",
+        "saving": "Saving…",
+        "saveFailTitle": "Save Failed",
+        "saveFailBody": "Please try again later.",
+        "saveSuccessTitle": "Profile Saved",
+        "saveSuccessBodyWithEmail": "Please log in again with your updated account.\nEmail: {{email}}",
+        "labels": {
+            "nickname": "Nickname",
+            "email": "Email",
+            "newPasswordOptional": "New Password (optional)",
+            "confirmNewPassword": "Confirm New Password"
+        },
+        "placeholders": {
+            "nickname": "Nickname",
+            "email": "Email",
+            "newPasswordOptional": "New Password (optional)",
+            "confirmNewPassword": "Confirm New Password"
+        },
+        "updateFailServer": "Update failed"
     }
 }

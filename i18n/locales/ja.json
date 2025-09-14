@@ -269,5 +269,42 @@
         "signupFailFallback": "不明なエラーが発生しました。",
         "alreadyHaveAccountQ": "すでにアカウントをお持ちですか？",
         "loginLink": "ログイン"
+    },
+    "profileEdit": {
+        "title": "プロフィール編集",
+        "loading": "読み込み中…",
+        "pickImage": "画像を選択",
+        "imagePermTitle": "権限が必要です",
+        "imagePermBody": "ギャラリーへのアクセスが必要です。",
+        "fetchFailTitle": "プロフィールの読み込みに失敗しました",
+        "fetchFailBody": "しばらくしてから再度お試しください。",
+        "noChangesTitle": "お知らせ",
+        "noChangesBody": "変更する項目がありません。",
+        "emailInvalid": "有効なメールアドレスを入力してください。",
+        "emailNeedsPwdTitle": "お知らせ",
+        "emailNeedsPwdBody": "メールを変更するには新しいパスワードの入力も必要です。",
+        "pwdTooShort": "パスワードは6文字以上である必要があります。",
+        "pwdMismatch": "パスワードが一致しません。",
+        "avatarNeededTitle": "プロフィール画像が必要です",
+        "avatarNeededBody": "画像を選択してください。",
+        "save": "保存",
+        "saving": "保存中…",
+        "saveFailTitle": "保存に失敗しました",
+        "saveFailBody": "しばらくしてから再度お試しください。",
+        "saveSuccessTitle": "プロフィールを保存しました",
+        "saveSuccessBodyWithEmail": "更新された情報で再ログインしてください。\nメール: {{email}}",
+        "labels": {
+            "nickname": "ニックネーム",
+            "email": "メール",
+            "newPasswordOptional": "新しいパスワード（任意）",
+            "confirmNewPassword": "新しいパスワード（確認）"
+        },
+        "placeholders": {
+            "nickname": "ニックネーム",
+            "email": "メール",
+            "newPasswordOptional": "新しいパスワード（任意）",
+            "confirmNewPassword": "新しいパスワード（確認）"
+        },
+        "updateFailServer": "更新に失敗しました"
     }
 }

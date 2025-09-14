@@ -269,5 +269,42 @@
         "signupFailFallback": "发生未知错误。",
         "alreadyHaveAccountQ": "已经有账号？",
         "loginLink": "登录"
+    },
+    "profileEdit": {
+        "title": "编辑资料",
+        "loading": "加载中…",
+        "pickImage": "选择图片",
+        "imagePermTitle": "需要权限",
+        "imagePermBody": "需要访问相册权限。",
+        "fetchFailTitle": "加载资料失败",
+        "fetchFailBody": "请稍后再试。",
+        "noChangesTitle": "提示",
+        "noChangesBody": "没有需要更新的内容。",
+        "emailInvalid": "请输入有效的邮箱地址。",
+        "emailNeedsPwdTitle": "提示",
+        "emailNeedsPwdBody": "修改邮箱需要同时输入新密码。",
+        "pwdTooShort": "密码至少需要 6 位。",
+        "pwdMismatch": "两次密码输入不一致。",
+        "avatarNeededTitle": "需要头像",
+        "avatarNeededBody": "请选择一张图片。",
+        "save": "保存",
+        "saving": "保存中…",
+        "saveFailTitle": "保存失败",
+        "saveFailBody": "请稍后再试。",
+        "saveSuccessTitle": "已保存资料",
+        "saveSuccessBodyWithEmail": "请使用更新后的信息重新登录。\n邮箱：{{email}}",
+        "labels": {
+            "nickname": "昵称",
+            "email": "邮箱",
+            "newPasswordOptional": "新密码（可选）",
+            "confirmNewPassword": "确认新密码"
+        },
+        "placeholders": {
+            "nickname": "昵称",
+            "email": "邮箱",
+            "newPasswordOptional": "新密码（可选）",
+            "confirmNewPassword": "确认新密码"
+        },
+        "updateFailServer": "更新失败"
     }
 }
