@@ -20,6 +20,7 @@ import KakaoMapWebView, { KakaoMapHandle } from '@/components/KakaoMapWebView';
 import { KAKAO_JS_API_KEY } from '@/src/env';
 import { useTranslation } from 'react-i18next';
 
+
 type Place = {
     id: number;
     name: string;
