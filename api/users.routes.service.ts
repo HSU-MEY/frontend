@@ -23,6 +23,7 @@ export type Route = {
   routeId: number;
   title: string;
   description: string;
+  imageUrl: string;
   totalDurationMinutes: number;
   preferredStartDate: string;
   preferredStartTime: string;

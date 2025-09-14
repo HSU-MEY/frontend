@@ -15,7 +15,7 @@ const RouteCard = ({ thumbnail, title, date, progress, onPress }: Props) => {
   return (
     <CardContainer onPress={onPress}>
       <ImageBackground
-        source={ thumbnail ? thumbnail : require('@/assets/images/sample-route-default.jpg') }
+        source={ thumbnail ? { uri: thumbnail } : require('@/assets/images/sample-route-default.jpg') }
         style={styleSheet.cardContainer}
         imageStyle={styleSheet.imageStyle}
         >

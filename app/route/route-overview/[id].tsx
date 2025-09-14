@@ -59,6 +59,7 @@ export default function RouteOverviewScreen() {
 
   const upsertRoute = useRouteRunStore((s) => s.upsertRoute);
   const setCurrent = useRouteRunStore((s) => s.setCurrent);
+  const clearRoute = useRouteRunStore((s) => s.clearRoute);
   const { i18n, t } = useTranslation();
 
   const { save: saveUserRoute } = useUserRoutes();
@@ -151,6 +152,10 @@ export default function RouteOverviewScreen() {
   const handleStartRoute = async () => {
     setIsLoading(true);
     try {
+      if (routeStatus === 'COMPLETED') {
+        clearRoute(String(id));
+      }
+
       const route = useRouteRunStore.getState().routes[String(id)];
       let segments;
 

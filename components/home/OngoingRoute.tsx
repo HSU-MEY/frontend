@@ -1,7 +1,8 @@
 import TicketCard from '@/components/TicketCard';
 import { useUserRoutes } from '@/hooks/useUserRoutes';
+import { useIsFocused } from '@react-navigation/native';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -11,7 +12,16 @@ export default function OngoingRoute() {
         data: ongoingData,
         loading: ongoingLoading,
         error: ongoingError,
+        refetch: refetchOngoing,
     } = useUserRoutes("ON_GOING");
+
+    const isFocused = useIsFocused();
+
+    useEffect(() => {
+        if (isFocused) {
+            refetchOngoing();
+        }
+    }, [isFocused]);
 
     const firstData = ongoingData?.savedRoutes[0];
 
