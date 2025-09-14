@@ -108,23 +108,17 @@ export default ({ config }) => ({
     KAKAO_JS_API_KEY: process.env.EXPO_PUBLIC_KAKAO_JS_API_KEY,
     KAKAO_NATIVE_API_KEY: process.env.EXPO_PUBLIC_KAKAO_NATIVE_API_KEY,
     OPEN_WEATHER_API_KEY: process.env.EXPO_PUBLIC_OPEN_WEATHER_API_KEY,
-  },
-
-  expo: {
-    name: "kroute-app",
-    slug: "kroute-app",
-    android: {
-      package: "com.mey.kroute",
-      versionCode: 1,
-    },
-    extra: {
-      eas: {
-        projectId: "5a3a223f-02ea-472c-aad3-a581a5aa4e07"
-      }
+    eas: {
+      projectId: "5a3a223f-02ea-472c-aad3-a581a5aa4e07"
     }
   },
 
   plugins: [
+    ["expo-build-properties", {
+      android: {
+        usesCleartextTraffic: true,
+      },
+    }],
     "expo-router",
     [
       "expo-splash-screen",
