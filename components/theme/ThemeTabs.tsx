@@ -18,6 +18,7 @@ const CATEGORIES: { key: ThemeCategory; label: string; icon: any }[] = [
         label: 'K-Beauty',
         icon: require('../../assets/images/icons/k-beauty.png'),
     },
+    /*
     {
         key: 'K-Fashion',
         label: 'K-Fashion',
@@ -28,6 +29,7 @@ const CATEGORIES: { key: ThemeCategory; label: string; icon: any }[] = [
         label: 'K-Food',
         icon: require('../../assets/images/icons/k-food.png'),
     },
+    */
 ];
 
 interface ThemeTabsProps {
