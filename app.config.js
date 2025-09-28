@@ -89,7 +89,7 @@ export default ({ config }) => ({
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: "./assets/images/adaptive-icon.png",
+      foregroundImage: "./assets/images/icon-a.png",
       backgroundColor: "#ffffff",
     },
     edgeToEdgeEnabled: true,
