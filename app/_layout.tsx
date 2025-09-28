@@ -16,7 +16,9 @@ import { KAKAO_NATIVE_API_KEY } from '@/src/env';
 import Constants from 'expo-constants';
 
 // i18n 추가
+import WelcomePopup from '@/components/common/WelcomePopup';
 import i18n, { initI18n } from '@/i18n';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { I18nextProvider } from 'react-i18next';
 
 export default function RootLayout() {
@@ -36,6 +38,23 @@ export default function RootLayout() {
 
   // i18n 준비 여부
   const [i18nReady, setI18nReady] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+
+
+  useEffect(() => {
+    const checkFirstLaunch = async () => {
+      try {
+        const hasLaunched = await AsyncStorage.getItem('hasLaunched');
+        if (hasLaunched === null) {
+          setShowPopup(true);
+          await AsyncStorage.setItem('hasLaunched', 'true');
+        }
+      } catch (error) {
+        console.error('Failed to access AsyncStorage', error);
+      }
+    };
+    checkFirstLaunch();
+  }, []);
 
   // Kakao SDK는 최초 1회만 초기화
   // useEffect(() => {
@@ -99,6 +118,7 @@ export default function RootLayout() {
                 </Stack>
               </SelectedRouteProvider>
               <StatusBar style="auto" />
+              <WelcomePopup visible={showPopup} onClose={() => setShowPopup(false)} />
             </SafeAreaView>
           </SafeAreaProvider>
         </ThemeProvider>

@@ -75,16 +75,12 @@ export default function RouteOverviewScreen() {
           setSavedRouteId(response.result.userRouteId);
           setRouteStatus(response.result.status as UserRouteStatus); // "NOT_STARTED", "ON_GOING", "COMPLETED"
         } else {
-          // This case might not be hit if API throws on non-success
           setRouteStatus('NOT_SAVED');
         }
       } catch (error: any) {
-        if (error.response && error.response.status === 404) {
-          setRouteStatus('NOT_SAVED');
-        } else {
-          console.error("Failed to fetch route status:", error);
-          setRouteStatus('NOT_SAVED'); // Or some error status
-        }
+        // If fetching the route status fails (e.g., 404 Not Found),
+        // assume the route is not saved and proceed without showing an error.
+        setRouteStatus('NOT_SAVED');
       }
     }
 

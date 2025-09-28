@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { ThemeCategory } from './ThemeRouteCards';
 
 const CATEGORIES: { key: ThemeCategory; label: string; icon: any }[] = [
@@ -18,6 +18,7 @@ const CATEGORIES: { key: ThemeCategory; label: string; icon: any }[] = [
         label: 'K-Beauty',
         icon: require('../../assets/images/icons/k-beauty.png'),
     },
+    /*
     {
         key: 'K-Fashion',
         label: 'K-Fashion',
@@ -28,6 +29,7 @@ const CATEGORIES: { key: ThemeCategory; label: string; icon: any }[] = [
         label: 'K-Food',
         icon: require('../../assets/images/icons/k-food.png'),
     },
+    */
 ];
 
 interface ThemeTabsProps {
@@ -37,11 +39,7 @@ interface ThemeTabsProps {
 
 export default function ThemeTabs({ selected, onSelect }: ThemeTabsProps) {
     return (
-        <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.tabRowContainer}
-        >
+        <View style={styles.tabRowContainer}>
             {CATEGORIES.map((item) => (
                 <TouchableOpacity
                     key={item.key}
@@ -55,23 +53,20 @@ export default function ThemeTabs({ selected, onSelect }: ThemeTabsProps) {
                     </View>
                 </TouchableOpacity>
             ))}
-        </ScrollView>
-
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     tabRowContainer: {
         flexDirection: 'row',
-        justifyContent: 'center', // 중앙 정렬
-        paddingHorizontal: 0,
+        justifyContent: 'space-around',
+        paddingHorizontal: 10,
         marginBottom: 18,
-        width: '100%'
     },
     tab: {
-        marginRight: 6,
-        width: 62,
         alignItems: 'center',
+        flex: 1,
     },
     tabInner: {
         alignItems: 'center',

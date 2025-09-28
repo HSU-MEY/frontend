@@ -73,7 +73,7 @@ require('dotenv').config();
 
 export default ({ config }) => ({
   ...config,
-  name: "kroute-app",
+  name: "K-Route",
   slug: "kroute-app",
   version: "1.0.0",
   orientation: "portrait",
@@ -89,7 +89,7 @@ export default ({ config }) => ({
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: "./assets/images/adaptive-icon.png",
+      foregroundImage: "./assets/images/icon-a.png",
       backgroundColor: "#ffffff",
     },
     edgeToEdgeEnabled: true,
