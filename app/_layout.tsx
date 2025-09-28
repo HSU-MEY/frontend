@@ -45,7 +45,7 @@ export default function RootLayout() {
     const checkFirstLaunch = async () => {
       try {
         const hasLaunched = await AsyncStorage.getItem('hasLaunched');
-        if (hasLaunched !== null) {
+        if (hasLaunched === null) {
           setShowPopup(true);
           await AsyncStorage.setItem('hasLaunched', 'true');
         }
