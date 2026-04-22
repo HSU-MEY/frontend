@@ -1,50 +1,39 @@
-# Welcome to your Expo app 👋
+# ✨K-Route
+2025 관광데이터 활용 공모전 프로젝트
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<br />
 
-## Get started
+## 👥 팀원 소개
 
-1. Install dependencies
+<table>
+  <tbody>
+    <tr>  
+       <td align="center"><a href="https://github.com/sumi-03"><img src="https://avatars.githubusercontent.com/sumi-03" width="150px;" alt=""/><br /><sub><b>Team Leader 임수미</b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/Enble"><img src="https://avatars.githubusercontent.com/Enble" width="150px;" alt=""/><br /><sub><b>Team Member 최재영</b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/yhw032"><img src="https://avatars.githubusercontent.com/yhw032" width="150px;" alt=""/><br /><sub><b>Team Member 윤희욱</b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/hana03030"><img src="https://avatars.githubusercontent.com/hana03030" width="150px;" alt=""/><br /><sub><b>Team Member 이주현</b></sub></a><br /></td>
+    </tr>
+<tr>
+<td align="center">백엔드</td>
+<td align="center">백엔드</td>
+<td align="center">프론트엔드</td>
+<td align="center">프론트엔드</td>
+</tr>
+  </tbody>
+</table>
 
-   ```bash
-   npm install
-   ```
+- 임수미: DB설계 및 구축, Rest-API 서버 개발, 외부 API 연동, 경로 추천 알고리즘 설계
 
-2. Start the app
+- 최재영: DB설계 및 구축, Rest-API 서버 개발, 루트 api 구현, 경로 추천 알고리즘 설계
 
-   ```bash
-   npx expo start
-   ```
+- 윤희욱: UI/UX 설계 및 구현, 로그인/회원가입, 마이페이지, 장소 추가/상세, 길찾기, 지도 연동, 챗봇 연동 개발, REST API연동
 
-In the output, you'll find options to open the app in a
+- 이주현: UI/UX 설계 및 구현, 홈화면, 루트(시간/날짜 선택, 추천, AI 가이드 루트, 핫 플레이스, 검색 장소, 편집, 리스트), 지도 연동 개발, REST API연동
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+<br />
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## ✔️ 프로젝트 소개
+<img width="100%" alt="k_route_image" src="https://github.com/user-attachments/assets/1a408b75-43b7-42a3-ab2d-52021b0d1bf3" />
 
-## Get a fresh project
+<br />
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
