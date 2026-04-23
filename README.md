@@ -33,6 +33,11 @@
 <br />
 
 ## ✔️ 프로젝트 소개
+> 🔗 **[프로젝트 상세 설명 및 개발 기록 (Notion)](https://www.notion.so/K-Route-34b31f3dc85d8028bc7ddd83d2df2489?source=copy_link)**
+> 
+> 💡 *프로젝트 설명과 개발 과정의 기록을 담고 있습니다.*
+
+
 <img width="100%" alt="k_route_image" src="https://github.com/user-attachments/assets/1a408b75-43b7-42a3-ab2d-52021b0d1bf3" />
 
 <br />
