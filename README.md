@@ -3,6 +3,10 @@
 
 <br />
 
+<img width="100%" alt="k_route_image" src="https://github.com/user-attachments/assets/1a408b75-43b7-42a3-ab2d-52021b0d1bf3" />
+
+<br />
+
 ## 👥 팀원 소개
 
 <table>
@@ -33,12 +37,58 @@
 <br />
 
 ## ✔️ 프로젝트 소개
-> 🔗 **[프로젝트 상세 설명 및 개발 기록 (Notion)](https://www.notion.so/K-Route-34b31f3dc85d8028bc7ddd83d2df2489?source=copy_link)**
-> 
-> 💡 *프로젝트 설명과 개발 과정의 기록을 담고 있습니다.*
 
+### 홈
 
-<img width="100%" alt="k_route_image" src="https://github.com/user-attachments/assets/1a408b75-43b7-42a3-ab2d-52021b0d1bf3" />
+<img width="786" height="1407" alt="image" src="https://github.com/user-attachments/assets/36b171d8-b37a-4386-9519-d7c527301105" />
+
+어플을 처음 키면 나오는 홈 화면입니다.  
+진행중인 루트, AI 추천 루트, 테마별 탐색, 추천 장소를 한 화면에서 볼 수 있습니다.
+
+<br>
+
+### 루트(추천)
+
+<img width="786" height="1666" alt="image" src="https://github.com/user-attachments/assets/f0ba1ac0-84d4-415b-8224-7e2b91fac988" />
+
+테마별로 미리 만들어진 베스트 루트 리스트입니다.  
+
+<br>
+
+### 루트(AI 가이드)
+
+<img width="786" height="1756" alt="image" src="https://github.com/user-attachments/assets/15e741f1-1677-44f9-85fc-a03612e60b39" />
+
+직접 맞춤 제작 루트입니다.  
+방문하고 싶은 장소를 선택할 수 있습니다.  
+장소 선택을 토대로 효율적인 루트를 만들어줍니다.
+
+<br>
+
+### 장소 상세
+
+<img width="786" height="1695" alt="image" src="https://github.com/user-attachments/assets/ce62d937-dc3c-4965-9f44-5ec1eae52470" />
+
+장소마다 영업 시간, 비용 등 상세 정보를 볼 수 있는 화면입니다.
+
+<br>
+
+### 루트 진행
+
+<img width="786" height="2186" alt="image" src="https://github.com/user-attachments/assets/b6873764-7d3e-4965-8b1b-ebcfb723fc18" />
+
+만들어진 루트를 진행하는 화면입니다.  
+루트 개요, 길 찾기를 안내합니다.
+
+<br>
+
+## 🛠️ Tech Stack
+
+- **개발 환경**: Windows, Mac OS
+- **개발 도구**: Visual Studio Code, IntelliJ, MySQL workbench
+- **개발 언어**: TypeScript, JavaScript, SQL, JAVA
+- **주요 기술**: React Native, Expo, OpenAI API (AI 챗봇 가이드 구현), i18next (다국어 처리), Kakao Maps API, React Navigation, Axios, AbortController (검색 비동기 최적화), 공공데이터 API 연동
+
 
 <br />
 
