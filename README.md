@@ -40,7 +40,7 @@
 
 ### 홈
 
-<img width="786" height="1407" alt="image" src="https://github.com/user-attachments/assets/36b171d8-b37a-4386-9519-d7c527301105" />
+<img width="586" alt="image" src="https://github.com/user-attachments/assets/36b171d8-b37a-4386-9519-d7c527301105" />
 
 어플을 처음 키면 나오는 홈 화면입니다.  
 진행중인 루트, AI 추천 루트, 테마별 탐색, 추천 장소를 한 화면에서 볼 수 있습니다.
@@ -49,7 +49,7 @@
 
 ### 루트(추천)
 
-<img width="786" height="1666" alt="image" src="https://github.com/user-attachments/assets/f0ba1ac0-84d4-415b-8224-7e2b91fac988" />
+<img width="586" alt="image" src="https://github.com/user-attachments/assets/f0ba1ac0-84d4-415b-8224-7e2b91fac988" />
 
 테마별로 미리 만들어진 베스트 루트 리스트입니다.  
 
@@ -57,7 +57,7 @@
 
 ### 루트(AI 가이드)
 
-<img width="786" height="1756" alt="image" src="https://github.com/user-attachments/assets/15e741f1-1677-44f9-85fc-a03612e60b39" />
+<img width="586" alt="image" src="https://github.com/user-attachments/assets/15e741f1-1677-44f9-85fc-a03612e60b39" />
 
 직접 맞춤 제작 루트입니다.  
 방문하고 싶은 장소를 선택할 수 있습니다.  
@@ -67,7 +67,7 @@
 
 ### 장소 상세
 
-<img width="786" height="1695" alt="image" src="https://github.com/user-attachments/assets/ce62d937-dc3c-4965-9f44-5ec1eae52470" />
+<img width="586" alt="image" src="https://github.com/user-attachments/assets/ce62d937-dc3c-4965-9f44-5ec1eae52470" />
 
 장소마다 영업 시간, 비용 등 상세 정보를 볼 수 있는 화면입니다.
 
@@ -75,7 +75,7 @@
 
 ### 루트 진행
 
-<img width="786" height="2186" alt="image" src="https://github.com/user-attachments/assets/b6873764-7d3e-4965-8b1b-ebcfb723fc18" />
+<img width="586" alt="image" src="https://github.com/user-attachments/assets/b6873764-7d3e-4965-8b1b-ebcfb723fc18" />
 
 만들어진 루트를 진행하는 화면입니다.  
 루트 개요, 길 찾기를 안내합니다.
